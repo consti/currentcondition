@@ -229,32 +229,35 @@
         }
         
         .weather-main {
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             margin-top: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
-            opacity: 0.85;
+            opacity: 1;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8), 0 0 20px rgba(0, 255, 0, 0.4);
         }
         
         .weather-icon {
-            font-size: 1.8rem;
+            font-size: 2rem;
         }
         
         .location-info {
-            font-size: 0.95rem;
-            margin-top: 6px;
-            opacity: 0.45;
+            font-size: 1.1rem;
+            margin-top: 8px;
+            opacity: 0.9;
             letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
         }
         
         .air-quality {
-            font-size: 0.95rem;
-            margin-top: 5px;
+            font-size: 1.05rem;
+            margin-top: 6px;
             display: flex;
             align-items: center;
             gap: 8px;
-            opacity: 0.55;
+            opacity: 0.9;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
         }
         
         /* Ticker bar at bottom */
@@ -446,11 +449,11 @@
         }
         
         .location-marker.visitor {
-            width: 6px;
-            height: 6px;
-            background: rgba(0, 255, 0, 0.6);
-            box-shadow: 0 0 4px rgba(0, 255, 0, 0.6), 0 0 8px rgba(0, 255, 0, 0.4);
-            animation: marker-blink-dim 2s ease-in-out infinite;
+            width: 8px;
+            height: 8px;
+            background: #88ddff;
+            box-shadow: 0 0 10px #88ddff, 0 0 20px rgba(136, 221, 255, 0.8), 0 0 30px rgba(136, 221, 255, 0.5);
+            animation: marker-blink-visitor 2s ease-in-out infinite;
         }
         
         @keyframes marker-blink {
@@ -463,9 +466,73 @@
             50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.2); }
         }
         
-        @keyframes marker-blink-dim {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 0.3; }
+        @keyframes marker-blink-visitor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.75; }
+        }
+        
+        /* Radar wave effect for visitors */
+        .location-marker.visitor::before,
+        .location-marker.visitor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(136, 221, 255, 0.7);
+            transform: translate(-50%, -50%);
+            animation: radar-wave-visitor 2.5s ease-out infinite;
+        }
+        
+        .location-marker.visitor::after {
+            animation-delay: 1.25s;
+        }
+        
+        @keyframes radar-wave-visitor {
+            0% {
+                width: 100%;
+                height: 100%;
+                opacity: 0.8;
+            }
+            100% {
+                width: 350%;
+                height: 350%;
+                opacity: 0;
+            }
+        }
+        
+        /* Radar wave effect for current user */
+        .location-marker.current-user::before,
+        .location-marker.current-user::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            transform: translate(-50%, -50%);
+            animation: radar-wave 2.5s ease-out infinite;
+        }
+        
+        .location-marker.current-user::after {
+            animation-delay: 1.25s;
+        }
+        
+        @keyframes radar-wave {
+            0% {
+                width: 100%;
+                height: 100%;
+                opacity: 0.6;
+            }
+            100% {
+                width: 400%;
+                height: 400%;
+                opacity: 0;
+            }
         }
         
         /* Refresh scan effect */
@@ -516,6 +583,9 @@
             align-items: center;
             padding: 15px 30px;
             margin-top: 10px;
+            background: rgba(0, 20, 0, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 0, 0.2);
         }
         
         .aqi-badge {
@@ -523,6 +593,7 @@
             border-radius: 4px;
             font-weight: bold;
             font-size: 0.95rem;
+            text-shadow: none;
         }
         
         .aqi-good { background: #00e400; color: #000; }
@@ -790,6 +861,40 @@
                 0 0 10px #00ff00,
                 0 0 15px rgba(0,255,0,0.5);
             animation: led-pulse 2s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .power-led.red {
+            background: #ff3333;
+            box-shadow: 
+                0 0 5px #ff3333,
+                0 0 10px #ff3333,
+                0 0 15px rgba(255,51,51,0.5);
+        }
+        
+        .power-led.purple {
+            background: #cc66ff;
+            box-shadow: 
+                0 0 5px #cc66ff,
+                0 0 10px #cc66ff,
+                0 0 15px rgba(204, 102, 255, 0.5);
+        }
+        
+        .power-led.grey {
+            background: #aaaaaa;
+            box-shadow: 
+                0 0 5px #aaaaaa,
+                0 0 10px #888888,
+                0 0 15px rgba(150, 150, 150, 0.5);
+        }
+        
+        .power-led.fullcolor {
+            background: linear-gradient(135deg, #ff6688, #88ccff);
+            box-shadow: 
+                0 0 5px #ff6688,
+                0 0 10px #88ccff,
+                0 0 15px rgba(136, 204, 255, 0.5);
         }
         
         @keyframes led-pulse {
@@ -998,6 +1103,551 @@
         body.monitor-mode {
             background: linear-gradient(180deg, #2a2a3a 0%, #1a1a2a 50%, #0a0a1a 100%);
         }
+        
+        /* Red color scheme */
+        body.red-mode .crt-container {
+            background: #1a0000;
+            box-shadow: 
+                0 0 100px rgba(255, 0, 0, 0.3),
+                inset 0 0 100px rgba(0, 0, 0, 0.8);
+        }
+        
+        body.red-mode .screen-content {
+            color: #ff3333;
+            text-shadow: 
+                0.5px 0 0 rgba(255, 100, 100, 0.3),
+                -0.5px 0 0 rgba(100, 255, 255, 0.3);
+        }
+        
+        body.red-mode .title {
+            animation: glow-red 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-red {
+            from {
+                text-shadow: 
+                    0 0 5px #ff3333,
+                    0 0 10px #ff3333,
+                    0 0 15px #ff3333,
+                    0 0 20px #ff3333;
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #ff3333,
+                    0 0 20px #ff3333,
+                    0 0 30px #ff3333,
+                    0 0 40px #ff3333;
+            }
+        }
+        
+        body.red-mode .flicker {
+            background: rgba(255, 0, 0, 0.03);
+        }
+        
+        body.red-mode .glitch-line {
+            background: rgba(255, 0, 0, 0.8);
+        }
+        
+        body.red-mode .ticker-container {
+            background: rgba(40, 0, 0, 0.85);
+            border-top: 1px solid #ff3333;
+        }
+        
+        body.red-mode .ticker-label {
+            background: #ff3333;
+            color: #1a0000;
+        }
+        
+        body.red-mode .ticker-separator {
+            color: #aa0000;
+        }
+        
+        body.red-mode .main-display {
+            background: rgba(20, 0, 0, 0.7);
+            border: 1px solid rgba(255, 51, 51, 0.2);
+        }
+        
+        body.red-mode .weather-main {
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.8), 0 0 20px rgba(255, 51, 51, 0.4);
+        }
+        
+        body.red-mode .location-info,
+        body.red-mode .air-quality {
+            text-shadow: 0 0 8px rgba(255, 51, 51, 0.6);
+        }
+        
+        body.red-mode .volume-control,
+        body.red-mode .play-pause-btn,
+        body.red-mode .view-toggle-btn {
+            background: rgba(20, 0, 0, 0.9);
+            border-color: #aa0000;
+            color: #ff3333;
+        }
+        
+        body.red-mode .volume-control:hover,
+        body.red-mode .play-pause-btn:hover,
+        body.red-mode .view-toggle-btn:hover {
+            border-color: #ff3333;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+        }
+        
+        body.red-mode .volume-bar.active {
+            background: #ff3333;
+            box-shadow: 0 0 4px #ff3333;
+        }
+        
+        body.red-mode .location-marker.current-user {
+            background: #ff3333;
+            box-shadow: 0 0 12px #ff3333, 0 0 24px #ff3333, 0 0 36px rgba(255, 51, 51, 0.5);
+        }
+        
+        body.red-mode .location-marker.current-user::before,
+        body.red-mode .location-marker.current-user::after {
+            border-color: rgba(255, 51, 51, 0.5);
+        }
+        
+        body.red-mode #globe {
+            filter: 
+                saturate(0) 
+                brightness(0.6) 
+                contrast(1.4)
+                sepia(100%)
+                hue-rotate(-30deg)
+                saturate(2);
+        }
+        
+        body.red-mode .view-toggle-btn .monitor-icon,
+        body.red-mode .view-toggle-btn .windowed-icon {
+            border-color: #ff3333;
+        }
+        
+        body.red-mode .view-toggle-btn .monitor-icon::after {
+            background: #ff3333;
+        }
+        
+        body.red-mode .view-toggle-btn .expand-icon::before {
+            border-left-color: #ff3333;
+        }
+        
+        body.red-mode .view-toggle-btn .expand-icon::after {
+            border-right-color: #ff3333;
+        }
+        
+        /* Purple color scheme */
+        body.purple-mode .crt-container {
+            background: #1a001a;
+            box-shadow: 
+                0 0 100px rgba(200, 0, 255, 0.3),
+                inset 0 0 100px rgba(0, 0, 0, 0.8);
+        }
+        
+        body.purple-mode .screen-content {
+            color: #cc66ff;
+            text-shadow: 
+                0.5px 0 0 rgba(255, 100, 255, 0.3),
+                -0.5px 0 0 rgba(100, 200, 255, 0.3);
+        }
+        
+        body.purple-mode .title {
+            animation: glow-purple 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-purple {
+            from {
+                text-shadow: 
+                    0 0 5px #cc66ff,
+                    0 0 10px #cc66ff,
+                    0 0 15px #cc66ff,
+                    0 0 20px #cc66ff;
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #cc66ff,
+                    0 0 20px #cc66ff,
+                    0 0 30px #cc66ff,
+                    0 0 40px #cc66ff;
+            }
+        }
+        
+        body.purple-mode .flicker {
+            background: rgba(200, 0, 255, 0.03);
+        }
+        
+        body.purple-mode .glitch-line {
+            background: rgba(200, 0, 255, 0.8);
+        }
+        
+        body.purple-mode .ticker-container {
+            background: rgba(40, 0, 40, 0.85);
+            border-top: 1px solid #cc66ff;
+        }
+        
+        body.purple-mode .ticker-label {
+            background: #cc66ff;
+            color: #1a001a;
+        }
+        
+        body.purple-mode .ticker-separator {
+            color: #9933cc;
+        }
+        
+        body.purple-mode .main-display {
+            background: rgba(20, 0, 20, 0.7);
+            border: 1px solid rgba(204, 102, 255, 0.2);
+        }
+        
+        body.purple-mode .weather-main {
+            text-shadow: 0 0 10px rgba(204, 102, 255, 0.8), 0 0 20px rgba(204, 102, 255, 0.4);
+        }
+        
+        body.purple-mode .location-info,
+        body.purple-mode .air-quality {
+            text-shadow: 0 0 8px rgba(204, 102, 255, 0.6);
+        }
+        
+        body.purple-mode .volume-control,
+        body.purple-mode .play-pause-btn,
+        body.purple-mode .view-toggle-btn {
+            background: rgba(20, 0, 20, 0.9);
+            border-color: #9933cc;
+            color: #cc66ff;
+        }
+        
+        body.purple-mode .volume-control:hover,
+        body.purple-mode .play-pause-btn:hover,
+        body.purple-mode .view-toggle-btn:hover {
+            border-color: #cc66ff;
+            box-shadow: 0 0 10px rgba(204, 102, 255, 0.3);
+        }
+        
+        body.purple-mode .volume-bar.active {
+            background: #cc66ff;
+            box-shadow: 0 0 4px #cc66ff;
+        }
+        
+        body.purple-mode .location-marker.current-user {
+            background: #cc66ff;
+            box-shadow: 0 0 12px #cc66ff, 0 0 24px #cc66ff, 0 0 36px rgba(204, 102, 255, 0.5);
+        }
+        
+        body.purple-mode .location-marker.current-user::before,
+        body.purple-mode .location-marker.current-user::after {
+            border-color: rgba(204, 102, 255, 0.5);
+        }
+        
+        body.purple-mode #globe {
+            filter: 
+                saturate(0) 
+                brightness(0.6) 
+                contrast(1.4)
+                sepia(100%)
+                hue-rotate(230deg)
+                saturate(2);
+        }
+        
+        body.purple-mode .view-toggle-btn .monitor-icon,
+        body.purple-mode .view-toggle-btn .windowed-icon {
+            border-color: #cc66ff;
+        }
+        
+        body.purple-mode .view-toggle-btn .monitor-icon::after {
+            background: #cc66ff;
+        }
+        
+        body.purple-mode .view-toggle-btn .expand-icon::before {
+            border-left-color: #cc66ff;
+        }
+        
+        body.purple-mode .view-toggle-btn .expand-icon::after {
+            border-right-color: #cc66ff;
+        }
+        
+        body.purple-mode .power-led {
+            background: #cc66ff;
+            box-shadow: 
+                0 0 5px #cc66ff,
+                0 0 10px #cc66ff,
+                0 0 15px rgba(204, 102, 255, 0.5);
+        }
+        
+        /* Greyscale color scheme */
+        body.grey-mode .crt-container {
+            background: #1a1a1a;
+            box-shadow: 
+                0 0 100px rgba(200, 200, 200, 0.2),
+                inset 0 0 100px rgba(0, 0, 0, 0.8);
+        }
+        
+        body.grey-mode .screen-content {
+            color: #cccccc;
+            text-shadow: 
+                0.5px 0 0 rgba(255, 255, 255, 0.2),
+                -0.5px 0 0 rgba(150, 150, 150, 0.2);
+        }
+        
+        body.grey-mode .title {
+            animation: glow-grey 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-grey {
+            from {
+                text-shadow: 
+                    0 0 5px #cccccc,
+                    0 0 10px #aaaaaa,
+                    0 0 15px #888888,
+                    0 0 20px #666666;
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #cccccc,
+                    0 0 20px #aaaaaa,
+                    0 0 30px #888888,
+                    0 0 40px #666666;
+            }
+        }
+        
+        body.grey-mode .flicker {
+            background: rgba(200, 200, 200, 0.03);
+        }
+        
+        body.grey-mode .glitch-line {
+            background: rgba(200, 200, 200, 0.8);
+        }
+        
+        body.grey-mode .ticker-container {
+            background: rgba(40, 40, 40, 0.85);
+            border-top: 1px solid #888888;
+        }
+        
+        body.grey-mode .ticker-label {
+            background: #888888;
+            color: #1a1a1a;
+        }
+        
+        body.grey-mode .ticker-separator {
+            color: #666666;
+        }
+        
+        body.grey-mode .main-display {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(150, 150, 150, 0.2);
+        }
+        
+        body.grey-mode .weather-main {
+            text-shadow: 0 0 10px rgba(200, 200, 200, 0.6), 0 0 20px rgba(150, 150, 150, 0.3);
+        }
+        
+        body.grey-mode .location-info,
+        body.grey-mode .air-quality {
+            text-shadow: 0 0 8px rgba(200, 200, 200, 0.4);
+        }
+        
+        body.grey-mode .volume-control,
+        body.grey-mode .play-pause-btn,
+        body.grey-mode .view-toggle-btn {
+            background: rgba(30, 30, 30, 0.9);
+            border-color: #666666;
+            color: #cccccc;
+        }
+        
+        body.grey-mode .volume-control:hover,
+        body.grey-mode .play-pause-btn:hover,
+        body.grey-mode .view-toggle-btn:hover {
+            border-color: #888888;
+            box-shadow: 0 0 10px rgba(200, 200, 200, 0.2);
+        }
+        
+        body.grey-mode .volume-bar.active {
+            background: #aaaaaa;
+            box-shadow: 0 0 4px #aaaaaa;
+        }
+        
+        body.grey-mode .location-marker.current-user {
+            background: #cccccc;
+            box-shadow: 0 0 12px #cccccc, 0 0 24px #aaaaaa, 0 0 36px rgba(200, 200, 200, 0.5);
+        }
+        
+        body.grey-mode .location-marker.current-user::before,
+        body.grey-mode .location-marker.current-user::after {
+            border-color: rgba(200, 200, 200, 0.5);
+        }
+        
+        body.grey-mode #globe {
+            filter: 
+                saturate(0) 
+                brightness(0.7) 
+                contrast(1.3);
+        }
+        
+        body.grey-mode .view-toggle-btn .monitor-icon,
+        body.grey-mode .view-toggle-btn .windowed-icon {
+            border-color: #cccccc;
+        }
+        
+        body.grey-mode .view-toggle-btn .monitor-icon::after {
+            background: #cccccc;
+        }
+        
+        body.grey-mode .view-toggle-btn .expand-icon::before {
+            border-left-color: #cccccc;
+        }
+        
+        body.grey-mode .view-toggle-btn .expand-icon::after {
+            border-right-color: #cccccc;
+        }
+        
+        body.grey-mode .power-led {
+            background: #aaaaaa;
+            box-shadow: 
+                0 0 5px #aaaaaa,
+                0 0 10px #888888,
+                0 0 15px rgba(150, 150, 150, 0.5);
+        }
+        
+        /* Full color mode */
+        body.fullcolor-mode .crt-container {
+            background: #0a0a1a;
+            box-shadow: 
+                0 0 100px rgba(100, 150, 255, 0.3),
+                inset 0 0 100px rgba(0, 0, 0, 0.8);
+        }
+        
+        body.fullcolor-mode .screen-content {
+            color: #ffffff;
+            text-shadow: 
+                0.5px 0 0 rgba(255, 100, 100, 0.3),
+                -0.5px 0 0 rgba(100, 100, 255, 0.3);
+        }
+        
+        body.fullcolor-mode .title {
+            animation: glow-fullcolor 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-fullcolor {
+            from {
+                text-shadow: 
+                    0 0 5px #88ccff,
+                    0 0 10px #88ccff,
+                    0 0 15px #66aaff,
+                    0 0 20px #4488ff;
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #88ccff,
+                    0 0 20px #88ccff,
+                    0 0 30px #66aaff,
+                    0 0 40px #4488ff;
+            }
+        }
+        
+        body.fullcolor-mode .flicker {
+            background: rgba(100, 150, 255, 0.02);
+        }
+        
+        body.fullcolor-mode .glitch-line {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.fullcolor-mode .ticker-container {
+            background: rgba(20, 30, 50, 0.85);
+            border-top: 1px solid #88ccff;
+        }
+        
+        body.fullcolor-mode .ticker-label {
+            background: linear-gradient(90deg, #ff6688, #88ccff);
+            color: #0a0a1a;
+        }
+        
+        body.fullcolor-mode .ticker-separator {
+            color: #88aacc;
+        }
+        
+        body.fullcolor-mode .main-display {
+            background: rgba(20, 30, 50, 0.7);
+            border: 1px solid rgba(136, 204, 255, 0.2);
+        }
+        
+        body.fullcolor-mode .weather-main {
+            text-shadow: 0 0 10px rgba(136, 204, 255, 0.8), 0 0 20px rgba(100, 150, 255, 0.4);
+        }
+        
+        body.fullcolor-mode .location-info,
+        body.fullcolor-mode .air-quality {
+            text-shadow: 0 0 8px rgba(136, 204, 255, 0.6);
+        }
+        
+        body.fullcolor-mode .volume-control,
+        body.fullcolor-mode .play-pause-btn,
+        body.fullcolor-mode .view-toggle-btn {
+            background: rgba(20, 30, 50, 0.9);
+            border-color: #6699cc;
+            color: #88ccff;
+        }
+        
+        body.fullcolor-mode .volume-control:hover,
+        body.fullcolor-mode .play-pause-btn:hover,
+        body.fullcolor-mode .view-toggle-btn:hover {
+            border-color: #88ccff;
+            box-shadow: 0 0 10px rgba(136, 204, 255, 0.3);
+        }
+        
+        body.fullcolor-mode .volume-bar.active {
+            background: #88ccff;
+            box-shadow: 0 0 4px #88ccff;
+        }
+        
+        body.fullcolor-mode .location-marker.current-user {
+            background: #ff6688;
+            box-shadow: 0 0 12px #ff6688, 0 0 24px #ff6688, 0 0 36px rgba(255, 102, 136, 0.5);
+        }
+        
+        body.fullcolor-mode .location-marker.current-user::before,
+        body.fullcolor-mode .location-marker.current-user::after {
+            border-color: rgba(255, 102, 136, 0.5);
+        }
+        
+        body.fullcolor-mode #globe {
+            filter: 
+                brightness(0.8) 
+                contrast(1.2)
+                saturate(1.2);
+        }
+        
+        body.fullcolor-mode .view-toggle-btn .monitor-icon,
+        body.fullcolor-mode .view-toggle-btn .windowed-icon {
+            border-color: #88ccff;
+        }
+        
+        body.fullcolor-mode .view-toggle-btn .monitor-icon::after {
+            background: #88ccff;
+        }
+        
+        body.fullcolor-mode .view-toggle-btn .expand-icon::before {
+            border-left-color: #88ccff;
+        }
+        
+        body.fullcolor-mode .view-toggle-btn .expand-icon::after {
+            border-right-color: #88ccff;
+        }
+        
+        body.fullcolor-mode .power-led {
+            background: linear-gradient(135deg, #ff6688, #88ccff);
+            box-shadow: 
+                0 0 5px #ff6688,
+                0 0 10px #88ccff,
+                0 0 15px rgba(136, 204, 255, 0.5);
+        }
+        
+        /* Main display toggle */
+        .main-display {
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        
+        .main-display.hidden-panel {
+            background: transparent;
+            border-color: transparent;
+        }
     </style>
 </head>
 <body class="windowed-mode">
@@ -1020,7 +1670,7 @@
         <div class="zap"></div>
         
         <div class="screen-content">
-            <div class="main-display">
+            <div class="main-display hidden-panel">
                 <div class="title">CURRENT CONDITION</div>
                 <div class="clock" id="clock">--:--:--</div>
                 <div class="date" id="date">Loading...</div>
@@ -1174,6 +1824,11 @@
                 // Start spinning
                 spinGlobe();
             });
+            
+            // Update markers on any map movement
+            map.on('move', () => {
+                updateMarkerPositions();
+            });
         }
         
         // Spin the globe
@@ -1185,8 +1840,8 @@
             if (!spinEnabled) return;
             
             const center = map.getCenter();
-            center.lng -= 0.8; // Faster spin
-            totalRotation += 0.8;
+            center.lng -= 0.4; // Slower spin
+            totalRotation += 0.4;
             map.setCenter(center);
             
             // Update marker positions during spin
@@ -1211,18 +1866,30 @@
         
         // Actually execute the fly to
         function executeFlyTo(lat, lng) {
+            // Hide markers during zoom animation to prevent jumping
+            locationMarkers.forEach(marker => {
+                marker.style.transition = 'opacity 0.3s';
+                marker.style.opacity = '0';
+            });
+            
             map.flyTo({
                 center: [lng, lat],
-                zoom: 3.5,
-                duration: 4000,
+                zoom: 3.0,
+                duration: 3000,
                 essential: true,
-                curve: 1.5
+                curve: 1.2
             });
             
             // After flying, do a slow rotation around the location
             setTimeout(() => {
+                // Fade markers back in
+                locationMarkers.forEach(marker => {
+                    marker.style.opacity = '';
+                    marker.style.transition = '';
+                });
+                updateMarkerPositions();
                 slowRotateAroundLocation(lng, lat);
-            }, 4500);
+            }, 3500);
         }
         
         // Slow rotation around user's location
@@ -1610,20 +2277,20 @@
             let items = [];
             
             // Weather info
-            items.push(`🌡️ TEMPERATURE: ${formatTemp(current.temperature_2m)}`);
-            items.push(`💨 WIND: ${current.wind_speed_10m} km/h`);
-            items.push(`💧 HUMIDITY: ${current.relative_humidity_2m}%`);
-            items.push(`☁️ ${getWeatherDescription(current.weather_code)}`);
+            items.push(`TEMPERATURE: ${formatTemp(current.temperature_2m)}`);
+            items.push(`WIND: ${current.wind_speed_10m} km/h`);
+            items.push(`HUMIDITY: ${current.relative_humidity_2m}%`);
+            items.push(`${getWeatherDescription(current.weather_code)}`);
             
             // Add air quality if available
             if (airQualityData) {
                 const level = getAQILevel(airQualityData.aqius);
-                items.push(`🌬️ AQI: ${airQualityData.aqius} ${level.text}`);
+                items.push(`AQI: ${airQualityData.aqius} ${level.text}`);
             }
             
             // Add stocks
             if (stockData.length > 0) {
-                items.push(`📈 MARKETS:`);
+                items.push(`MARKETS:`);
                 const stockStr = stockData.map(s => 
                     `${s.symbol} ${s.up ? '▲' : '▼'}${Math.abs(s.change)}%`
                 ).join(' • ');
@@ -1632,20 +2299,20 @@
             
             // Add currently playing track
             if (currentTrack) {
-                items.push(`🎵 NOW PLAYING: ${currentTrack.toUpperCase()}`);
+                items.push(`NOW PLAYING: ${currentTrack.toUpperCase()}`);
             }
             
             // Add news items (separated by single icon, not each item)
             if (newsData.length > 0) {
-                items.push(`📰 NEWS`);
+                items.push(`NEWS`);
                 const newsStr = newsData.map(n => n.title.toUpperCase()).join(' • ');
                 items.push(newsStr);
             }
             
             // Add location/system info
-            items.push(`🌍 ${locationData.city}, ${locationData.country_name}`);
-            items.push(`🕐 ${timezone}`);
-            items.push(`📶 ${locationData.org || 'UNKNOWN'}`);
+            items.push(`${locationData.city}, ${locationData.country_name}`);
+            items.push(`${timezone}`);
+            items.push(`${locationData.org || 'UNKNOWN'}`);
             
             // Build ticker with two identical tracks for seamless loop
             const trackHTML = items.map(item => 
@@ -1697,7 +2364,7 @@
                 isPlaying = true;
                 updatePlayPauseButton();
                 const station = radioStations[currentStationIndex];
-                currentTrack = station.name + ' ♪ ' + station.genre;
+                currentTrack = station.name + ' - ' + station.genre;
                 if (weatherData && locationData) {
                     updateTicker();
                 }
@@ -1720,7 +2387,7 @@
         function setStation(index) {
             const station = radioStations[index];
             radioPlayer.src = station.url;
-            currentTrack = station.name + ' ♪ ' + station.genre;
+            currentTrack = station.name + ' - ' + station.genre;
         }
         
         function tryPlay() {
@@ -1880,6 +2547,17 @@
             }
         }
         
+        function flyBackToUser() {
+            if (userLocation && map) {
+                map.flyTo({
+                    center: [userLocation.lng, userLocation.lat],
+                    zoom: 3.0,
+                    duration: 2000,
+                    essential: true
+                });
+            }
+        }
+        
         function switchToWindowedView() {
             // Exit browser fullscreen if active
             if (document.fullscreenElement) {
@@ -1892,6 +2570,9 @@
             
             moveCrtTo('wrapper');
             updateToggleButton();
+            
+            // Fly back to user location after view change
+            setTimeout(flyBackToUser, 300);
         }
         
         function switchToMonitorView() {
@@ -1901,6 +2582,9 @@
             
             moveCrtTo('monitor');
             updateToggleButton();
+            
+            // Fly back to user location after view change
+            setTimeout(flyBackToUser, 300);
         }
         
         function switchToFullscreenView() {
@@ -1916,6 +2600,9 @@
             });
             
             updateToggleButton();
+            
+            // Fly back to user location after view change
+            setTimeout(flyBackToUser, 300);
         }
         
         function moveCrtTo(target) {
@@ -1947,6 +2634,59 @@
             }
         }
         
+        // Color mode toggle (LED click)
+        const colorModes = ['green', 'red', 'purple', 'grey', 'fullcolor'];
+        let currentColorIndex = 0;
+        
+        function initColorToggle() {
+            const powerLed = document.querySelector('.power-led');
+            if (powerLed) {
+                powerLed.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    cycleColorMode();
+                });
+            }
+        }
+        
+        function cycleColorMode() {
+            const powerLed = document.querySelector('.power-led');
+            
+            // Remove current mode class
+            document.body.classList.remove('red-mode', 'purple-mode', 'grey-mode', 'fullcolor-mode');
+            powerLed.classList.remove('red', 'purple', 'grey', 'fullcolor');
+            
+            // Move to next mode
+            currentColorIndex = (currentColorIndex + 1) % colorModes.length;
+            const newMode = colorModes[currentColorIndex];
+            
+            // Apply new mode (green is default, no class needed)
+            if (newMode !== 'green') {
+                document.body.classList.add(newMode + '-mode');
+                powerLed.classList.add(newMode);
+            }
+        }
+        
+        // Main display panel toggle
+        function initPanelToggle() {
+            // Use event delegation on screen-content to catch clicks even when main-display is hidden
+            const screenContent = document.querySelector('.screen-content');
+            if (screenContent) {
+                screenContent.addEventListener('click', function(e) {
+                    // Don't toggle if clicking on buttons or controls
+                    if (e.target.closest('button')) return;
+                    if (e.target.closest('.volume-control')) return;
+                    if (e.target.closest('.ticker-container')) return;
+                    if (e.target.closest('.view-toggle-btn')) return;
+                    if (e.target.closest('.play-pause-btn')) return;
+                    
+                    const mainDisplay = document.querySelector('.main-display');
+                    if (mainDisplay) {
+                        mainDisplay.classList.toggle('hidden-panel');
+                    }
+                });
+            }
+        }
+        
         // Initialize
         detectTemperatureUnit();
         initRadio();
@@ -1954,6 +2694,8 @@
         initVolumeControl();
         initPlayPauseButton();
         initViewToggle();
+        initColorToggle();
+        initPanelToggle();
         initGlobe();
         initLocationTracking();
         updateClock();
