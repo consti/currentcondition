@@ -423,6 +423,51 @@
             display: none;
         }
         
+        /* Location markers on globe */
+        .location-marker {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: marker-blink 1.5s ease-in-out infinite;
+            box-shadow: 0 0 8px #00ff00, 0 0 16px #00ff00;
+        }
+        
+        .location-marker.current-user {
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            box-shadow: 0 0 12px #00ff00, 0 0 24px #00ff00, 0 0 36px rgba(0, 255, 0, 0.5);
+            animation: marker-blink-bright 1s ease-in-out infinite;
+            z-index: 10;
+        }
+        
+        .location-marker.visitor {
+            width: 6px;
+            height: 6px;
+            background: rgba(0, 255, 0, 0.6);
+            box-shadow: 0 0 4px rgba(0, 255, 0, 0.6), 0 0 8px rgba(0, 255, 0, 0.4);
+            animation: marker-blink-dim 2s ease-in-out infinite;
+        }
+        
+        @keyframes marker-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        @keyframes marker-blink-bright {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        @keyframes marker-blink-dim {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+        
         /* Refresh scan effect */
         .refresh-scan {
             position: absolute;
@@ -492,13 +537,34 @@
             display: none !important;
         }
         
-        /* Volume bars (inside audio-control) */
+        /* Volume control */
+        .volume-control {
+            position: absolute;
+            bottom: 55px;
+            right: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 35px;
+            padding: 8px 10px;
+            background: rgba(0, 20, 0, 0.9);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        
+        .volume-control:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
         .volume-bars {
             display: flex;
             align-items: flex-end;
             gap: 3px;
             height: 100%;
-            margin-left: 8px;
         }
         
         .volume-bar {
@@ -506,7 +572,6 @@
             background: #003300;
             border-radius: 1px;
             transition: background 0.15s;
-            cursor: pointer;
         }
         
         .volume-bar.active {
@@ -521,34 +586,41 @@
         .volume-bar:nth-child(5) { height: 85%; }
         .volume-bar:nth-child(6) { height: 100%; }
         
-        .audio-control:hover .volume-bar:not(.active) {
+        .volume-control:hover .volume-bar:not(.active) {
             background: #005500;
         }
         
-        /* Combined audio control with speaker icon */
-        .audio-control {
+        /* Play/Pause button */
+        .play-pause-btn {
             position: absolute;
             bottom: 55px;
-            right: 20px;
-            display: flex;
-            align-items: flex-end;
-            gap: 6px;
+            right: 90px;
+            width: 35px;
             height: 35px;
-            padding: 8px 10px;
             background: rgba(0, 20, 0, 0.9);
             border: 1px solid #00aa00;
             border-radius: 4px;
             cursor: pointer;
-            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            color: #00ff00;
+            z-index: 50;
         }
         
-        .audio-control:hover {
+        .play-pause-btn:hover {
             border-color: #00ff00;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
         
-        .audio-control.paused {
+        .play-pause-btn.playing {
+            color: #00ff00;
+        }
+        
+        .play-pause-btn.paused {
             animation: pulse-glow 1.5s ease-in-out infinite;
         }
         
@@ -562,67 +634,9 @@
             }
         }
         
-        .speaker-icon {
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #00ff00;
-            font-size: 14px;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .speaker-icon::before {
-            content: '';
-            width: 6px;
-            height: 8px;
-            background: #00ff00;
-            position: absolute;
-            left: 2px;
-        }
-        
-        .speaker-icon::after {
-            content: '';
-            width: 0;
-            height: 0;
-            border-top: 6px solid transparent;
-            border-bottom: 6px solid transparent;
-            border-left: 6px solid #00ff00;
-            position: absolute;
-            left: 6px;
-        }
-        
-        .speaker-waves {
-            position: absolute;
-            right: -2px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        
-        .speaker-wave {
-            width: 3px;
-            height: 3px;
-            border: 1px solid #00ff00;
-            border-left: none;
-            border-radius: 0 50% 50% 0;
-        }
-        
-        .speaker-wave:nth-child(1) { width: 4px; height: 6px; }
-        .speaker-wave:nth-child(2) { width: 6px; height: 10px; }
-        
-        .audio-control.muted .speaker-waves,
-        .audio-control.paused .speaker-waves {
-            display: none;
-        }
-        
-        .audio-control.paused .speaker-icon::before,
-        .audio-control.paused .speaker-icon::after {
-            opacity: 0.5;
-        }
-        
+        .volume-control.muted .volume-bar.active {
+            background: #005500;
+            box-shadow: none;
         /* Hidden audio player */
         .audio-player {
             display: none;
@@ -1022,15 +1036,14 @@
                 </div>
             </button>
             
-            <!-- Combined Audio Control -->
-            <div class="audio-control paused" id="audio-control" title="Click speaker to play/pause, bars for volume">
-                <div class="speaker-icon" id="speaker-icon">
-                    <div class="speaker-waves">
-                        <div class="speaker-wave"></div>
-                        <div class="speaker-wave"></div>
-                    </div>
-                </div>
-                <div class="volume-bars" id="volume-bars">
+            <!-- Play/Pause Button -->
+            <button class="play-pause-btn paused" id="play-pause-btn" title="Click to play/pause">
+                ▶
+            </button>
+            
+            <!-- Volume Control -->
+            <div class="volume-control" id="volume-control" title="Click to adjust volume">
+                <div class="volume-bars">
                     <div class="volume-bar active" data-level="1"></div>
                     <div class="volume-bar active" data-level="2"></div>
                     <div class="volume-bar active" data-level="3"></div>
@@ -1174,6 +1187,9 @@
             totalRotation += 0.8;
             map.setCenter(center);
             
+            // Update marker positions during spin
+            updateMarkerPositions();
+            
             // After one full rotation (360 degrees), fly to location if pending
             if (totalRotation >= 360 && pendingFlyTo) {
                 spinEnabled = false;
@@ -1214,9 +1230,147 @@
                 angle += 0.0008; // Very slow rotation
                 const newLng = lng + Math.sin(angle) * 3; // Smaller oscillation range
                 map.setCenter([newLng, lat]);
+                updateMarkerPositions(); // Update marker positions as globe rotates
                 requestAnimationFrame(rotate);
             }
             rotate();
+        }
+        
+        // Location tracking
+        let userLocation = null;
+        let visitorLocations = [];
+        let locationMarkers = [];
+        
+        // Send current user's location to server
+        async function sendUserLocation(lat, lng) {
+            try {
+                await fetch('/api/location', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lat, lng })
+                });
+            } catch (error) {
+                console.error('Error sending location:', error);
+            }
+        }
+        
+        // Fetch all visitor locations
+        async function fetchVisitorLocations() {
+            try {
+                const response = await fetch('/api/locations');
+                const locations = await response.json();
+                visitorLocations = locations || [];
+                updateLocationMarkers();
+            } catch (error) {
+                console.error('Error fetching locations:', error);
+            }
+        }
+        
+        // Convert lat/lng to screen position on the globe
+        function latLngToPixel(lat, lng) {
+            if (!map) return null;
+            
+            const point = map.project([lng, lat]);
+            return { x: point.x, y: point.y };
+        }
+        
+        // Check if a point is visible on the globe (not on back side)
+        function isPointVisible(lat, lng) {
+            if (!map) return false;
+            
+            const center = map.getCenter();
+            const centerLng = center.lng;
+            
+            // Simple check: point is visible if within ~90 degrees of center longitude
+            let diff = Math.abs(lng - centerLng);
+            if (diff > 180) diff = 360 - diff;
+            
+            return diff < 85;
+        }
+        
+        // Create or update location markers
+        function updateLocationMarkers() {
+            // Clear existing markers
+            locationMarkers.forEach(marker => marker.remove());
+            locationMarkers = [];
+            
+            const globeContainer = document.querySelector('.globe-container');
+            if (!globeContainer || !map) return;
+            
+            // Add visitor markers
+            visitorLocations.forEach(loc => {
+                // Skip if this is the current user's location (within ~1km)
+                if (userLocation && 
+                    Math.abs(loc.lat - userLocation.lat) < 0.01 && 
+                    Math.abs(loc.lng - userLocation.lng) < 0.01) {
+                    return;
+                }
+                
+                const marker = document.createElement('div');
+                marker.className = 'location-marker visitor';
+                marker.dataset.lat = loc.lat;
+                marker.dataset.lng = loc.lng;
+                globeContainer.appendChild(marker);
+                locationMarkers.push(marker);
+            });
+            
+            // Add current user marker (brightest)
+            if (userLocation) {
+                const marker = document.createElement('div');
+                marker.className = 'location-marker current-user';
+                marker.dataset.lat = userLocation.lat;
+                marker.dataset.lng = userLocation.lng;
+                globeContainer.appendChild(marker);
+                locationMarkers.push(marker);
+            }
+            
+            updateMarkerPositions();
+        }
+        
+        // Update marker positions based on globe rotation
+        function updateMarkerPositions() {
+            if (!map) return;
+            
+            const globeContainer = document.querySelector('.globe-container');
+            if (!globeContainer) return;
+            
+            const globeRect = globeContainer.getBoundingClientRect();
+            const globeEl = document.getElementById('globe');
+            if (!globeEl) return;
+            
+            const mapRect = globeEl.getBoundingClientRect();
+            
+            locationMarkers.forEach(marker => {
+                const lat = parseFloat(marker.dataset.lat);
+                const lng = parseFloat(marker.dataset.lng);
+                
+                if (isPointVisible(lat, lng)) {
+                    const pos = latLngToPixel(lat, lng);
+                    if (pos) {
+                        // Adjust for globe container offset
+                        const offsetX = mapRect.left - globeRect.left;
+                        const offsetY = mapRect.top - globeRect.top;
+                        
+                        marker.style.left = (pos.x + offsetX) + 'px';
+                        marker.style.top = (pos.y + offsetY) + 'px';
+                        marker.style.display = 'block';
+                    }
+                } else {
+                    marker.style.display = 'none';
+                }
+            });
+        }
+        
+        // Initialize location tracking
+        function initLocationTracking() {
+            // Fetch existing visitor locations
+            fetchVisitorLocations();
+            
+            // Periodically refresh visitor locations
+            setInterval(fetchVisitorLocations, 60000); // Every minute
+            
+            // Update marker positions during globe spin
+            const originalSpinGlobe = spinGlobe;
         }
         
         // Get air quality from IQAir
@@ -1282,6 +1436,10 @@
                 const ipData = await ipResponse.json();
                 locationData = ipData;
                 
+                // Store user location and send to server
+                userLocation = { lat: ipData.latitude, lng: ipData.longitude };
+                sendUserLocation(ipData.latitude, ipData.longitude);
+                
                 // Fly globe to user's location (only on initial load)
                 if (!isRefresh) {
                     if (map && map.loaded()) {
@@ -1289,6 +1447,11 @@
                     } else if (map) {
                         map.on('load', () => flyToLocation(ipData.latitude, ipData.longitude));
                     }
+                    
+                    // Update markers after a short delay to let globe load
+                    setTimeout(() => {
+                        fetchVisitorLocations();
+                    }, 2000);
                 }
                 
                 // Get weather from Open-Meteo
@@ -1530,7 +1693,7 @@
             
             radioPlayer.addEventListener('playing', function() {
                 isPlaying = true;
-                updateAudioControlState();
+                updatePlayPauseButton();
                 const station = radioStations[currentStationIndex];
                 currentTrack = station.name + ' ♪ ' + station.genre;
                 if (weatherData && locationData) {
@@ -1540,7 +1703,7 @@
             
             radioPlayer.addEventListener('pause', function() {
                 isPlaying = false;
-                updateAudioControlState();
+                updatePlayPauseButton();
             });
             
             radioPlayer.addEventListener('error', function(e) {
@@ -1594,22 +1757,13 @@
             document.addEventListener('keydown', startAudio, { once: false });
         }
         
-        // Audio control (combined play/pause + volume)
-        function initAudioControl() {
-            const audioControl = document.getElementById('audio-control');
-            const speakerIcon = document.getElementById('speaker-icon');
-            const volumeBars = document.getElementById('volume-bars');
+        // Volume control
+        function initVolumeControl() {
+            const volumeControl = document.getElementById('volume-control');
+            const barsContainer = volumeControl.querySelector('.volume-bars');
             
-            // Click on speaker icon to toggle play/pause
-            speakerIcon.addEventListener('click', function(e) {
-                e.stopPropagation();
-                togglePlayPause();
-            });
-            
-            // Click on volume bars to adjust volume
-            volumeBars.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const rect = volumeBars.getBoundingClientRect();
+            volumeControl.addEventListener('click', function(e) {
+                const rect = barsContainer.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
                 
                 const barWidth = rect.width / 6;
@@ -1626,7 +1780,15 @@
             
             // Set initial visual state
             updateVolumeBars(3); // Start at 50%
-            updateAudioControlState();
+        }
+        
+        // Play/Pause button
+        function initPlayPauseButton() {
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            playPauseBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                togglePlayPause();
+            });
         }
         
         function setVolume(level) {
@@ -1638,7 +1800,14 @@
             }
             
             updateVolumeBars(level);
-            updateAudioControlState();
+            
+            // Update muted state
+            const volumeControl = document.getElementById('volume-control');
+            if (currentVolume === 0) {
+                volumeControl.classList.add('muted');
+            } else {
+                volumeControl.classList.remove('muted');
+            }
         }
         
         function updateVolumeBars(level) {
@@ -1653,23 +1822,20 @@
             });
         }
         
-        function updateAudioControlState() {
-            const audioControl = document.getElementById('audio-control');
+        function updatePlayPauseButton() {
+            const btn = document.getElementById('play-pause-btn');
+            if (!btn) return;
             
-            if (!audioControl) return;
-            
-            // Update muted state
-            if (currentVolume === 0) {
-                audioControl.classList.add('muted');
-            } else {
-                audioControl.classList.remove('muted');
-            }
-            
-            // Update playing state
             if (isPlaying) {
-                audioControl.classList.remove('paused');
+                btn.textContent = '❚❚';
+                btn.classList.remove('paused');
+                btn.classList.add('playing');
+                btn.title = 'Click to pause';
             } else {
-                audioControl.classList.add('paused');
+                btn.textContent = '▶';
+                btn.classList.remove('playing');
+                btn.classList.add('paused');
+                btn.title = 'Click to play';
             }
         }
         
@@ -1783,9 +1949,11 @@
         detectTemperatureUnit();
         initRadio();
         setupAutoplayFallback();
-        initAudioControl();
+        initVolumeControl();
+        initPlayPauseButton();
         initViewToggle();
         initGlobe();
+        initLocationTracking();
         updateClock();
         setInterval(updateClock, 1000);
         getWeather();
