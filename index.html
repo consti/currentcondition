@@ -4459,21 +4459,15 @@
                 if (enteringHighscore) {
                     e.preventDefault();
                     if (e.key === 'Enter' && highscoreInitials.length === 3) {
-                        submitHighscore();
-                        currentGame.draw();
+                        submitHighscore().then(() => {
+                            if (currentGame) currentGame.draw();
+                        });
                     } else if (e.key === 'Backspace') {
                         highscoreInitials = highscoreInitials.slice(0, -1);
                         currentGame.draw();
                     } else if (/^[a-zA-Z]$/.test(e.key) && highscoreInitials.length < 3) {
                         highscoreInitials += e.key.toUpperCase();
                         currentGame.draw();
-                        if (highscoreInitials.length === 3) {
-                            // Auto-submit after 3 chars
-                            setTimeout(() => {
-                                submitHighscore();
-                                currentGame.draw();
-                            }, 300);
-                        }
                     }
                     return;
                 }
