@@ -3413,7 +3413,8 @@
             }
             // Done checking
             checkingHighscore = false;
-            // If not a high score, just show the table (enteringHighscore stays false)
+            // Redraw to show the result
+            if (currentGame) currentGame.draw();
         }
         
         async function submitHighscore() {
