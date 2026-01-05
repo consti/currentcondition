@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Condition</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'VT323', monospace;
+            overflow: hidden;
+        }
+        
+        .crt-container {
+            position: relative;
+            width: 90vw;
+            height: 90vh;
+            max-width: 1200px;
+            background: #001a00;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 100px rgba(0, 255, 0, 0.3),
+                inset 0 0 100px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* CRT Screen curvature */
+        .crt-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.2) 70%,
+                rgba(0, 0, 0, 0.6) 100%
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        /* Scanlines */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 20;
+        }
+        
+        /* Flicker effect */
+        .flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 255, 0, 0.03);
+            pointer-events: none;
+            z-index: 15;
+            animation: flicker 0.15s infinite;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.27861; }
+            5% { opacity: 0.34769; }
+            10% { opacity: 0.23604; }
+            15% { opacity: 0.90626; }
+            20% { opacity: 0.18128; }
+            25% { opacity: 0.83891; }
+            30% { opacity: 0.65583; }
+            35% { opacity: 0.67807; }
+            40% { opacity: 0.26559; }
+            45% { opacity: 0.84693; }
+            50% { opacity: 0.96019; }
+            55% { opacity: 0.08594; }
+            60% { opacity: 0.20313; }
+            65% { opacity: 0.71988; }
+            70% { opacity: 0.53455; }
+            75% { opacity: 0.37288; }
+            80% { opacity: 0.71428; }
+            85% { opacity: 0.70419; }
+            90% { opacity: 0.7003; }
+            95% { opacity: 0.36108; }
+            100% { opacity: 0.24387; }
+        }
+        
+        /* RGB split / chromatic aberration */
+        @keyframes textShadow {
+            0% {
+                text-shadow: 
+                    0.4px 0 0 rgba(255, 0, 0, 0.3),
+                    -0.4px 0 0 rgba(0, 255, 255, 0.3);
+            }
+            25% {
+                text-shadow: 
+                    0.6px 0 0 rgba(255, 0, 0, 0.3),
+                    -0.6px 0 0 rgba(0, 255, 255, 0.3);
+            }
+            50% {
+                text-shadow: 
+                    0.3px 0 0 rgba(255, 0, 0, 0.3),
+                    -0.3px 0 0 rgba(0, 255, 255, 0.3);
+            }
+            75% {
+                text-shadow: 
+                    0.5px 0 0 rgba(255, 0, 0, 0.3),
+                    -0.5px 0 0 rgba(0, 255, 255, 0.3);
+            }
+            100% {
+                text-shadow: 
+                    0.4px 0 0 rgba(255, 0, 0, 0.3),
+                    -0.4px 0 0 rgba(0, 255, 255, 0.3);
+            }
+        }
+        
+        /* Static noise overlay */
+        .static-noise {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 25;
+            animation: staticNoise 0.2s steps(10) infinite;
+        }
+        
+        @keyframes staticNoise {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-1%, -1%); }
+            20% { transform: translate(1%, 1%); }
+            30% { transform: translate(-1%, 1%); }
+            40% { transform: translate(1%, -1%); }
+            50% { transform: translate(-1%, 0); }
+            60% { transform: translate(1%, 0); }
+            70% { transform: translate(0, 1%); }
+            80% { transform: translate(0, -1%); }
+            90% { transform: translate(1%, 1%); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        /* Occasional screen glitch */
+        .glitch-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(0, 255, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 30;
+            animation: glitchLine 8s infinite;
+        }
+        
+        @keyframes glitchLine {
+            0%, 95%, 100% { opacity: 0; top: 0; }
+            96% { opacity: 1; top: 20%; }
+            97% { opacity: 0; top: 50%; }
+            98% { opacity: 1; top: 80%; }
+            99% { opacity: 0; top: 30%; }
+        }
+        
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-align: center;
+            animation: glow 2s ease-in-out infinite alternate;
+            width: 100%;
+            letter-spacing: 8px;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 
+                    0 0 5px #00ff00,
+                    0 0 10px #00ff00,
+                    0 0 15px #00ff00,
+                    0 0 20px #00ff00;
+            }
+            to {
+                text-shadow: 
+                    0 0 10px #00ff00,
+                    0 0 20px #00ff00,
+                    0 0 30px #00ff00,
+                    0 0 40px #00ff00;
+            }
+        }
+        
+        .clock {
+            font-size: 2.8rem;
+            letter-spacing: 3px;
+            opacity: 0.9;
+        }
+        
+        .date {
+            font-size: 1rem;
+            margin-top: 2px;
+            opacity: 0.5;
+        }
+        
+        .weather-main {
+            font-size: 1.6rem;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.85;
+        }
+        
+        .weather-icon {
+            font-size: 1.8rem;
+        }
+        
+        .location-info {
+            font-size: 0.95rem;
+            margin-top: 6px;
+            opacity: 0.45;
+            letter-spacing: 1px;
+        }
+        
+        .air-quality {
+            font-size: 0.95rem;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.55;
+        }
+        
+        /* Ticker bar at bottom */
+        .ticker-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: rgba(0, 40, 0, 0.85);
+            border-top: 1px solid #00ff00;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        
+        .ticker-label {
+            background: #00ff00;
+            color: #001a00;
+            padding: 8px 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            z-index: 5;
+            white-space: nowrap;
+        }
+        
+        .ticker-wrapper {
+            display: flex;
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .ticker-content {
+            display: flex;
+            white-space: nowrap;
+            font-size: 1.2rem;
+            will-change: transform;
+        }
+        
+        .ticker-track {
+            display: flex;
+            animation: scroll 70s linear infinite;
+        }
+        
+        .ticker-item {
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .ticker-separator {
+            color: #00aa00;
+            padding: 0 5px;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Power on effect */
+        .power-on {
+            animation: powerOn 2s ease-out forwards;
+        }
+        
+        @keyframes powerOn {
+            0% {
+                filter: brightness(0) blur(10px);
+                transform: scale(1.1, 0.01);
+            }
+            50% {
+                filter: brightness(2) blur(5px);
+                transform: scale(1, 0.8);
+            }
+            100% {
+                filter: brightness(1) blur(0);
+                transform: scale(1, 1);
+            }
+        }
+        
+        /* Zap effect */
+        .zap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                transparent 0%,
+                rgba(0, 255, 0, 0.1) 50%,
+                transparent 100%
+            );
+            animation: zapMove 10s linear infinite;
+            pointer-events: none;
+            z-index: 12;
+        }
+        
+        @keyframes zapMove {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        
+        .loading {
+            font-size: 2rem;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Globe container */
+        .globe-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        #globe {
+            width: 100%;
+            height: 100%;
+            filter: 
+                saturate(0) 
+                brightness(0.6) 
+                contrast(1.4)
+                sepia(100%)
+                hue-rotate(70deg)
+                saturate(2);
+        }
+        
+        /* Pixelation overlay for globe */
+        .globe-pixelate {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 20, 0, 0.3) 2px,
+                    rgba(0, 20, 0, 0.3) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 20, 0, 0.3) 2px,
+                    rgba(0, 20, 0, 0.3) 4px
+                );
+            pointer-events: none;
+        }
+        
+        /* Globe glow effect - disabled */
+        .globe-glow {
+            display: none;
+        }
+        
+        /* Refresh scan effect */
+        .refresh-scan {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 255, 0, 0.15) 45%,
+                rgba(0, 255, 0, 0.4) 50%,
+                rgba(0, 255, 0, 0.15) 55%,
+                transparent 100%
+            );
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+        
+        @keyframes refreshScan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        
+        .screen-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            color: #00ff00;
+            text-shadow: 
+                0.5px 0 0 rgba(255, 0, 0, 0.3),
+                -0.5px 0 0 rgba(0, 255, 255, 0.3);
+            animation: textShadow 1.6s infinite;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        
+        .main-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 30px;
+            margin-top: 10px;
+        }
+        
+        .aqi-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        
+        .aqi-good { background: #00e400; color: #000; }
+        .aqi-moderate { background: #ffff00; color: #000; }
+        .aqi-sensitive { background: #ff7e00; color: #000; }
+        .aqi-unhealthy { background: #ff0000; color: #fff; }
+        .aqi-very-unhealthy { background: #8f3f97; color: #fff; }
+        .aqi-hazardous { background: #7e0023; color: #fff; }
+        
+        .mapboxgl-ctrl-logo,
+        .mapboxgl-ctrl-attrib {
+            display: none !important;
+        }
+        
+        /* Volume control */
+        .volume-control {
+            position: absolute;
+            bottom: 55px;
+            right: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 35px;
+            padding: 8px 10px;
+            background: rgba(0, 20, 0, 0.9);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        
+        .volume-control:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .volume-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 100%;
+        }
+        
+        .volume-bar {
+            width: 5px;
+            background: #003300;
+            border-radius: 1px;
+            transition: background 0.15s;
+        }
+        
+        .volume-bar.active {
+            background: #00ff00;
+            box-shadow: 0 0 4px #00ff00;
+        }
+        
+        .volume-bar:nth-child(1) { height: 25%; }
+        .volume-bar:nth-child(2) { height: 40%; }
+        .volume-bar:nth-child(3) { height: 55%; }
+        .volume-bar:nth-child(4) { height: 70%; }
+        .volume-bar:nth-child(5) { height: 85%; }
+        .volume-bar:nth-child(6) { height: 100%; }
+        
+        .volume-control:hover .volume-bar:not(.active) {
+            background: #005500;
+        }
+        
+        /* Play/Pause button */
+        .audio-controls {
+            position: absolute;
+            bottom: 55px;
+            right: 100px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 50;
+        }
+        
+        .play-pause-btn {
+            width: 35px;
+            height: 35px;
+            background: rgba(0, 20, 0, 0.9);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            color: #00ff00;
+        }
+        
+        .play-pause-btn:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .play-pause-btn.playing {
+            color: #00ff00;
+        }
+        
+        .play-pause-btn.paused {
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+                border-color: #00ff00;
+            }
+        }
+        
+        /* Hidden audio player */
+        .audio-player {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hidden Audio Player for Internet Radio -->
+    <audio id="radio-player" class="audio-player" crossorigin="anonymous"></audio>
+    
+    <div class="crt-container power-on">
+        <div class="refresh-scan" id="refresh-scan"></div>
+        <div class="globe-container">
+            <div id="globe"></div>
+            <div class="globe-pixelate"></div>
+            <div class="globe-glow"></div>
+        </div>
+        <div class="scanlines"></div>
+        <div class="flicker"></div>
+        <div class="static-noise"></div>
+        <div class="glitch-line"></div>
+        <div class="zap"></div>
+        
+        <div class="screen-content">
+            <div class="main-display">
+                <div class="title">CURRENT CONDITION</div>
+                <div class="clock" id="clock">--:--:--</div>
+                <div class="date" id="date">Loading...</div>
+                <div class="weather-main" id="weather-main">
+                    <span class="loading">ACQUIRING DATA...</span>
+                </div>
+                <div class="location-info" id="location-info"></div>
+                <div class="air-quality" id="air-quality"></div>
+            </div>
+            
+            <div class="audio-controls">
+                <button class="play-pause-btn paused" id="play-pause-btn" title="Click to play/pause">
+                    ▶
+                </button>
+            </div>
+            <div class="volume-control" id="volume-control" title="Click to adjust volume">
+                <div class="volume-bars">
+                    <div class="volume-bar active" data-level="1"></div>
+                    <div class="volume-bar active" data-level="2"></div>
+                    <div class="volume-bar active" data-level="3"></div>
+                    <div class="volume-bar" data-level="4"></div>
+                    <div class="volume-bar" data-level="5"></div>
+                    <div class="volume-bar" data-level="6"></div>
+                </div>
+            </div>
+            
+            <div class="ticker-container">
+                <div class="ticker-label" onclick="manualRefresh()" style="cursor: pointer;">▶ LIVE DATA</div>
+                <div class="ticker-wrapper">
+                    <div class="ticker-content" id="ticker">
+                        <div class="ticker-track">
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                        </div>
+                        <div class="ticker-track">
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                            <span class="ticker-item">CURRENT CONDITION</span>
+                            <span class="ticker-separator">◆</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let weatherData = null;
+        let locationData = null;
+        let newsData = [];
+        let airQualityData = null;
+        let stockData = [];
+        let map = null;
+        
+        const IQAIR_API_KEY = '9dd3bd73-fb52-4393-85de-4ca87a16b4f7';
+        const MAPBOX_TOKEN = 'pk.eyJ1IjoiY29uc3RpIiwiYSI6ImNtazBwbXl5dzI1bTczZXM5dTlhaTdnMzMifQ.7a4E2YslVejb6HzsJox7Bw';
+        
+        let currentVolume = 50; // 0-100
+        let currentTrack = null;
+        let useFahrenheit = false;
+        
+        // Detect if user prefers Fahrenheit (US, Liberia, Myanmar)
+        function detectTemperatureUnit() {
+            const locale = navigator.language || navigator.userLanguage || 'en-US';
+            const fahrenheitLocales = ['en-US', 'en-LR', 'my-MM'];
+            useFahrenheit = fahrenheitLocales.some(l => locale.startsWith(l.split('-')[0]) && locale.includes(l.split('-')[1]));
+            // Simpler check: if locale contains US, use Fahrenheit
+            if (locale.includes('US') || locale.includes('us')) {
+                useFahrenheit = true;
+            }
+        }
+        
+        function celsiusToFahrenheit(c) {
+            return Math.round((c * 9/5) + 32);
+        }
+        
+        function formatTemp(celsius) {
+            if (useFahrenheit) {
+                return `${celsiusToFahrenheit(celsius)}°F`;
+            }
+            return `${Math.round(celsius)}°C`;
+        }
+        
+        // Initialize the 3D globe
+        function initGlobe() {
+            mapboxgl.accessToken = MAPBOX_TOKEN;
+            
+            map = new mapboxgl.Map({
+                container: 'globe',
+                style: 'mapbox://styles/mapbox/satellite-v9',
+                center: [0, 20],
+                zoom: 1.5,
+                projection: 'globe',
+                interactive: false
+            });
+            
+            map.on('style.load', () => {
+                // Add atmosphere effect
+                map.setFog({
+                    color: 'rgb(0, 20, 0)',
+                    'high-color': 'rgb(0, 40, 0)',
+                    'horizon-blend': 0.1,
+                    'space-color': 'rgb(0, 5, 0)',
+                    'star-intensity': 0.2
+                });
+                
+                // Start spinning
+                spinGlobe();
+            });
+        }
+        
+        // Spin the globe
+        let spinEnabled = true;
+        let totalRotation = 0;
+        let pendingFlyTo = null;
+        
+        function spinGlobe() {
+            if (!spinEnabled) return;
+            
+            const center = map.getCenter();
+            center.lng -= 0.8; // Faster spin
+            totalRotation += 0.8;
+            map.setCenter(center);
+            
+            // After one full rotation (360 degrees), fly to location if pending
+            if (totalRotation >= 360 && pendingFlyTo) {
+                spinEnabled = false;
+                const { lat, lng } = pendingFlyTo;
+                pendingFlyTo = null;
+                executeFlyTo(lat, lng);
+                return;
+            }
+            
+            requestAnimationFrame(spinGlobe);
+        }
+        
+        // Queue fly to user's location (after spin completes)
+        function flyToLocation(lat, lng) {
+            pendingFlyTo = { lat, lng };
+        }
+        
+        // Actually execute the fly to
+        function executeFlyTo(lat, lng) {
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 3.5,
+                duration: 4000,
+                essential: true,
+                curve: 1.5
+            });
+            
+            // After flying, do a slow rotation around the location
+            setTimeout(() => {
+                slowRotateAroundLocation(lng, lat);
+            }, 4500);
+        }
+        
+        // Slow rotation around user's location
+        function slowRotateAroundLocation(lng, lat) {
+            let angle = 0;
+            function rotate() {
+                angle += 0.0008; // Very slow rotation
+                const newLng = lng + Math.sin(angle) * 3; // Smaller oscillation range
+                map.setCenter([newLng, lat]);
+                requestAnimationFrame(rotate);
+            }
+            rotate();
+        }
+        
+        // Get air quality from IQAir
+        async function getAirQuality(lat, lon) {
+            try {
+                const response = await fetch(
+                    `https://api.airvisual.com/v2/nearest_city?lat=${lat}&lon=${lon}&key=${IQAIR_API_KEY}`
+                );
+                const data = await response.json();
+                if (data.status === 'success') {
+                    airQualityData = data.data.current.pollution;
+                    updateAirQualityDisplay();
+                }
+            } catch (error) {
+                console.error('Error fetching air quality:', error);
+            }
+        }
+        
+        // Get AQI level info
+        function getAQILevel(aqi) {
+            if (aqi <= 50) return { class: 'aqi-good', text: 'GOOD' };
+            if (aqi <= 100) return { class: 'aqi-moderate', text: 'MODERATE' };
+            if (aqi <= 150) return { class: 'aqi-sensitive', text: 'UNHEALTHY FOR SENSITIVE' };
+            if (aqi <= 200) return { class: 'aqi-unhealthy', text: 'UNHEALTHY' };
+            if (aqi <= 300) return { class: 'aqi-very-unhealthy', text: 'VERY UNHEALTHY' };
+            return { class: 'aqi-hazardous', text: 'HAZARDOUS' };
+        }
+        
+        // Update air quality display
+        function updateAirQualityDisplay() {
+            if (!airQualityData) return;
+            
+            const aqi = airQualityData.aqius;
+            const level = getAQILevel(aqi);
+            
+            document.getElementById('air-quality').innerHTML = `
+                AIR QUALITY: <span class="aqi-badge ${level.class}">AQI ${aqi} - ${level.text}</span>
+            `;
+        }
+        
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        // Get weather using IP-based location (no permission needed)
+        async function getWeather(isRefresh = false) {
+            try {
+                // Show refresh scan effect
+                if (isRefresh) {
+                    triggerRefreshScan();
+                }
+                
+                // First get location from IP
+                const ipResponse = await fetch('https://ipapi.co/json/');
+                const ipData = await ipResponse.json();
+                locationData = ipData;
+                
+                // Fly globe to user's location (only on initial load)
+                if (!isRefresh) {
+                    if (map && map.loaded()) {
+                        flyToLocation(ipData.latitude, ipData.longitude);
+                    } else if (map) {
+                        map.on('load', () => flyToLocation(ipData.latitude, ipData.longitude));
+                    }
+                }
+                
+                // Get weather from Open-Meteo
+                const weatherResponse = await fetch(
+                    `https://api.open-meteo.com/v1/forecast?latitude=${ipData.latitude}&longitude=${ipData.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`
+                );
+                weatherData = await weatherResponse.json();
+                
+                // Fetch news, air quality, and stocks in parallel
+                await Promise.all([
+                    getNews(ipData.country_code),
+                    getAirQuality(ipData.latitude, ipData.longitude),
+                    getStocks()
+                ]);
+                
+                updateDisplay();
+                updateTicker();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('weather-main').innerHTML = '<span style="color: #ff6600;">SIGNAL INTERFERENCE - RETRY IN PROGRESS</span>';
+                setTimeout(() => getWeather(isRefresh), 5000);
+            }
+        }
+        
+        // Trigger a visible CRT scan effect for refresh
+        function triggerRefreshScan() {
+            const scanLine = document.getElementById('refresh-scan');
+            scanLine.style.display = 'block';
+            scanLine.style.animation = 'none';
+            scanLine.offsetHeight; // Trigger reflow
+            scanLine.style.animation = 'refreshScan 1.5s ease-out forwards';
+            setTimeout(() => {
+                scanLine.style.display = 'none';
+            }, 1500);
+        }
+        
+        // Manual refresh trigger
+        function manualRefresh() {
+            getWeather(true);
+        }
+        
+        // Get news headlines
+        async function getNews(countryCode) {
+            try {
+                // Using a free news API - RSS to JSON service with Google News
+                const newsResponse = await fetch(
+                    `https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=en-${countryCode || 'US'}&gl=${countryCode || 'US'}&ceid=${countryCode || 'US'}:en`
+                );
+                const data = await newsResponse.json();
+                if (data.items) {
+                    newsData = data.items.slice(0, 8).map(item => ({
+                        title: item.title.replace(/ - .*$/, ''), // Remove source suffix
+                        source: item.title.match(/ - ([^-]+)$/)?.[1] || 'News'
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching news:', error);
+                newsData = [];
+            }
+        }
+        
+        // Get stock data using finnhub free API
+        async function getStocks() {
+            try {
+                // Using a simpler approach with static major indices
+                // In production, you'd use a proper stock API with CORS support
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                
+                stockData = [];
+                
+                if (data.bitcoin) {
+                    stockData.push({
+                        symbol: 'BTC',
+                        price: data.bitcoin.usd.toFixed(0),
+                        change: data.bitcoin.usd_24h_change?.toFixed(2) || '0',
+                        up: (data.bitcoin.usd_24h_change || 0) >= 0
+                    });
+                }
+                if (data.ethereum) {
+                    stockData.push({
+                        symbol: 'ETH',
+                        price: data.ethereum.usd.toFixed(0),
+                        change: data.ethereum.usd_24h_change?.toFixed(2) || '0',
+                        up: (data.ethereum.usd_24h_change || 0) >= 0
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching crypto:', error);
+                stockData = [];
+            }
+        }
+        
+        function getWeatherIcon(code) {
+            // WMO Weather interpretation codes
+            const icons = {
+                0: '☀️', // Clear sky
+                1: '🌤️', 2: '⛅', 3: '☁️', // Partly cloudy
+                45: '🌫️', 48: '🌫️', // Fog
+                51: '🌧️', 53: '🌧️', 55: '🌧️', // Drizzle
+                61: '🌧️', 63: '🌧️', 65: '🌧️', // Rain
+                71: '🌨️', 73: '🌨️', 75: '🌨️', // Snow
+                77: '🌨️', // Snow grains
+                80: '🌧️', 81: '🌧️', 82: '🌧️', // Showers
+                85: '🌨️', 86: '🌨️', // Snow showers
+                95: '⛈️', // Thunderstorm
+                96: '⛈️', 99: '⛈️' // Thunderstorm with hail
+            };
+            return icons[code] || '🌡️';
+        }
+        
+        function getWeatherDescription(code) {
+            const descriptions = {
+                0: 'CLEAR SKY',
+                1: 'MAINLY CLEAR', 2: 'PARTLY CLOUDY', 3: 'OVERCAST',
+                45: 'FOG', 48: 'DEPOSITING RIME FOG',
+                51: 'LIGHT DRIZZLE', 53: 'MODERATE DRIZZLE', 55: 'DENSE DRIZZLE',
+                61: 'LIGHT RAIN', 63: 'MODERATE RAIN', 65: 'HEAVY RAIN',
+                71: 'LIGHT SNOW', 73: 'MODERATE SNOW', 75: 'HEAVY SNOW',
+                77: 'SNOW GRAINS',
+                80: 'LIGHT SHOWERS', 81: 'MODERATE SHOWERS', 82: 'VIOLENT SHOWERS',
+                85: 'LIGHT SNOW SHOWERS', 86: 'HEAVY SNOW SHOWERS',
+                95: 'THUNDERSTORM',
+                96: 'THUNDERSTORM WITH HAIL', 99: 'SEVERE THUNDERSTORM'
+            };
+            return descriptions[code] || 'UNKNOWN CONDITIONS';
+        }
+        
+        function updateDisplay() {
+            if (!weatherData || !locationData) return;
+            
+            const current = weatherData.current;
+            const temp = current.temperature_2m;
+            const feelsLike = current.apparent_temperature;
+            const weatherCode = current.weather_code;
+            
+            document.getElementById('weather-main').innerHTML = `
+                <span class="weather-icon">${getWeatherIcon(weatherCode)}</span>
+                <span>${formatTemp(temp)}</span>
+                <span style="font-size: 1rem; opacity: 0.7;">FEELS LIKE ${formatTemp(feelsLike)}</span>
+            `;
+            
+            document.getElementById('location-info').innerHTML = `
+                ${locationData.city}, ${locationData.region}, ${locationData.country_name}
+            `;
+        }
+        
+        function updateTicker() {
+            if (!weatherData || !locationData) return;
+            
+            const current = weatherData.current;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            let items = [];
+            
+            // Weather info
+            items.push(`🌡️ TEMPERATURE: ${formatTemp(current.temperature_2m)}`);
+            items.push(`💨 WIND: ${current.wind_speed_10m} km/h`);
+            items.push(`💧 HUMIDITY: ${current.relative_humidity_2m}%`);
+            items.push(`☁️ ${getWeatherDescription(current.weather_code)}`);
+            
+            // Add air quality if available
+            if (airQualityData) {
+                const level = getAQILevel(airQualityData.aqius);
+                items.push(`🌬️ AQI: ${airQualityData.aqius} ${level.text}`);
+            }
+            
+            // Add stocks
+            if (stockData.length > 0) {
+                items.push(`📈 MARKETS:`);
+                const stockStr = stockData.map(s => 
+                    `${s.symbol} ${s.up ? '▲' : '▼'}${Math.abs(s.change)}%`
+                ).join(' • ');
+                items.push(stockStr);
+            }
+            
+            // Add currently playing track
+            if (currentTrack) {
+                items.push(`🎵 NOW PLAYING: ${currentTrack.toUpperCase()}`);
+            }
+            
+            // Add news items (separated by single icon, not each item)
+            if (newsData.length > 0) {
+                items.push(`📰 NEWS`);
+                const newsStr = newsData.map(n => n.title.toUpperCase()).join(' • ');
+                items.push(newsStr);
+            }
+            
+            // Add location/system info
+            items.push(`🌍 ${locationData.city}, ${locationData.country_name}`);
+            items.push(`🕐 ${timezone}`);
+            items.push(`📶 ${locationData.org || 'UNKNOWN'}`);
+            
+            // Build ticker with two identical tracks for seamless loop
+            const trackHTML = items.map(item => 
+                `<span class="ticker-item">${item}</span><span class="ticker-separator">◆</span>`
+            ).join('');
+            
+            document.getElementById('ticker').innerHTML = 
+                `<div class="ticker-track">${trackHTML}</div>` +
+                `<div class="ticker-track">${trackHTML}</div>`;
+        }
+        
+        // Random glitch effect
+        function randomGlitch() {
+            const container = document.querySelector('.crt-container');
+            if (Math.random() < 0.1) {
+                container.style.transform = `translateX(${Math.random() * 4 - 2}px)`;
+                setTimeout(() => {
+                    container.style.transform = 'translateX(0)';
+                }, 50);
+            }
+            setTimeout(randomGlitch, Math.random() * 3000 + 1000);
+        }
+        
+        // Initialize Internet Radio player
+        let radioPlayer = null;
+        let userInteracted = false;
+        let isPlaying = false;
+        
+        // Radio stations with lo-fi/vaporwave vibes
+        const radioStations = [
+            { name: 'Lofi Girl Radio', url: 'https://play.streamafrica.net/lofiradio', genre: 'Lo-Fi' },
+            { name: 'Nightwave Plaza', url: 'https://radio.plaza.one/mp3', genre: 'Vaporwave' },
+            { name: 'SomaFM DEF CON', url: 'https://ice2.somafm.com/defcon-128-mp3', genre: 'Synthwave' },
+            { name: 'SomaFM Space Station', url: 'https://ice2.somafm.com/spacestation-128-mp3', genre: 'Ambient' },
+        ];
+        
+        let currentStationIndex = 1; // Start with Nightwave Plaza (vaporwave)
+        
+        function initRadio() {
+            radioPlayer = document.getElementById('radio-player');
+            
+            // Set initial volume (0-1 scale)
+            radioPlayer.volume = currentVolume / 100;
+            
+            // Set station
+            setStation(currentStationIndex);
+            
+            radioPlayer.addEventListener('playing', function() {
+                isPlaying = true;
+                updatePlayPauseButton();
+                const station = radioStations[currentStationIndex];
+                currentTrack = station.name + ' ♪ ' + station.genre;
+                if (weatherData && locationData) {
+                    updateTicker();
+                }
+            });
+            
+            radioPlayer.addEventListener('pause', function() {
+                isPlaying = false;
+                updatePlayPauseButton();
+            });
+            
+            // Initialize play/pause button
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            playPauseBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                togglePlayPause();
+            });
+            
+            radioPlayer.addEventListener('error', function(e) {
+                console.log('Radio error, trying next station...');
+                // Try next station on error
+                currentStationIndex = (currentStationIndex + 1) % radioStations.length;
+                setStation(currentStationIndex);
+                tryPlay();
+            });
+        }
+        
+        function setStation(index) {
+            const station = radioStations[index];
+            radioPlayer.src = station.url;
+            currentTrack = station.name + ' ♪ ' + station.genre;
+        }
+        
+        function tryPlay() {
+            if (radioPlayer) {
+                radioPlayer.play().catch(function(e) {
+                    console.log('Autoplay blocked, waiting for user interaction');
+                });
+            }
+        }
+        
+        function togglePlayPause() {
+            if (radioPlayer) {
+                if (radioPlayer.paused) {
+                    radioPlayer.play().catch(function(e) {
+                        console.log('Play error:', e.message);
+                    });
+                } else {
+                    radioPlayer.pause();
+                }
+            }
+        }
+        
+        function updatePlayPauseButton() {
+            const btn = document.getElementById('play-pause-btn');
+            if (isPlaying) {
+                btn.textContent = '❙❙';
+                btn.classList.remove('paused');
+                btn.classList.add('playing');
+                btn.title = 'Click to pause';
+            } else {
+                btn.textContent = '▶';
+                btn.classList.remove('playing');
+                btn.classList.add('paused');
+                btn.title = 'Click to play';
+            }
+        }
+        
+        // For Safari and other browsers with strict autoplay policies
+        // Start playing on first user interaction
+        function setupAutoplayFallback() {
+            const startAudio = function() {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    tryPlay();
+                }
+            };
+            
+            document.addEventListener('click', startAudio, { once: false });
+            document.addEventListener('touchstart', startAudio, { once: false });
+            document.addEventListener('keydown', startAudio, { once: false });
+        }
+        
+        // Volume control
+        function initVolumeControl() {
+            const volumeControl = document.getElementById('volume-control');
+            const barsContainer = volumeControl.querySelector('.volume-bars');
+            
+            volumeControl.addEventListener('click', function(e) {
+                const rect = barsContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                
+                const barWidth = rect.width / 6;
+                let level = Math.ceil(clickX / barWidth);
+                level = Math.max(0, Math.min(6, level));
+                
+                // If clicking on already-lowest active bar, mute
+                if (level === 1 && currentVolume <= 17) {
+                    setVolume(0);
+                } else {
+                    setVolume(level);
+                }
+            });
+            
+            // Set initial visual state
+            updateVolumeBars(3); // Start at 50%
+        }
+        
+        function setVolume(level) {
+            // level is 0-6, convert to 0-100
+            currentVolume = Math.round((level / 6) * 100);
+            
+            if (radioPlayer) {
+                radioPlayer.volume = currentVolume / 100;
+            }
+            
+            updateVolumeBars(level);
+        }
+        
+        function updateVolumeBars(level) {
+            const bars = document.querySelectorAll('.volume-bar');
+            const volumeControl = document.getElementById('volume-control');
+            
+            bars.forEach((bar, index) => {
+                if (index < level) {
+                    bar.classList.add('active');
+                } else {
+                    bar.classList.remove('active');
+                }
+            });
+            
+            if (level === 0) {
+                volumeControl.classList.add('volume-muted');
+            } else {
+                volumeControl.classList.remove('volume-muted');
+            }
+        }
+        
+        // Initialize
+        detectTemperatureUnit();
+        initRadio();
+        setupAutoplayFallback();
+        initVolumeControl();
+        initGlobe();
+        updateClock();
+        setInterval(updateClock, 1000);
+        getWeather();
+        setInterval(() => getWeather(true), 300000); // Refresh all data every 5 minutes with scan effect
+        setTimeout(randomGlitch, 2000);
+    </script>
+</body>
+</html>

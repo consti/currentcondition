@@ -1,0 +1,14 @@
+[Unit]
+Description=CRT Weather Terminal
+After=network.target
+
+[Service]
+Type=simple
+User=exedev
+WorkingDirectory=/home/exedev/crt-weather
+ExecStart=/home/exedev/crt-weather/server
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
