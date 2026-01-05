@@ -492,34 +492,13 @@
             display: none !important;
         }
         
-        /* Volume control */
-        .volume-control {
-            position: absolute;
-            bottom: 55px;
-            right: 20px;
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            height: 35px;
-            padding: 8px 10px;
-            background: rgba(0, 20, 0, 0.9);
-            border: 1px solid #00aa00;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 50;
-            transition: all 0.2s;
-        }
-        
-        .volume-control:hover {
-            border-color: #00ff00;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-        }
-        
+        /* Volume bars (inside audio-control) */
         .volume-bars {
             display: flex;
             align-items: flex-end;
             gap: 3px;
             height: 100%;
+            margin-left: 8px;
         }
         
         .volume-bar {
@@ -527,6 +506,7 @@
             background: #003300;
             border-radius: 1px;
             transition: background 0.15s;
+            cursor: pointer;
         }
         
         .volume-bar.active {
@@ -541,47 +521,34 @@
         .volume-bar:nth-child(5) { height: 85%; }
         .volume-bar:nth-child(6) { height: 100%; }
         
-        .volume-control:hover .volume-bar:not(.active) {
+        .audio-control:hover .volume-bar:not(.active) {
             background: #005500;
         }
         
-        /* Play/Pause button */
-        .audio-controls {
+        /* Combined audio control with speaker icon */
+        .audio-control {
             position: absolute;
             bottom: 55px;
-            right: 100px;
+            right: 20px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 50;
-        }
-        
-        .play-pause-btn {
-            width: 35px;
+            align-items: flex-end;
+            gap: 6px;
             height: 35px;
+            padding: 8px 10px;
             background: rgba(0, 20, 0, 0.9);
             border: 1px solid #00aa00;
             border-radius: 4px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            z-index: 50;
             transition: all 0.2s;
-            font-family: 'VT323', monospace;
-            font-size: 18px;
-            color: #00ff00;
         }
         
-        .play-pause-btn:hover {
+        .audio-control:hover {
             border-color: #00ff00;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
         
-        .play-pause-btn.playing {
-            color: #00ff00;
-        }
-        
-        .play-pause-btn.paused {
+        .audio-control.paused {
             animation: pulse-glow 1.5s ease-in-out infinite;
         }
         
@@ -593,6 +560,67 @@
                 box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
                 border-color: #00ff00;
             }
+        }
+        
+        .speaker-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00ff00;
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .speaker-icon::before {
+            content: '';
+            width: 6px;
+            height: 8px;
+            background: #00ff00;
+            position: absolute;
+            left: 2px;
+        }
+        
+        .speaker-icon::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 6px solid #00ff00;
+            position: absolute;
+            left: 6px;
+        }
+        
+        .speaker-waves {
+            position: absolute;
+            right: -2px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .speaker-wave {
+            width: 3px;
+            height: 3px;
+            border: 1px solid #00ff00;
+            border-left: none;
+            border-radius: 0 50% 50% 0;
+        }
+        
+        .speaker-wave:nth-child(1) { width: 4px; height: 6px; }
+        .speaker-wave:nth-child(2) { width: 6px; height: 10px; }
+        
+        .audio-control.muted .speaker-waves,
+        .audio-control.paused .speaker-waves {
+            display: none;
+        }
+        
+        .audio-control.paused .speaker-icon::before,
+        .audio-control.paused .speaker-icon::after {
+            opacity: 0.5;
         }
         
         /* Hidden audio player */
@@ -777,14 +805,14 @@
                 inset 0 -2px 0 rgba(0,0,0,0.2);
         }
         
-        /* Fullscreen/Monitor toggle button */
+        /* View toggle button - inside screen */
         .view-toggle-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 20, 0, 0.9);
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 20, 0, 0.8);
             border: 1px solid #00aa00;
             border-radius: 4px;
             cursor: pointer;
@@ -793,12 +821,14 @@
             justify-content: center;
             transition: all 0.2s;
             font-family: 'VT323', monospace;
-            font-size: 16px;
+            font-size: 14px;
             color: #00ff00;
-            z-index: 1000;
+            z-index: 50;
+            opacity: 0.7;
         }
         
         .view-toggle-btn:hover {
+            opacity: 1;
             border-color: #00ff00;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
@@ -858,24 +888,93 @@
             border-top: none;
         }
         
+        /* Windowed icon (rectangle) */
+        .view-toggle-btn .windowed-icon {
+            width: 16px;
+            height: 12px;
+            border: 2px solid #00ff00;
+            border-radius: 2px;
+        }
+        
+        /* True fullscreen icon (expand arrows) */
+        .view-toggle-btn .expand-icon {
+            width: 16px;
+            height: 14px;
+            position: relative;
+        }
+        
+        .view-toggle-btn .expand-icon::before,
+        .view-toggle-btn .expand-icon::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+        
+        .view-toggle-btn .expand-icon::before {
+            top: 0;
+            left: 0;
+            border-left: 6px solid #00ff00;
+            border-bottom: 6px solid transparent;
+        }
+        
+        .view-toggle-btn .expand-icon::after {
+            bottom: 0;
+            right: 0;
+            border-right: 6px solid #00ff00;
+            border-top: 6px solid transparent;
+        }
+        
         /* View modes */
-        body.fullscreen-mode .crt-container.standalone {
-            display: block;
+        /* Windowed mode - default CRT screen view */
+        body.windowed-mode .crt-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         
-        body.fullscreen-mode .crt-monitor {
-            display: none !important;
-        }
-        
-        body.monitor-mode .crt-container.standalone {
+        body.windowed-mode .crt-monitor-wrapper {
             display: none;
         }
         
-        body.monitor-mode .crt-monitor {
-            display: flex !important;
+        /* Monitor mode - CRT in physical monitor frame */
+        body.monitor-mode .crt-wrapper {
+            display: none;
         }
         
-        /* Default is fullscreen mode */
+        body.monitor-mode .crt-monitor-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        body.monitor-mode .crt-monitor {
+            display: flex;
+        }
+        
+        /* True fullscreen mode */
+        body.true-fullscreen-mode .crt-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        body.true-fullscreen-mode .crt-monitor-wrapper {
+            display: none;
+        }
+        
+        body.true-fullscreen-mode .crt-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+        }
+        
+        /* Default is windowed mode */
         body {
             background: #0a0a0a;
         }
@@ -885,19 +984,13 @@
         }
     </style>
 </head>
-<body class="fullscreen-mode">
+<body class="windowed-mode">
     <!-- Hidden Audio Player for Internet Radio -->
     <audio id="radio-player" class="audio-player" crossorigin="anonymous"></audio>
     
-    <!-- View Toggle Button -->
-    <button class="view-toggle-btn" id="view-toggle" title="Switch to CRT Monitor view">
-        <div class="icon">
-            <div class="monitor-icon"></div>
-        </div>
-    </button>
-    
-    <!-- Fullscreen View (default) -->
-    <div class="crt-container standalone power-on">
+    <!-- Windowed View (default) -->
+    <div class="crt-wrapper">
+        <div class="crt-container power-on">
         <div class="refresh-scan" id="refresh-scan"></div>
         <div class="globe-container">
             <div id="globe"></div>
@@ -922,13 +1015,22 @@
                 <div class="air-quality" id="air-quality"></div>
             </div>
             
-            <div class="audio-controls">
-                <button class="play-pause-btn paused" id="play-pause-btn" title="Click to play/pause">
-                    ▶
-                </button>
-            </div>
-            <div class="volume-control" id="volume-control" title="Click to adjust volume">
-                <div class="volume-bars">
+            <!-- View Toggle Button -->
+            <button class="view-toggle-btn" id="view-toggle" title="Cycle view mode">
+                <div class="icon">
+                    <div class="monitor-icon"></div>
+                </div>
+            </button>
+            
+            <!-- Combined Audio Control -->
+            <div class="audio-control paused" id="audio-control" title="Click speaker to play/pause, bars for volume">
+                <div class="speaker-icon" id="speaker-icon">
+                    <div class="speaker-waves">
+                        <div class="speaker-wave"></div>
+                        <div class="speaker-wave"></div>
+                    </div>
+                </div>
+                <div class="volume-bars" id="volume-bars">
                     <div class="volume-bar active" data-level="1"></div>
                     <div class="volume-bar active" data-level="2"></div>
                     <div class="volume-bar active" data-level="3"></div>
@@ -967,30 +1069,31 @@
             </div>
         </div>
     </div>
+    </div>
     
     <!-- CRT Monitor View -->
-    <div class="crt-monitor" id="crt-monitor">
-        <div class="monitor-body">
-            <div class="monitor-bezel">
-                <div class="monitor-screen-wrapper">
-                    <div class="crt-container power-on" id="monitor-screen">
-                        <!-- Content will be cloned here -->
+    <div class="crt-monitor-wrapper">
+        <div class="crt-monitor" id="crt-monitor">
+            <div class="monitor-body">
+                <div class="monitor-bezel">
+                    <div class="monitor-screen-wrapper" id="monitor-screen-wrapper">
+                        <!-- CRT container will be moved here -->
+                        <div class="screen-curve"></div>
+                        <div class="screen-reflection"></div>
                     </div>
-                    <div class="screen-curve"></div>
-                    <div class="screen-reflection"></div>
+                </div>
+                <div class="monitor-controls">
+                    <div class="monitor-brand">TRINITRON</div>
+                    <div class="monitor-buttons">
+                        <div class="monitor-btn"></div>
+                        <div class="monitor-btn"></div>
+                        <div class="power-led"></div>
+                    </div>
                 </div>
             </div>
-            <div class="monitor-controls">
-                <div class="monitor-brand">TRINITRON</div>
-                <div class="monitor-buttons">
-                    <div class="monitor-btn"></div>
-                    <div class="monitor-btn"></div>
-                    <div class="power-led"></div>
-                </div>
-            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
         </div>
-        <div class="monitor-stand"></div>
-        <div class="monitor-base"></div>
     </div>
     
     <script>
@@ -1427,7 +1530,7 @@
             
             radioPlayer.addEventListener('playing', function() {
                 isPlaying = true;
-                updatePlayPauseButton();
+                updateAudioControlState();
                 const station = radioStations[currentStationIndex];
                 currentTrack = station.name + ' ♪ ' + station.genre;
                 if (weatherData && locationData) {
@@ -1437,14 +1540,7 @@
             
             radioPlayer.addEventListener('pause', function() {
                 isPlaying = false;
-                updatePlayPauseButton();
-            });
-            
-            // Initialize play/pause button
-            const playPauseBtn = document.getElementById('play-pause-btn');
-            playPauseBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                togglePlayPause();
+                updateAudioControlState();
             });
             
             radioPlayer.addEventListener('error', function(e) {
@@ -1482,20 +1578,6 @@
             }
         }
         
-        function updatePlayPauseButton() {
-            const btn = document.getElementById('play-pause-btn');
-            if (isPlaying) {
-                btn.textContent = '❙❙';
-                btn.classList.remove('paused');
-                btn.classList.add('playing');
-                btn.title = 'Click to pause';
-            } else {
-                btn.textContent = '▶';
-                btn.classList.remove('playing');
-                btn.classList.add('paused');
-                btn.title = 'Click to play';
-            }
-        }
         
         // For Safari and other browsers with strict autoplay policies
         // Start playing on first user interaction
@@ -1512,13 +1594,22 @@
             document.addEventListener('keydown', startAudio, { once: false });
         }
         
-        // Volume control
-        function initVolumeControl() {
-            const volumeControl = document.getElementById('volume-control');
-            const barsContainer = volumeControl.querySelector('.volume-bars');
+        // Audio control (combined play/pause + volume)
+        function initAudioControl() {
+            const audioControl = document.getElementById('audio-control');
+            const speakerIcon = document.getElementById('speaker-icon');
+            const volumeBars = document.getElementById('volume-bars');
             
-            volumeControl.addEventListener('click', function(e) {
-                const rect = barsContainer.getBoundingClientRect();
+            // Click on speaker icon to toggle play/pause
+            speakerIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                togglePlayPause();
+            });
+            
+            // Click on volume bars to adjust volume
+            volumeBars.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const rect = volumeBars.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
                 
                 const barWidth = rect.width / 6;
@@ -1535,6 +1626,7 @@
             
             // Set initial visual state
             updateVolumeBars(3); // Start at 50%
+            updateAudioControlState();
         }
         
         function setVolume(level) {
@@ -1546,11 +1638,11 @@
             }
             
             updateVolumeBars(level);
+            updateAudioControlState();
         }
         
         function updateVolumeBars(level) {
             const bars = document.querySelectorAll('.volume-bar');
-            const volumeControl = document.getElementById('volume-control');
             
             bars.forEach((bar, index) => {
                 if (index < level) {
@@ -1559,123 +1651,131 @@
                     bar.classList.remove('active');
                 }
             });
+        }
+        
+        function updateAudioControlState() {
+            const audioControl = document.getElementById('audio-control');
             
-            if (level === 0) {
-                volumeControl.classList.add('volume-muted');
+            if (!audioControl) return;
+            
+            // Update muted state
+            if (currentVolume === 0) {
+                audioControl.classList.add('muted');
             } else {
-                volumeControl.classList.remove('volume-muted');
+                audioControl.classList.remove('muted');
+            }
+            
+            // Update playing state
+            if (isPlaying) {
+                audioControl.classList.remove('paused');
+            } else {
+                audioControl.classList.add('paused');
             }
         }
         
         // View toggle functionality
-        let currentView = 'fullscreen'; // 'fullscreen' or 'monitor'
+        // Modes: 'windowed' (default), 'monitor' (CRT frame), 'fullscreen' (browser fullscreen)
+        let currentView = 'windowed';
+        const crtContainer = document.querySelector('.crt-container');
+        const crtWrapper = document.querySelector('.crt-wrapper');
+        const monitorScreenWrapper = document.getElementById('monitor-screen-wrapper');
         
         function initViewToggle() {
             const toggleBtn = document.getElementById('view-toggle');
             
-            toggleBtn.addEventListener('click', function() {
-                if (currentView === 'fullscreen') {
-                    switchToMonitorView();
-                } else {
-                    switchToFullscreenView();
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                cycleViewMode();
+            });
+            
+            // Handle exiting browser fullscreen
+            document.addEventListener('fullscreenchange', function() {
+                if (!document.fullscreenElement && currentView === 'fullscreen') {
+                    // Exited fullscreen via Escape key
+                    currentView = 'windowed';
+                    document.body.classList.remove('true-fullscreen-mode');
+                    document.body.classList.add('windowed-mode');
+                    moveCrtTo('wrapper');
+                    updateToggleButton();
                 }
             });
         }
         
+        function cycleViewMode() {
+            // Cycle: windowed -> monitor -> fullscreen -> windowed
+            if (currentView === 'windowed') {
+                switchToMonitorView();
+            } else if (currentView === 'monitor') {
+                switchToFullscreenView();
+            } else {
+                switchToWindowedView();
+            }
+        }
+        
+        function switchToWindowedView() {
+            // Exit browser fullscreen if active
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            
+            currentView = 'windowed';
+            document.body.classList.remove('monitor-mode', 'true-fullscreen-mode');
+            document.body.classList.add('windowed-mode');
+            
+            moveCrtTo('wrapper');
+            updateToggleButton();
+        }
+        
         function switchToMonitorView() {
             currentView = 'monitor';
-            document.body.classList.remove('fullscreen-mode');
+            document.body.classList.remove('windowed-mode', 'true-fullscreen-mode');
             document.body.classList.add('monitor-mode');
             
-            // Clone the content to monitor screen
-            const standaloneScreen = document.querySelector('.crt-container.standalone');
-            const monitorScreen = document.getElementById('monitor-screen');
-            monitorScreen.innerHTML = standaloneScreen.innerHTML;
-            
-            // Reinitialize globe in monitor view
-            setTimeout(() => {
-                const monitorGlobe = monitorScreen.querySelector('#globe');
-                if (monitorGlobe && typeof mapboxgl !== 'undefined') {
-                    initGlobeInElement(monitorGlobe);
-                }
-            }, 100);
-            
-            // Update button icon
-            const toggleBtn = document.getElementById('view-toggle');
-            toggleBtn.innerHTML = '<div class="icon"><div class="fullscreen-icon"></div></div>';
-            toggleBtn.title = 'Switch to Fullscreen view';
+            moveCrtTo('monitor');
+            updateToggleButton();
         }
         
         function switchToFullscreenView() {
             currentView = 'fullscreen';
-            document.body.classList.remove('monitor-mode');
-            document.body.classList.add('fullscreen-mode');
+            document.body.classList.remove('windowed-mode', 'monitor-mode');
+            document.body.classList.add('true-fullscreen-mode');
             
-            // Update button icon
-            const toggleBtn = document.getElementById('view-toggle');
-            toggleBtn.innerHTML = '<div class="icon"><div class="monitor-icon"></div></div>';
-            toggleBtn.title = 'Switch to CRT Monitor view';
+            moveCrtTo('wrapper');
+            
+            // Request browser fullscreen
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log('Fullscreen request failed:', err);
+            });
+            
+            updateToggleButton();
         }
         
-        function initGlobeInElement(container) {
-            if (!container || !mapboxgl) return;
-            
-            try {
-                const miniMap = new mapboxgl.Map({
-                    container: container,
-                    style: {
-                        version: 8,
-                        sources: {
-                            'countries': {
-                                type: 'geojson',
-                                data: 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson'
-                            }
-                        },
-                        layers: [
-                            {
-                                id: 'background',
-                                type: 'background',
-                                paint: { 'background-color': 'transparent' }
-                            },
-                            {
-                                id: 'countries-fill',
-                                type: 'fill',
-                                source: 'countries',
-                                paint: { 'fill-color': '#00ff00', 'fill-opacity': 0.15 }
-                            },
-                            {
-                                id: 'countries-line',
-                                type: 'line',
-                                source: 'countries',
-                                paint: { 'line-color': '#00ff00', 'line-width': 0.5, 'line-opacity': 0.6 }
-                            }
-                        ]
-                    },
-                    center: [0, 20],
-                    zoom: 1.2,
-                    projection: 'globe',
-                    interactive: false,
-                    attributionControl: false
-                });
-                
-                miniMap.on('load', () => {
-                    miniMap.setFog({
-                        color: 'rgba(0, 20, 0, 0.9)',
-                        'horizon-blend': 0.1,
-                        'star-intensity': 0
-                    });
-                });
-                
-                // Rotate the mini globe
-                function rotateMiniGlobe() {
-                    const center = miniMap.getCenter();
-                    center.lng += 0.15;
-                    miniMap.setCenter(center);
-                    requestAnimationFrame(rotateMiniGlobe);
+        function moveCrtTo(target) {
+            if (target === 'wrapper') {
+                // Move CRT container back to wrapper
+                if (crtContainer.parentElement !== crtWrapper) {
+                    crtWrapper.appendChild(crtContainer);
                 }
-                rotateMiniGlobe();
-            } catch (e) {
-                console.log('Mini globe init error:', e);
+            } else if (target === 'monitor') {
+                // Move CRT container to monitor screen
+                if (crtContainer.parentElement !== monitorScreenWrapper) {
+                    monitorScreenWrapper.insertBefore(crtContainer, monitorScreenWrapper.firstChild);
+                }
+            }
+        }
+        
+        function updateToggleButton() {
+            const toggleBtn = document.getElementById('view-toggle');
+            
+            if (currentView === 'windowed') {
+                toggleBtn.innerHTML = '<div class="icon"><div class="monitor-icon"></div></div>';
+                toggleBtn.title = 'Switch to CRT Monitor view';
+            } else if (currentView === 'monitor') {
+                toggleBtn.innerHTML = '<div class="icon"><div class="expand-icon"></div></div>';
+                toggleBtn.title = 'Switch to True Fullscreen';
+            } else {
+                toggleBtn.innerHTML = '<div class="icon"><div class="windowed-icon"></div></div>';
+                toggleBtn.title = 'Switch to Windowed view';
             }
         }
         
@@ -1683,7 +1783,7 @@
         detectTemperatureUnit();
         initRadio();
         setupAutoplayFallback();
-        initVolumeControl();
+        initAudioControl();
         initViewToggle();
         initGlobe();
         updateClock();
