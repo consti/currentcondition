@@ -282,6 +282,10 @@
             font-weight: bold;
             z-index: 5;
             white-space: nowrap;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
         }
         
         .ticker-wrapper {
@@ -705,6 +709,46 @@
             }
         }
         
+        @keyframes pulse-glow-red {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+                border-color: #ff3333;
+            }
+        }
+        
+        @keyframes pulse-glow-purple {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(204, 102, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(204, 102, 255, 0.6);
+                border-color: #cc66ff;
+            }
+        }
+        
+        @keyframes pulse-glow-grey {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(170, 170, 170, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(170, 170, 170, 0.6);
+                border-color: #aaaaaa;
+            }
+        }
+        
+        @keyframes pulse-glow-fullcolor {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(136, 204, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(136, 204, 255, 0.6);
+                border-color: #88ccff;
+            }
+        }
+        
         .volume-control.muted .volume-bar.active {
             background: #005500;
             box-shadow: none;
@@ -849,6 +893,19 @@
             box-shadow: 
                 inset 0 1px 0 rgba(255,255,255,0.2),
                 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .monitor-btn.hdr-led {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .monitor-btn.hdr-led.active {
+            background: linear-gradient(180deg, #ffee00 0%, #ffaa00 100%);
+            box-shadow: 
+                0 0 8px #ffee00,
+                0 0 16px rgba(255, 238, 0, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.4);
         }
         
         .power-led {
@@ -1191,6 +1248,10 @@
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
         }
         
+        body.red-mode .play-pause-btn.paused {
+            animation: pulse-glow-red 1.5s ease-in-out infinite;
+        }
+        
         body.red-mode .volume-bar.active {
             background: #ff3333;
             box-shadow: 0 0 4px #ff3333;
@@ -1318,6 +1379,10 @@
         body.purple-mode .view-toggle-btn:hover {
             border-color: #cc66ff;
             box-shadow: 0 0 10px rgba(204, 102, 255, 0.3);
+        }
+        
+        body.purple-mode .play-pause-btn.paused {
+            animation: pulse-glow-purple 1.5s ease-in-out infinite;
         }
         
         body.purple-mode .volume-bar.active {
@@ -1457,6 +1522,10 @@
             box-shadow: 0 0 10px rgba(200, 200, 200, 0.2);
         }
         
+        body.grey-mode .play-pause-btn.paused {
+            animation: pulse-glow-grey 1.5s ease-in-out infinite;
+        }
+        
         body.grey-mode .volume-bar.active {
             background: #aaaaaa;
             box-shadow: 0 0 4px #aaaaaa;
@@ -1591,6 +1660,10 @@
             box-shadow: 0 0 10px rgba(136, 204, 255, 0.3);
         }
         
+        body.fullcolor-mode .play-pause-btn.paused {
+            animation: pulse-glow-fullcolor 1.5s ease-in-out infinite;
+        }
+        
         body.fullcolor-mode .volume-bar.active {
             background: #88ccff;
             box-shadow: 0 0 4px #88ccff;
@@ -1638,6 +1711,425 @@
                 0 0 15px rgba(136, 204, 255, 0.5);
         }
         
+        /* HDR Mode - superwhite video behind everything */
+        .hdr-video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            display: none;
+            background: #ffffff;
+        }
+        
+        .hdr-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Ensure video renders in HDR when available */
+            image-rendering: high-quality;
+        }
+        
+        body.hdr-mode .hdr-video-container {
+            display: block;
+        }
+        
+        /* In HDR mode, make CRT and body background transparent to show video */
+        body.hdr-mode {
+            background: transparent;
+        }
+        
+        body.hdr-mode.monitor-mode {
+            background: transparent;
+        }
+        
+        body.hdr-mode .crt-container {
+            background: rgba(0, 10, 0, 0.85);
+        }
+        
+        /* Globe on top of HDR video with inverted/dark styling */
+        body.hdr-mode .globe-container {
+            z-index: 2;
+        }
+        
+        body.hdr-mode #globe {
+            filter: 
+                invert(1)
+                brightness(0.8)
+                contrast(1.2);
+        }
+        
+        body.hdr-mode .globe-pixelate {
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.15) 2px,
+                    rgba(0, 0, 0, 0.15) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.15) 2px,
+                    rgba(0, 0, 0, 0.15) 4px
+                );
+        }
+        
+        /* Screen content - dark text on bright HDR background */
+        body.hdr-mode .screen-content {
+            color: #000000;
+            text-shadow: none;
+            animation: none;
+            z-index: 5;
+        }
+        
+        body.hdr-mode .title {
+            color: #000000;
+            text-shadow: 
+                0 0 20px rgba(0, 0, 0, 0.3),
+                0 0 40px rgba(0, 0, 0, 0.2);
+            animation: none;
+        }
+        
+        body.hdr-mode .clock,
+        body.hdr-mode .date,
+        body.hdr-mode .weather-main,
+        body.hdr-mode .location-info,
+        body.hdr-mode .air-quality {
+            color: #000000;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        body.hdr-mode .ticker-content {
+            color: #000000;
+        }
+        
+        body.hdr-mode .ticker-label {
+            background: #000000;
+            color: #ffffff;
+        }
+        
+        body.hdr-mode .ticker-container {
+            background: rgba(255, 255, 255, 0.3);
+            border-top-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        body.hdr-mode .ticker-separator {
+            color: #333333;
+        }
+        
+        body.hdr-mode .volume-bar {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        body.hdr-mode .volume-bar.active {
+            background: #000000;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        body.hdr-mode .play-pause-btn,
+        body.hdr-mode .view-toggle-btn,
+        body.hdr-mode .volume-control {
+            color: #000000;
+            border-color: rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        body.hdr-mode .play-pause-btn:hover,
+        body.hdr-mode .view-toggle-btn:hover,
+        body.hdr-mode .volume-control:hover {
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        body.hdr-mode .main-display {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        body.hdr-mode .location-marker.current-user {
+            background: #000000;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 0, 0, 0.5);
+        }
+        
+        body.hdr-mode .location-marker.current-user::before,
+        body.hdr-mode .location-marker.current-user::after {
+            border-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        body.hdr-mode .location-marker.visitor {
+            background: #333333;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+        }
+        
+        body.hdr-mode .location-marker.visitor::before,
+        body.hdr-mode .location-marker.visitor::after {
+            border-color: rgba(0, 0, 0, 0.4);
+        }
+        
+        body.hdr-mode .view-toggle-btn .monitor-icon,
+        body.hdr-mode .view-toggle-btn .windowed-icon {
+            border-color: #000000;
+        }
+        
+        body.hdr-mode .view-toggle-btn .monitor-icon::after {
+            background: #000000;
+        }
+        
+        body.hdr-mode .view-toggle-btn .expand-icon::before {
+            border-left-color: #000000;
+        }
+        
+        body.hdr-mode .view-toggle-btn .expand-icon::after {
+            border-right-color: #000000;
+        }
+        
+        /* Hide CRT effects in HDR mode for clean bright look */
+        body.hdr-mode .scanlines,
+        body.hdr-mode .flicker,
+        body.hdr-mode .static-noise,
+        body.hdr-mode .glitch-line,
+        body.hdr-mode .zap {
+            display: none;
+        }
+        
+        body.hdr-mode .crt-container::before {
+            display: none;
+        }
+        
+        /* AQI badge in HDR mode */
+        body.hdr-mode .aqi-badge {
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Game Container Styles */
+        .game-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 40px; /* Leave room for ticker */
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            background: rgba(0, 10, 0, 0.95);
+        }
+        
+        .game-container.active {
+            display: flex;
+        }
+        
+        .game-title {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            letter-spacing: 4px;
+            opacity: 0.7;
+        }
+        
+        .game-canvas {
+            border: 2px solid currentColor;
+            box-shadow: 0 0 20px currentColor;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        .game-score {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .game-instructions {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 2rem;
+            animation: blink 0.5s infinite;
+            z-index: 60;
+            display: none;
+        }
+        
+        .game-over.active {
+            display: block;
+        }
+        
+        /* Mobile touch controls */
+        .game-controls {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 55;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 5px;
+        }
+        
+        @media (max-width: 768px), (pointer: coarse) {
+            .game-controls {
+                display: grid;
+            }
+        }
+        
+        .game-ctrl-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 40, 0, 0.8);
+            border: 2px solid currentColor;
+            border-radius: 8px;
+            color: inherit;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .game-ctrl-btn:active {
+            background: rgba(0, 100, 0, 0.8);
+            transform: scale(0.95);
+        }
+        
+        .game-ctrl-btn.up { grid-column: 2; grid-row: 1; }
+        .game-ctrl-btn.left { grid-column: 1; grid-row: 2; }
+        .game-ctrl-btn.down { grid-column: 2; grid-row: 3; }
+        .game-ctrl-btn.right { grid-column: 3; grid-row: 2; }
+        
+        /* Game button in windowed view */
+        .game-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+            z-index: 50;
+            opacity: 0.7;
+        }
+        
+        .game-btn:hover {
+            opacity: 1;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .game-btn.active {
+            opacity: 1;
+            background: rgba(0, 100, 0, 0.8);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        
+        body.red-mode .game-btn {
+            background: rgba(20, 0, 0, 0.8);
+            border-color: #aa0000;
+        }
+        body.red-mode .game-btn:hover,
+        body.red-mode .game-btn.active {
+            border-color: #ff3333;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+        }
+        
+        body.purple-mode .game-btn {
+            background: rgba(20, 0, 20, 0.8);
+            border-color: #9933cc;
+        }
+        body.purple-mode .game-btn:hover,
+        body.purple-mode .game-btn.active {
+            border-color: #cc66ff;
+            box-shadow: 0 0 10px rgba(204, 102, 255, 0.3);
+        }
+        
+        body.grey-mode .game-btn {
+            background: rgba(30, 30, 30, 0.8);
+            border-color: #666666;
+        }
+        body.grey-mode .game-btn:hover,
+        body.grey-mode .game-btn.active {
+            border-color: #888888;
+            box-shadow: 0 0 10px rgba(200, 200, 200, 0.2);
+        }
+        
+        body.fullcolor-mode .game-btn {
+            background: rgba(20, 30, 50, 0.8);
+            border-color: #6699cc;
+        }
+        body.fullcolor-mode .game-btn:hover,
+        body.fullcolor-mode .game-btn.active {
+            border-color: #88ccff;
+            box-shadow: 0 0 10px rgba(136, 204, 255, 0.3);
+        }
+        
+        body.hdr-mode .game-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(0, 0, 0, 0.5);
+        }
+        body.hdr-mode .game-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Snake LED indicator */
+        .monitor-btn.snake-led {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .monitor-btn.snake-led.active {
+            background: linear-gradient(180deg, #00ff00 0%, #00aa00 100%);
+            box-shadow: 
+                0 0 8px #00ff00,
+                0 0 16px rgba(0, 255, 0, 0.5),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+        
+        body.red-mode .monitor-btn.snake-led.active {
+            background: linear-gradient(180deg, #ff3333 0%, #aa0000 100%);
+            box-shadow: 0 0 8px #ff3333, 0 0 16px rgba(255, 51, 51, 0.5);
+        }
+        
+        body.purple-mode .monitor-btn.snake-led.active {
+            background: linear-gradient(180deg, #cc66ff 0%, #9933cc 100%);
+            box-shadow: 0 0 8px #cc66ff, 0 0 16px rgba(204, 102, 255, 0.5);
+        }
+        
+        body.grey-mode .monitor-btn.snake-led.active {
+            background: linear-gradient(180deg, #cccccc 0%, #888888 100%);
+            box-shadow: 0 0 8px #cccccc, 0 0 16px rgba(200, 200, 200, 0.5);
+        }
+        
+        body.fullcolor-mode .monitor-btn.snake-led.active {
+            background: linear-gradient(180deg, #88ccff 0%, #4488ff 100%);
+            box-shadow: 0 0 8px #88ccff, 0 0 16px rgba(136, 204, 255, 0.5);
+        }
+
         /* Main display toggle */
         .main-display {
             cursor: pointer;
@@ -1645,14 +2137,23 @@
         }
         
         .main-display.hidden-panel {
-            background: transparent;
-            border-color: transparent;
+            background: transparent !important;
+            border-color: transparent !important;
         }
     </style>
 </head>
 <body class="windowed-mode">
     <!-- Hidden Audio Player for Internet Radio -->
     <audio id="radio-player" class="audio-player" crossorigin="anonymous"></audio>
+    
+    <!-- HDR Video Background (behind everything) -->
+    <div class="hdr-video-container" id="hdr-container">
+        <video id="hdr-video" loop muted playsinline>
+            <source src="superwhite.mp4" type="video/mp4">
+        </video>
+    </div>
+    
+
     
     <!-- Windowed View (default) -->
     <div class="crt-wrapper">
@@ -1670,6 +2171,20 @@
         <div class="zap"></div>
         
         <div class="screen-content">
+            <!-- Games Container -->
+            <div class="game-container" id="game-container">
+                <div class="game-title" id="game-title">SNAKE</div>
+                <div class="game-score">SCORE: <span id="game-score">0</span></div>
+                <canvas id="game-canvas" class="game-canvas"></canvas>
+                <div class="game-instructions" id="game-instructions">PRESS ARROW KEYS OR SWIPE TO PLAY</div>
+                <div class="game-over" id="game-over">GAME OVER<br><span style="font-size: 1rem;">PRESS SPACE TO RESTART</span></div>
+                <div class="game-controls" id="game-controls">
+                    <button class="game-ctrl-btn up" data-dir="up">▲</button>
+                    <button class="game-ctrl-btn left" data-dir="left">◄</button>
+                    <button class="game-ctrl-btn down" data-dir="down">▼</button>
+                    <button class="game-ctrl-btn right" data-dir="right">►</button>
+                </div>
+            </div>
             <div class="main-display hidden-panel">
                 <div class="title">CURRENT CONDITION</div>
                 <div class="clock" id="clock">--:--:--</div>
@@ -1680,6 +2195,11 @@
                 <div class="location-info" id="location-info"></div>
                 <div class="air-quality" id="air-quality"></div>
             </div>
+            
+            <!-- Game Button -->
+            <button class="game-btn" id="game-btn" title="Play Games (G)">
+                <span class="game-icon">🕹️</span>
+            </button>
             
             <!-- View Toggle Button -->
             <button class="view-toggle-btn" id="view-toggle" title="Cycle view mode">
@@ -1751,7 +2271,7 @@
                     <div class="monitor-brand">TRINITRON</div>
                     <div class="monitor-buttons">
                         <div class="monitor-btn"></div>
-                        <div class="monitor-btn"></div>
+                        <div class="monitor-btn hdr-led" title="Toggle HDR mode"></div>
                         <div class="power-led"></div>
                     </div>
                 </div>
@@ -2268,6 +2788,49 @@
             `;
         }
         
+        function getTimeBasedGreeting() {
+            const hour = new Date().getHours();
+            const greetings = {
+                morning: [
+                    "GOOD MORNING - HOPE YOUR DAY IS OFF TO A GREAT START",
+                    "RISE AND SHINE - YOU'VE GOT THIS TODAY",
+                    "MORNING! REMEMBER TO STRETCH AND HYDRATE",
+                    "HAVE A WONDERFUL MORNING - MAKE IT COUNT",
+                    "GOOD MORNING! TODAY IS FULL OF POSSIBILITIES"
+                ],
+                afternoon: [
+                    "GOOD AFTERNOON - KEEP UP THE GREAT WORK",
+                    "AFTERNOON CHECK-IN: YOU'RE DOING AMAZING",
+                    "HALFWAY THROUGH THE DAY! STAY HYDRATED",
+                    "HOPE YOUR DAY IS GOING WELL",
+                    "AFTERNOON VIBES - TAKE A MOMENT TO BREATHE"
+                ],
+                evening: [
+                    "GOOD EVENING - HOPE YOU HAD A GOOD DAY",
+                    "EVENING TIME - WIND DOWN AND RELAX",
+                    "YOU MADE IT THROUGH ANOTHER DAY - WELL DONE",
+                    "ENJOY YOUR EVENING - YOU DESERVE IT",
+                    "EVENING REMINDER: BE KIND TO YOURSELF"
+                ],
+                night: [
+                    "NIGHT OWL? REMEMBER TO REST SOON",
+                    "LATE NIGHT GREETINGS - DON'T FORGET SLEEP",
+                    "BURNING THE MIDNIGHT OIL? STAY COZY",
+                    "SWEET DREAMS COMING SOON - TAKE CARE",
+                    "NIGHT MODE - HOPE YOU'RE DOING WELL"
+                ]
+            };
+            
+            let timeOfDay;
+            if (hour >= 5 && hour < 12) timeOfDay = 'morning';
+            else if (hour >= 12 && hour < 17) timeOfDay = 'afternoon';
+            else if (hour >= 17 && hour < 21) timeOfDay = 'evening';
+            else timeOfDay = 'night';
+            
+            const options = greetings[timeOfDay];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+        
         function updateTicker() {
             if (!weatherData || !locationData) return;
             
@@ -2309,10 +2872,13 @@
                 items.push(newsStr);
             }
             
+            // Add a nice greeting based on time of day
+            items.push(getTimeBasedGreeting());
+            
             // Add location/system info
             items.push(`${locationData.city}, ${locationData.country_name}`);
             items.push(`${timezone}`);
-            items.push(`${locationData.org || 'UNKNOWN'}`);
+            items.push(`${locationData.org || 'UNKNOWN'}`)
             
             // Build ticker with two identical tracks for seamless loop
             const trackHTML = items.map(item => 
@@ -2637,6 +3203,7 @@
         // Color mode toggle (LED click)
         const colorModes = ['green', 'red', 'purple', 'grey', 'fullcolor'];
         let currentColorIndex = 0;
+        let hdrMode = false;
         
         function initColorToggle() {
             const powerLed = document.querySelector('.power-led');
@@ -2647,6 +3214,49 @@
                 });
             }
         }
+        
+        function initHdrToggle() {
+            const hdrLed = document.querySelector('.hdr-led');
+            if (hdrLed) {
+                hdrLed.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleHdrMode();
+                });
+            }
+        }
+        
+        function toggleHdrMode() {
+            hdrMode = !hdrMode;
+            const hdrLed = document.querySelector('.hdr-led');
+            const hdrVideo = document.getElementById('hdr-video');
+            
+            if (hdrMode) {
+                document.body.classList.add('hdr-mode');
+                if (hdrLed) hdrLed.classList.add('active');
+                if (hdrVideo) {
+                    hdrVideo.play().catch(e => {
+                        console.log('HDR video autoplay blocked, will retry on interaction');
+                    });
+                }
+            } else {
+                document.body.classList.remove('hdr-mode');
+                if (hdrLed) hdrLed.classList.remove('active');
+                if (hdrVideo) {
+                    hdrVideo.pause();
+                }
+            }
+        }
+        
+        // Try to play HDR video on any user interaction
+        function tryPlayHdrVideo() {
+            const hdrVideo = document.getElementById('hdr-video');
+            if (hdrMode && hdrVideo && hdrVideo.paused) {
+                hdrVideo.play().catch(() => {});
+            }
+        }
+        
+        document.addEventListener('click', tryPlayHdrVideo);
+        document.addEventListener('touchstart', tryPlayHdrVideo);
         
         function cycleColorMode() {
             const powerLed = document.querySelector('.power-led');
@@ -2663,6 +3273,11 @@
             if (newMode !== 'green') {
                 document.body.classList.add(newMode + '-mode');
                 powerLed.classList.add(newMode);
+            }
+            
+            // Redraw current game if active
+            if (gameActive && currentGame) {
+                currentGame.draw();
             }
         }
         
@@ -2687,6 +3302,1510 @@
             }
         }
         
+        // Multi-Game System
+        const GAMES = ['SNAKE', 'TETRIS', 'ASTEROIDS', 'PONG'];
+        const GAME_ICONS = { SNAKE: '🐍', TETRIS: '🧱', ASTEROIDS: '🚀', PONG: '🏓' };
+        let currentGameIndex = 0;
+        let gameActive = false;
+        let currentGame = null;
+        let enteringHighscore = false;
+        let highscoreInitials = '';
+        let pendingHighscore = null;
+        
+        // Highscore system - Top 5, 3-character initials
+        const DEFAULT_HIGHSCORES = [
+            { name: 'CON', score: 0 },
+            { name: 'CON', score: 0 },
+            { name: 'CON', score: 0 },
+            { name: 'CON', score: 0 },
+            { name: 'CON', score: 0 }
+        ];
+        
+        function getThemeColor() {
+            if (document.body.classList.contains('red-mode')) return '#ff3333';
+            if (document.body.classList.contains('purple-mode')) return '#cc66ff';
+            if (document.body.classList.contains('grey-mode')) return '#cccccc';
+            if (document.body.classList.contains('fullcolor-mode')) return '#88ccff';
+            return '#00ff00'; // Default green
+        }
+        
+        function getThemeDarkColor() {
+            if (document.body.classList.contains('red-mode')) return '#330000';
+            if (document.body.classList.contains('purple-mode')) return '#1a001a';
+            if (document.body.classList.contains('grey-mode')) return '#1a1a1a';
+            if (document.body.classList.contains('fullcolor-mode')) return '#0a0a1a';
+            return '#001a00'; // Default green
+        }
+        
+        // Highscore cache - stores fetched scores locally for quick access
+        const highscoreCache = {};
+        
+        async function fetchHighscores(game) {
+            try {
+                const response = await fetch(`/api/highscores?game=${encodeURIComponent(game)}`);
+                if (response.ok) {
+                    const scores = await response.json();
+                    highscoreCache[game] = scores;
+                    return scores;
+                }
+            } catch (e) {
+                console.error('Failed to fetch highscores:', e);
+            }
+            return highscoreCache[game] || DEFAULT_HIGHSCORES.map(h => ({...h}));
+        }
+        
+        function getHighscores(game) {
+            // Return cached scores synchronously, fetch in background
+            if (!highscoreCache[game]) {
+                highscoreCache[game] = DEFAULT_HIGHSCORES.map(h => ({...h}));
+                fetchHighscores(game); // Fetch in background
+            }
+            return highscoreCache[game];
+        }
+        
+        async function saveHighscore(game, name, score) {
+            try {
+                const response = await fetch('/api/highscore', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ game, name: name.toUpperCase().substring(0, 3), score })
+                });
+                if (response.ok) {
+                    const scores = await response.json();
+                    highscoreCache[game] = scores;
+                    return scores;
+                }
+            } catch (e) {
+                console.error('Failed to save highscore:', e);
+            }
+            // Fallback: update cache locally
+            const scores = getHighscores(game);
+            scores.push({ name: name.toUpperCase().substring(0, 3), score });
+            scores.sort((a, b) => b.score - a.score);
+            scores.length = 5;
+            highscoreCache[game] = scores;
+            return scores;
+        }
+        
+        function isHighscore(game, score) {
+            if (score <= 0) return false;
+            const scores = getHighscores(game);
+            return score > scores[4].score;
+        }
+        
+        // Track the last submitted highscore for highlighting
+        let lastSubmittedHighscore = null;
+        // Track if we're still checking whether it's a highscore
+        let checkingHighscore = false;
+        // Track if user is manually viewing highscores (H key toggle)
+        let showingHighscores = false;
+        
+        async function checkAndShowHighscore(game, score) {
+            // Set checking state immediately to prevent table from showing
+            checkingHighscore = true;
+            // Fetch latest scores before checking
+            await fetchHighscores(game);
+            // Only prompt for initials if it's actually a high score
+            if (isHighscore(game, score)) {
+                enteringHighscore = true;
+                highscoreInitials = '';
+                pendingHighscore = { game, score };
+            }
+            // Done checking
+            checkingHighscore = false;
+            // If not a high score, just show the table (enteringHighscore stays false)
+        }
+        
+        async function submitHighscore() {
+            if (!pendingHighscore) return;
+            const name = highscoreInitials.padEnd(3, ' ').substring(0, 3);
+            await saveHighscore(pendingHighscore.game, name, pendingHighscore.score);
+            // Store for highlighting
+            lastSubmittedHighscore = { game: pendingHighscore.game, name: name.toUpperCase(), score: pendingHighscore.score };
+            enteringHighscore = false;
+            pendingHighscore = null;
+            highscoreInitials = '';
+        }
+        
+        function drawHighscoreEntry(ctx, width, height, game, score) {
+            const color = getThemeColor();
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.font = '20px monospace';
+            ctx.textAlign = 'center';
+            
+            ctx.fillText('NEW HIGH SCORE!', width / 2, height / 2 - 80);
+            ctx.font = '30px monospace';
+            ctx.fillText(score.toString(), width / 2, height / 2 - 45);
+            
+            ctx.font = '14px monospace';
+            ctx.fillText('ENTER YOUR INITIALS:', width / 2, height / 2 - 10);
+            
+            // Draw initials boxes
+            ctx.font = '28px monospace';
+            const boxWidth = 35;
+            const startX = width / 2 - (boxWidth * 1.5);
+            for (let i = 0; i < 3; i++) {
+                const x = startX + i * boxWidth;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, height / 2 + 10, boxWidth - 5, 40);
+                const char = highscoreInitials[i] || '_';
+                ctx.fillText(char, x + (boxWidth - 5) / 2, height / 2 + 40);
+            }
+            
+            ctx.font = '12px monospace';
+            ctx.fillText('TYPE 3 LETTERS, THEN ENTER', width / 2, height / 2 + 75);
+            
+            ctx.shadowBlur = 0;
+            ctx.textAlign = 'left';
+        }
+        
+        function drawHighscoreTable(ctx, width, height, game) {
+            const scores = getHighscores(game);
+            const color = getThemeColor();
+            
+            // Dark overlay
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.font = '18px monospace';
+            ctx.textAlign = 'center';
+            
+            // Show different title if viewing mid-game vs game over
+            const isGameOver = currentGame && currentGame.gameOver;
+            ctx.fillText(isGameOver ? 'GAME OVER' : 'HIGH SCORES', width / 2, height / 2 - 100);
+            
+            ctx.font = '16px monospace';
+            ctx.fillText(game, width / 2, height / 2 - 65);
+            
+            ctx.font = '14px monospace';
+            for (let i = 0; i < scores.length; i++) {
+                const y = height / 2 - 35 + i * 22;
+                const scoreText = `${i + 1}. ${scores[i].name} ${scores[i].score.toString().padStart(6, '0')}`;
+                
+                // Check if this is the newly submitted highscore - make it bold
+                const isNewEntry = lastSubmittedHighscore && 
+                    lastSubmittedHighscore.game === game &&
+                    scores[i].name === lastSubmittedHighscore.name &&
+                    scores[i].score === lastSubmittedHighscore.score;
+                
+                if (isNewEntry) {
+                    ctx.font = 'bold 14px monospace';
+                    ctx.shadowBlur = 15;
+                    ctx.fillText('> ' + scoreText + ' <', width / 2, y);
+                    ctx.font = '14px monospace';
+                    ctx.shadowBlur = 10;
+                } else {
+                    ctx.fillText(scoreText, width / 2, y);
+                }
+            }
+            
+            ctx.font = '12px monospace';
+            if (isGameOver) ctx.fillText('R TO PLAY AGAIN', width / 2, height / 2 + 85);
+            
+            ctx.shadowBlur = 0;
+            ctx.textAlign = 'left';
+        }
+        
+        class SnakeGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.gridSize = 20;
+                this.tileCount = 20;
+                
+                // Set canvas size
+                this.canvas.width = this.gridSize * this.tileCount;
+                this.canvas.height = this.gridSize * this.tileCount;
+                
+                this.reset();
+                this.gameLoop = null;
+                this.speed = 100; // ms between moves
+            }
+            
+            reset() {
+                this.snake = [
+                    { x: 10, y: 10 },
+                    { x: 9, y: 10 },
+                    { x: 8, y: 10 }
+                ];
+                this.direction = { x: 1, y: 0 };
+                this.nextDirection = { x: 1, y: 0 };
+                this.food = this.randomFood();
+                this.score = 0;
+                this.gameOver = false;
+                this.updateScore();
+                const gameOverEl = document.getElementById('game-over');
+                if (gameOverEl) gameOverEl.classList.remove('active');
+                const instrEl = document.getElementById('game-instructions');
+                if (instrEl) instrEl.style.display = 'block';
+            }
+            
+            randomFood() {
+                let food;
+                do {
+                    food = {
+                        x: Math.floor(Math.random() * this.tileCount),
+                        y: Math.floor(Math.random() * this.tileCount)
+                    };
+                } while (this.snake.some(s => s.x === food.x && s.y === food.y));
+                return food;
+            }
+            
+            start() {
+                if (this.gameLoop) return;
+                this.gameLoop = setInterval(() => this.update(), this.speed);
+            }
+            
+            stop() {
+                if (this.gameLoop) {
+                    clearInterval(this.gameLoop);
+                    this.gameLoop = null;
+                }
+            }
+            
+            setDirection(dir) {
+                
+                const opposites = {
+                    up: 'down', down: 'up',
+                    left: 'right', right: 'left'
+                };
+                
+                const currentDir = this.direction.x === 1 ? 'right' :
+                                   this.direction.x === -1 ? 'left' :
+                                   this.direction.y === 1 ? 'down' : 'up';
+                
+                if (opposites[dir] === currentDir) return;
+                
+                switch(dir) {
+                    case 'up': this.nextDirection = { x: 0, y: -1 }; break;
+                    case 'down': this.nextDirection = { x: 0, y: 1 }; break;
+                    case 'left': this.nextDirection = { x: -1, y: 0 }; break;
+                    case 'right': this.nextDirection = { x: 1, y: 0 }; break;
+                }
+            }
+            
+            update() {
+                if (this.gameOver) return;
+                
+                this.direction = this.nextDirection;
+                
+                const head = {
+                    x: this.snake[0].x + this.direction.x,
+                    y: this.snake[0].y + this.direction.y
+                };
+                
+                // Wall collision
+                if (head.x < 0 || head.x >= this.tileCount || 
+                    head.y < 0 || head.y >= this.tileCount) {
+                    this.endGame();
+                    return;
+                }
+                
+                // Self collision
+                if (this.snake.some(s => s.x === head.x && s.y === head.y)) {
+                    this.endGame();
+                    return;
+                }
+                
+                this.snake.unshift(head);
+                
+                // Food collision
+                if (head.x === this.food.x && head.y === this.food.y) {
+                    this.score += 10;
+                    this.updateScore();
+                    this.food = this.randomFood();
+                    // Speed up slightly
+                    if (this.speed > 50) {
+                        this.speed -= 2;
+                        this.stop();
+                        this.start();
+                    }
+                } else {
+                    this.snake.pop();
+                }
+                
+                this.draw();
+            }
+            
+            endGame() {
+                this.gameOver = true;
+                this.stop();
+                checkAndShowHighscore('SNAKE', this.score);
+                this.draw();
+            }
+            
+            updateScore() {
+                // Score is now updated by updateGameScore()
+            }
+            
+            getColor() {
+                // Match current CRT color scheme
+                if (document.body.classList.contains('red-mode')) return '#ff3333';
+                if (document.body.classList.contains('purple-mode')) return '#cc66ff';
+                if (document.body.classList.contains('grey-mode')) return '#cccccc';
+                if (document.body.classList.contains('fullcolor-mode')) return '#88ccff';
+                return '#00ff00'; // Default green
+            }
+            
+            draw() {
+                const color = this.getColor();
+                const darkColor = color + '40'; // Semi-transparent
+                
+                // Clear canvas
+                this.ctx.fillStyle = '#001a00';
+                if (document.body.classList.contains('red-mode')) this.ctx.fillStyle = '#1a0000';
+                if (document.body.classList.contains('purple-mode')) this.ctx.fillStyle = '#1a001a';
+                if (document.body.classList.contains('grey-mode')) this.ctx.fillStyle = '#1a1a1a';
+                if (document.body.classList.contains('fullcolor-mode')) this.ctx.fillStyle = '#0a0a1a';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw grid (subtle)
+                this.ctx.strokeStyle = darkColor;
+                this.ctx.lineWidth = 0.5;
+                for (let i = 0; i <= this.tileCount; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(i * this.gridSize, 0);
+                    this.ctx.lineTo(i * this.gridSize, this.canvas.height);
+                    this.ctx.stroke();
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, i * this.gridSize);
+                    this.ctx.lineTo(this.canvas.width, i * this.gridSize);
+                    this.ctx.stroke();
+                }
+                
+                // Draw food with glow
+                this.ctx.shadowColor = color;
+                this.ctx.shadowBlur = 10;
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(
+                    this.food.x * this.gridSize + 2,
+                    this.food.y * this.gridSize + 2,
+                    this.gridSize - 4,
+                    this.gridSize - 4
+                );
+                
+                // Draw snake
+                this.snake.forEach((segment, index) => {
+                    const alpha = 1 - (index / this.snake.length) * 0.5;
+                    this.ctx.shadowBlur = index === 0 ? 15 : 5;
+                    this.ctx.fillStyle = color;
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.fillRect(
+                        segment.x * this.gridSize + 1,
+                        segment.y * this.gridSize + 1,
+                        this.gridSize - 2,
+                        this.gridSize - 2
+                    );
+                });
+                
+                this.ctx.globalAlpha = 1;
+                this.ctx.shadowBlur = 0;
+                
+                // Game over overlay with highscores
+                if (this.gameOver) {
+                    if (checkingHighscore) {
+                        // Still checking, show nothing yet
+                    } else if (enteringHighscore && pendingHighscore && pendingHighscore.game === 'SNAKE') {
+                        drawHighscoreEntry(this.ctx, this.canvas.width, this.canvas.height, 'SNAKE', this.score);
+                    } else {
+                        drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'SNAKE');
+                    }
+                } else if (showingHighscores) {
+                    drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'SNAKE');
+                }
+            }
+        }
+        
+        // Tetris Game Class
+        class TetrisGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.cols = 10;
+                this.rows = 20;
+                // Calculate block size based on canvas height (which is limiting factor)
+                this.blockSize = Math.floor(canvas.height / this.rows);
+                // Center horizontally
+                this.offsetX = Math.floor((canvas.width - this.cols * this.blockSize) / 2);
+                this.board = [];
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.gameOver = false;
+                this.running = false;
+                this.currentPiece = null;
+                this.nextPiece = null;
+                this.dropInterval = 1000;
+                this.lastDrop = 0;
+                
+                this.pieces = [
+                    { shape: [[1,1,1,1]], color: '#00ffff' }, // I
+                    { shape: [[1,1],[1,1]], color: '#ffff00' }, // O
+                    { shape: [[0,1,0],[1,1,1]], color: '#ff00ff' }, // T
+                    { shape: [[1,0,0],[1,1,1]], color: '#ff8800' }, // L
+                    { shape: [[0,0,1],[1,1,1]], color: '#0088ff' }, // J
+                    { shape: [[0,1,1],[1,1,0]], color: '#00ff00' }, // S
+                    { shape: [[1,1,0],[0,1,1]], color: '#ff0000' }  // Z
+                ];
+                
+                this.reset();
+            }
+            
+            reset() {
+                this.board = Array(this.rows).fill(null).map(() => Array(this.cols).fill(null));
+                this.score = 0;
+                this.lines = 0;
+                this.level = 1;
+                this.gameOver = false;
+                this.dropInterval = 1000;
+                this.spawnPiece();
+                this.nextPiece = this.randomPiece();
+            }
+            
+            randomPiece() {
+                const p = this.pieces[Math.floor(Math.random() * this.pieces.length)];
+                return {
+                    shape: p.shape.map(row => [...row]),
+                    color: p.color,
+                    x: Math.floor(this.cols / 2) - Math.floor(p.shape[0].length / 2),
+                    y: 0
+                };
+            }
+            
+            spawnPiece() {
+                this.currentPiece = this.nextPiece || this.randomPiece();
+                this.nextPiece = this.randomPiece();
+                if (this.collision(this.currentPiece)) {
+                    this.gameOver = true;
+                    this.running = false;
+                    checkAndShowHighscore('TETRIS', this.score);
+                    this.draw();
+                }
+            }
+            
+            collision(piece, offsetX = 0, offsetY = 0) {
+                for (let y = 0; y < piece.shape.length; y++) {
+                    for (let x = 0; x < piece.shape[y].length; x++) {
+                        if (piece.shape[y][x]) {
+                            const newX = piece.x + x + offsetX;
+                            const newY = piece.y + y + offsetY;
+                            if (newX < 0 || newX >= this.cols || newY >= this.rows) return true;
+                            if (newY >= 0 && this.board[newY][newX]) return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            
+            merge() {
+                for (let y = 0; y < this.currentPiece.shape.length; y++) {
+                    for (let x = 0; x < this.currentPiece.shape[y].length; x++) {
+                        if (this.currentPiece.shape[y][x]) {
+                            const boardY = this.currentPiece.y + y;
+                            if (boardY >= 0) {
+                                this.board[boardY][this.currentPiece.x + x] = this.currentPiece.color;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            clearLines() {
+                let cleared = 0;
+                for (let y = this.rows - 1; y >= 0; y--) {
+                    if (this.board[y].every(cell => cell !== null)) {
+                        this.board.splice(y, 1);
+                        this.board.unshift(Array(this.cols).fill(null));
+                        cleared++;
+                        y++;
+                    }
+                }
+                if (cleared > 0) {
+                    this.lines += cleared;
+                    this.score += [0, 100, 300, 500, 800][cleared] * this.level;
+                    this.level = Math.floor(this.lines / 10) + 1;
+                    this.dropInterval = Math.max(100, 1000 - (this.level - 1) * 100);
+                }
+            }
+            
+            rotate() {
+                const rotated = this.currentPiece.shape[0].map((_, i) =>
+                    this.currentPiece.shape.map(row => row[i]).reverse()
+                );
+                const original = this.currentPiece.shape;
+                this.currentPiece.shape = rotated;
+                if (this.collision(this.currentPiece)) {
+                    this.currentPiece.shape = original;
+                }
+            }
+            
+            move(dir) {
+                if (!this.collision(this.currentPiece, dir, 0)) {
+                    this.currentPiece.x += dir;
+                }
+            }
+            
+            drop() {
+                if (!this.collision(this.currentPiece, 0, 1)) {
+                    this.currentPiece.y++;
+                } else {
+                    this.merge();
+                    this.clearLines();
+                    this.spawnPiece();
+                }
+            }
+            
+            hardDrop() {
+                while (!this.collision(this.currentPiece, 0, 1)) {
+                    this.currentPiece.y++;
+                    this.score += 2;
+                }
+                this.merge();
+                this.clearLines();
+                this.spawnPiece();
+            }
+            
+            start() {
+                if (!this.running && !this.gameOver) {
+                    this.running = true;
+                    this.lastDrop = Date.now();
+                    this.loop();
+                }
+            }
+            
+            loop() {
+                if (!this.running) return;
+                const now = Date.now();
+                if (now - this.lastDrop > this.dropInterval) {
+                    this.drop();
+                    this.lastDrop = now;
+                }
+                this.draw();
+                if (!this.gameOver) {
+                    requestAnimationFrame(() => this.loop());
+                }
+            }
+            
+            draw() {
+                const color = getThemeColor();
+                const darkBg = getThemeDarkColor();
+                const gridColor = color + '30';
+                
+                this.ctx.fillStyle = darkBg;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const ox = this.offsetX;
+                
+                // Draw board
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        if (this.board[y][x]) {
+                            this.ctx.fillStyle = this.board[y][x];
+                            this.ctx.shadowColor = this.board[y][x];
+                            this.ctx.shadowBlur = 5;
+                            this.ctx.fillRect(ox + x * this.blockSize + 1, y * this.blockSize + 1, this.blockSize - 2, this.blockSize - 2);
+                        }
+                    }
+                }
+                
+                // Draw current piece
+                if (this.currentPiece) {
+                    this.ctx.fillStyle = this.currentPiece.color;
+                    this.ctx.shadowColor = this.currentPiece.color;
+                    this.ctx.shadowBlur = 8;
+                    for (let y = 0; y < this.currentPiece.shape.length; y++) {
+                        for (let x = 0; x < this.currentPiece.shape[y].length; x++) {
+                            if (this.currentPiece.shape[y][x]) {
+                                this.ctx.fillRect(
+                                    ox + (this.currentPiece.x + x) * this.blockSize + 1,
+                                    (this.currentPiece.y + y) * this.blockSize + 1,
+                                    this.blockSize - 2,
+                                    this.blockSize - 2
+                                );
+                            }
+                        }
+                    }
+                }
+                
+                this.ctx.shadowBlur = 0;
+                
+                // Draw grid
+                this.ctx.strokeStyle = gridColor;
+                for (let x = 0; x <= this.cols; x++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ox + x * this.blockSize, 0);
+                    this.ctx.lineTo(ox + x * this.blockSize, this.rows * this.blockSize);
+                    this.ctx.stroke();
+                }
+                for (let y = 0; y <= this.rows; y++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ox, y * this.blockSize);
+                    this.ctx.lineTo(ox + this.cols * this.blockSize, y * this.blockSize);
+                    this.ctx.stroke();
+                }
+                
+                // Score display (in left margin)
+                this.ctx.fillStyle = color;
+                this.ctx.font = '10px monospace';
+                this.ctx.fillText(`SCR`, 5, 15);
+                this.ctx.fillText(`${this.score}`, 5, 27);
+                this.ctx.fillText(`LNS`, 5, 45);
+                this.ctx.fillText(`${this.lines}`, 5, 57);
+                this.ctx.fillText(`LVL`, 5, 75);
+                this.ctx.fillText(`${this.level}`, 5, 87);
+                
+                if (this.gameOver) {
+                    if (checkingHighscore) {
+                        // Still checking, show nothing yet
+                    } else if (enteringHighscore && pendingHighscore && pendingHighscore.game === 'TETRIS') {
+                        drawHighscoreEntry(this.ctx, this.canvas.width, this.canvas.height, 'TETRIS', this.score);
+                    } else {
+                        drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'TETRIS');
+                    }
+                } else if (showingHighscores) {
+                    drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'TETRIS');
+                }
+            }
+        }
+        
+        // Asteroids Game Class
+        class AsteroidsGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                this.score = 0;
+                this.lives = 3;
+                this.gameOver = false;
+                this.running = false;
+                this.ship = null;
+                this.asteroids = [];
+                this.bullets = [];
+                this.keys = {};
+                
+                this.reset();
+            }
+            
+            reset() {
+                this.ship = {
+                    x: this.width / 2,
+                    y: this.height / 2,
+                    angle: -Math.PI / 2,
+                    vx: 0,
+                    vy: 0,
+                    radius: 12,
+                    invincible: 60
+                };
+                this.asteroids = [];
+                this.bullets = [];
+                this.score = 0;
+                this.lives = 3;
+                this.gameOver = false;
+                
+                for (let i = 0; i < 5; i++) {
+                    this.spawnAsteroid(3);
+                }
+            }
+            
+            spawnAsteroid(size, x, y) {
+                const ast = {
+                    x: x !== undefined ? x : Math.random() * this.width,
+                    y: y !== undefined ? y : Math.random() * this.height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    size: size,
+                    radius: size * 10,
+                    angle: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.05
+                };
+                // Don't spawn on ship
+                if (x === undefined) {
+                    const dx = ast.x - this.ship.x;
+                    const dy = ast.y - this.ship.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < 100) {
+                        ast.x = (ast.x + this.width/2) % this.width;
+                    }
+                }
+                this.asteroids.push(ast);
+            }
+            
+            start() {
+                if (!this.running && !this.gameOver) {
+                    this.running = true;
+                    this.loop();
+                }
+            }
+            
+            loop() {
+                if (!this.running) return;
+                this.update();
+                this.draw();
+                if (!this.gameOver) {
+                    requestAnimationFrame(() => this.loop());
+                }
+            }
+            
+            update() {
+                // Ship controls
+                if (this.keys['ArrowLeft'] || this.keys['a']) this.ship.angle -= 0.08;
+                if (this.keys['ArrowRight'] || this.keys['d']) this.ship.angle += 0.08;
+                if (this.keys['ArrowUp'] || this.keys['w']) {
+                    this.ship.vx += Math.cos(this.ship.angle) * 0.15;
+                    this.ship.vy += Math.sin(this.ship.angle) * 0.15;
+                }
+                
+                // Ship physics
+                this.ship.x += this.ship.vx;
+                this.ship.y += this.ship.vy;
+                this.ship.vx *= 0.99;
+                this.ship.vy *= 0.99;
+                
+                // Wrap ship
+                if (this.ship.x < 0) this.ship.x = this.width;
+                if (this.ship.x > this.width) this.ship.x = 0;
+                if (this.ship.y < 0) this.ship.y = this.height;
+                if (this.ship.y > this.height) this.ship.y = 0;
+                
+                if (this.ship.invincible > 0) this.ship.invincible--;
+                
+                // Update bullets
+                this.bullets = this.bullets.filter(b => {
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    b.life--;
+                    return b.life > 0 && b.x >= 0 && b.x <= this.width && b.y >= 0 && b.y <= this.height;
+                });
+                
+                // Update asteroids
+                this.asteroids.forEach(ast => {
+                    ast.x += ast.vx;
+                    ast.y += ast.vy;
+                    ast.angle += ast.rotSpeed;
+                    if (ast.x < -ast.radius) ast.x = this.width + ast.radius;
+                    if (ast.x > this.width + ast.radius) ast.x = -ast.radius;
+                    if (ast.y < -ast.radius) ast.y = this.height + ast.radius;
+                    if (ast.y > this.height + ast.radius) ast.y = -ast.radius;
+                });
+                
+                // Bullet-asteroid collisions
+                for (let i = this.bullets.length - 1; i >= 0; i--) {
+                    for (let j = this.asteroids.length - 1; j >= 0; j--) {
+                        const b = this.bullets[i];
+                        const a = this.asteroids[j];
+                        if (!b || !a) continue;
+                        const dx = b.x - a.x;
+                        const dy = b.y - a.y;
+                        if (Math.sqrt(dx*dx + dy*dy) < a.radius) {
+                            this.bullets.splice(i, 1);
+                            this.asteroids.splice(j, 1);
+                            this.score += (4 - a.size) * 20;
+                            if (a.size > 1) {
+                                this.spawnAsteroid(a.size - 1, a.x, a.y);
+                                this.spawnAsteroid(a.size - 1, a.x, a.y);
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                // Ship-asteroid collisions
+                if (this.ship.invincible <= 0) {
+                    for (let a of this.asteroids) {
+                        const dx = this.ship.x - a.x;
+                        const dy = this.ship.y - a.y;
+                        if (Math.sqrt(dx*dx + dy*dy) < this.ship.radius + a.radius) {
+                            this.lives--;
+                            if (this.lives <= 0) {
+                                this.gameOver = true;
+                                this.running = false;
+                                checkAndShowHighscore('ASTEROIDS', this.score);
+                                this.draw();
+                            } else {
+                                this.ship.x = this.width / 2;
+                                this.ship.y = this.height / 2;
+                                this.ship.vx = 0;
+                                this.ship.vy = 0;
+                                this.ship.invincible = 120;
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                // Spawn more asteroids
+                if (this.asteroids.length === 0) {
+                    for (let i = 0; i < 5 + Math.floor(this.score / 500); i++) {
+                        this.spawnAsteroid(3);
+                    }
+                }
+            }
+            
+            shoot() {
+                if (this.bullets.length < 5) {
+                    this.bullets.push({
+                        x: this.ship.x + Math.cos(this.ship.angle) * 15,
+                        y: this.ship.y + Math.sin(this.ship.angle) * 15,
+                        vx: Math.cos(this.ship.angle) * 8,
+                        vy: Math.sin(this.ship.angle) * 8,
+                        life: 60
+                    });
+                }
+            }
+            
+            draw() {
+                const color = getThemeColor();
+                
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+                
+                this.ctx.strokeStyle = color;
+                this.ctx.shadowColor = color;
+                this.ctx.shadowBlur = 5;
+                this.ctx.lineWidth = 2;
+                
+                // Draw ship
+                if (this.ship.invincible <= 0 || Math.floor(this.ship.invincible / 5) % 2 === 0) {
+                    this.ctx.save();
+                    this.ctx.translate(this.ship.x, this.ship.y);
+                    this.ctx.rotate(this.ship.angle);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(15, 0);
+                    this.ctx.lineTo(-10, -8);
+                    this.ctx.lineTo(-5, 0);
+                    this.ctx.lineTo(-10, 8);
+                    this.ctx.closePath();
+                    this.ctx.stroke();
+                    this.ctx.restore();
+                }
+                
+                // Draw asteroids
+                this.asteroids.forEach(ast => {
+                    this.ctx.save();
+                    this.ctx.translate(ast.x, ast.y);
+                    this.ctx.rotate(ast.angle);
+                    this.ctx.beginPath();
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const r = ast.radius * (0.8 + Math.sin(i * 1.5) * 0.2);
+                        if (i === 0) this.ctx.moveTo(Math.cos(angle) * r, Math.sin(angle) * r);
+                        else this.ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+                    }
+                    this.ctx.closePath();
+                    this.ctx.stroke();
+                    this.ctx.restore();
+                });
+                
+                // Draw bullets
+                this.ctx.fillStyle = color;
+                this.bullets.forEach(b => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(b.x, b.y, 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                
+                this.ctx.shadowBlur = 0;
+                
+                // HUD
+                this.ctx.fillStyle = color;
+                this.ctx.font = '14px monospace';
+                this.ctx.fillText(`Score: ${this.score}`, 10, 20);
+                this.ctx.fillText(`Lives: ${this.lives}`, 10, 40);
+                
+                if (this.gameOver) {
+                    if (checkingHighscore) {
+                        // Still checking, show nothing yet
+                    } else if (enteringHighscore && pendingHighscore && pendingHighscore.game === 'ASTEROIDS') {
+                        drawHighscoreEntry(this.ctx, this.canvas.width, this.canvas.height, 'ASTEROIDS', this.score);
+                    } else {
+                        drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'ASTEROIDS');
+                    }
+                } else if (showingHighscores) {
+                    drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'ASTEROIDS');
+                }
+            }
+        }
+        
+        // Pong Game Class
+        class PongGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.width = canvas.width;
+                this.height = canvas.height;
+                this.paddleHeight = 60;
+                this.paddleWidth = 10;
+                this.ballRadius = 6;
+                this.playerScore = 0;
+                this.cpuScore = 0;
+                this.winScore = 5;
+                this.gameOver = false;
+                this.running = false;
+                
+                this.reset();
+            }
+            
+            reset() {
+                this.player = {
+                    y: this.height / 2 - this.paddleHeight / 2,
+                    speed: 6
+                };
+                this.cpu = {
+                    y: this.height / 2 - this.paddleHeight / 2,
+                    speed: 3
+                };
+                this.resetBall();
+                this.playerScore = 0;
+                this.cpuScore = 0;
+                this.gameOver = false;
+            }
+            
+            resetBall() {
+                this.ball = {
+                    x: this.width / 2,
+                    y: this.height / 2,
+                    vx: (Math.random() > 0.5 ? 1 : -1) * 4,
+                    vy: (Math.random() - 0.5) * 4
+                };
+            }
+            
+            start() {
+                if (!this.running && !this.gameOver) {
+                    this.running = true;
+                    this.loop();
+                }
+            }
+            
+            loop() {
+                if (!this.running) return;
+                this.update();
+                this.draw();
+                if (!this.gameOver) {
+                    requestAnimationFrame(() => this.loop());
+                }
+            }
+            
+            movePlayer(dir) {
+                this.player.y += dir * this.player.speed;
+                this.player.y = Math.max(0, Math.min(this.height - this.paddleHeight, this.player.y));
+            }
+            
+            update() {
+                // Ball movement
+                this.ball.x += this.ball.vx;
+                this.ball.y += this.ball.vy;
+                
+                // Top/bottom bounce
+                if (this.ball.y - this.ballRadius < 0 || this.ball.y + this.ballRadius > this.height) {
+                    this.ball.vy *= -1;
+                    this.ball.y = Math.max(this.ballRadius, Math.min(this.height - this.ballRadius, this.ball.y));
+                }
+                
+                // Player paddle collision
+                if (this.ball.x - this.ballRadius < this.paddleWidth + 10 &&
+                    this.ball.y > this.player.y &&
+                    this.ball.y < this.player.y + this.paddleHeight &&
+                    this.ball.vx < 0) {
+                    this.ball.vx *= -1.05;
+                    this.ball.vy += (this.ball.y - (this.player.y + this.paddleHeight / 2)) * 0.1;
+                    this.ball.x = this.paddleWidth + 10 + this.ballRadius;
+                }
+                
+                // CPU paddle collision
+                if (this.ball.x + this.ballRadius > this.width - this.paddleWidth - 10 &&
+                    this.ball.y > this.cpu.y &&
+                    this.ball.y < this.cpu.y + this.paddleHeight &&
+                    this.ball.vx > 0) {
+                    this.ball.vx *= -1.05;
+                    this.ball.vy += (this.ball.y - (this.cpu.y + this.paddleHeight / 2)) * 0.1;
+                    this.ball.x = this.width - this.paddleWidth - 10 - this.ballRadius;
+                }
+                
+                // Cap ball speed
+                const maxSpeed = 10;
+                this.ball.vx = Math.max(-maxSpeed, Math.min(maxSpeed, this.ball.vx));
+                this.ball.vy = Math.max(-maxSpeed, Math.min(maxSpeed, this.ball.vy));
+                
+                // Scoring
+                if (this.ball.x < 0) {
+                    this.cpuScore++;
+                    this.resetBall();
+                } else if (this.ball.x > this.width) {
+                    this.playerScore++;
+                    this.resetBall();
+                }
+                
+                // Win condition
+                if (this.playerScore >= this.winScore || this.cpuScore >= this.winScore) {
+                    this.gameOver = true;
+                    this.running = false;
+                }
+                
+                // CPU AI
+                const cpuCenter = this.cpu.y + this.paddleHeight / 2;
+                if (cpuCenter < this.ball.y - 20) {
+                    this.cpu.y += this.cpu.speed;
+                } else if (cpuCenter > this.ball.y + 20) {
+                    this.cpu.y -= this.cpu.speed;
+                }
+                this.cpu.y = Math.max(0, Math.min(this.height - this.paddleHeight, this.cpu.y));
+            }
+            
+            draw() {
+                const color = getThemeColor();
+                const dimColor = color + '40';
+                
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+                
+                this.ctx.fillStyle = color;
+                this.ctx.shadowColor = color;
+                this.ctx.shadowBlur = 10;
+                
+                // Center line
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.strokeStyle = dimColor;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.width / 2, 0);
+                this.ctx.lineTo(this.width / 2, this.height);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // Paddles
+                this.ctx.fillRect(10, this.player.y, this.paddleWidth, this.paddleHeight);
+                this.ctx.fillRect(this.width - this.paddleWidth - 10, this.cpu.y, this.paddleWidth, this.paddleHeight);
+                
+                // Ball
+                this.ctx.beginPath();
+                this.ctx.arc(this.ball.x, this.ball.y, this.ballRadius, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                this.ctx.shadowBlur = 0;
+                
+                // Score
+                this.ctx.font = '30px monospace';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(this.playerScore, this.width / 4, 40);
+                this.ctx.fillText(this.cpuScore, 3 * this.width / 4, 40);
+                this.ctx.textAlign = 'left';
+                
+                if (this.gameOver) {
+                    // Full screen overlay like other games
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+                    this.ctx.fillRect(0, 0, this.width, this.height);
+                    
+                    this.ctx.fillStyle = color;
+                    this.ctx.shadowColor = color;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.font = '18px monospace';
+                    this.ctx.textAlign = 'center';
+                    
+                    this.ctx.fillText('GAME OVER', this.width / 2, this.height / 2 - 50);
+                    
+                    this.ctx.font = '24px monospace';
+                    this.ctx.fillText(
+                        this.playerScore > this.cpuScore ? 'YOU WIN!' : 'CPU WINS',
+                        this.width / 2,
+                        this.height / 2
+                    );
+                    
+                    this.ctx.font = '16px monospace';
+                    this.ctx.fillText(`${this.playerScore} - ${this.cpuScore}`, this.width / 2, this.height / 2 + 35);
+                    
+                    this.ctx.font = '12px monospace';
+                    this.ctx.fillText('R TO PLAY AGAIN', this.width / 2, this.height / 2 + 70);
+                    
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.textAlign = 'left';
+                } else if (showingHighscores) {
+                    drawHighscoreTable(this.ctx, this.canvas.width, this.canvas.height, 'PONG');
+                }
+            }
+        }
+        
+        let snakeGame, tetrisGame, asteroidsGame, pongGame;
+        
+        function initGames() {
+            const canvas = document.getElementById('game-canvas');
+            
+            // Initialize all games with the same canvas
+            snakeGame = new SnakeGame(canvas);
+            tetrisGame = new TetrisGame(canvas);
+            asteroidsGame = new AsteroidsGame(canvas);
+            pongGame = new PongGame(canvas);
+            
+            currentGame = snakeGame;
+            currentGame.draw();
+            
+            // Preload highscores from server
+            GAMES.forEach(game => fetchHighscores(game));
+            
+            // Keyboard controls for all games
+            document.addEventListener('keydown', (e) => {
+                if (!gameActive) return;
+                
+                // Handle highscore entry
+                if (enteringHighscore) {
+                    e.preventDefault();
+                    if (e.key === 'Enter' && highscoreInitials.length === 3) {
+                        submitHighscore();
+                        currentGame.draw();
+                    } else if (e.key === 'Backspace') {
+                        highscoreInitials = highscoreInitials.slice(0, -1);
+                        currentGame.draw();
+                    } else if (/^[a-zA-Z]$/.test(e.key) && highscoreInitials.length < 3) {
+                        highscoreInitials += e.key.toUpperCase();
+                        currentGame.draw();
+                        if (highscoreInitials.length === 3) {
+                            // Auto-submit after 3 chars
+                            setTimeout(() => {
+                                submitHighscore();
+                                currentGame.draw();
+                            }, 300);
+                        }
+                    }
+                    return;
+                }
+                
+                const gameName = GAMES[currentGameIndex];
+                
+                // R to restart any game
+                if (e.key === 'r' || e.key === 'R') {
+                    e.preventDefault();
+                    if (currentGame && currentGame.gameOver && !enteringHighscore) {
+                        lastSubmittedHighscore = null; // Clear highlight
+                        showingHighscores = false; // Close highscores view
+                        currentGame.reset();
+                        currentGame.draw();
+                    }
+                    return;
+                }
+                
+                // Tab to switch games
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    cycleGame(e.shiftKey ? -1 : 1);
+                    return;
+                }
+                
+                // H to toggle highscores view
+                if (e.key === 'h' || e.key === 'H') {
+                    e.preventDefault();
+                    if (!enteringHighscore && !checkingHighscore) {
+                        showingHighscores = !showingHighscores;
+                        if (currentGame) currentGame.draw();
+                    }
+                    return;
+                }
+                
+                // Game-specific controls
+                if (gameName === 'SNAKE') {
+                    switch(e.key) {
+                        case 'ArrowUp': case 'w': case 'W':
+                            e.preventDefault();
+                            snakeGame.setDirection('up');
+                            snakeGame.start();
+                            break;
+                        case 'ArrowDown': case 's': case 'S':
+                            e.preventDefault();
+                            snakeGame.setDirection('down');
+                            snakeGame.start();
+                            break;
+                        case 'ArrowLeft': case 'a': case 'A':
+                            e.preventDefault();
+                            snakeGame.setDirection('left');
+                            snakeGame.start();
+                            break;
+                        case 'ArrowRight': case 'd': case 'D':
+                            e.preventDefault();
+                            snakeGame.setDirection('right');
+                            snakeGame.start();
+                            break;
+                    }
+                } else if (gameName === 'TETRIS') {
+                    switch(e.key) {
+                        case 'ArrowLeft': case 'a': case 'A':
+                            e.preventDefault();
+                            tetrisGame.move(-1);
+                            break;
+                        case 'ArrowRight': case 'd': case 'D':
+                            e.preventDefault();
+                            tetrisGame.move(1);
+                            break;
+                        case 'ArrowDown': case 's': case 'S':
+                            e.preventDefault();
+                            tetrisGame.drop();
+                            break;
+                        case 'ArrowUp': case 'w': case 'W':
+                            e.preventDefault();
+                            tetrisGame.rotate();
+                            break;
+                        case ' ':
+                            e.preventDefault();
+                            tetrisGame.hardDrop();
+                            break;
+                    }
+                    tetrisGame.start();
+                } else if (gameName === 'ASTEROIDS') {
+                    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'a', 'd', 'w', 'A', 'D', 'W'].includes(e.key)) {
+                        e.preventDefault();
+                        asteroidsGame.keys[e.key] = true;
+                        asteroidsGame.start();
+                    }
+                    if (e.key === ' ') {
+                        e.preventDefault();
+                        asteroidsGame.shoot();
+                        asteroidsGame.start();
+                    }
+                } else if (gameName === 'PONG') {
+                    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+                        e.preventDefault();
+                        pongGame.movePlayer(-1);
+                        pongGame.start();
+                    }
+                    if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                        e.preventDefault();
+                        pongGame.movePlayer(1);
+                        pongGame.start();
+                    }
+                }
+            });
+            
+            // Key up for Asteroids
+            document.addEventListener('keyup', (e) => {
+                if (!gameActive || GAMES[currentGameIndex] !== 'ASTEROIDS') return;
+                asteroidsGame.keys[e.key] = false;
+            });
+            
+            // Touch controls (buttons)
+            document.querySelectorAll('.game-ctrl-btn').forEach(btn => {
+                const handleTouch = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!gameActive) return;
+                    
+                    const gameName = GAMES[currentGameIndex];
+                    const dir = btn.dataset.dir;
+                    
+                    if (gameName === 'SNAKE') {
+                        if (snakeGame.gameOver) {
+                            snakeGame.reset();
+                            snakeGame.draw();
+                            return;
+                        }
+                        snakeGame.setDirection(dir);
+                        snakeGame.start();
+                    } else if (gameName === 'TETRIS') {
+                        if (dir === 'left') tetrisGame.move(-1);
+                        else if (dir === 'right') tetrisGame.move(1);
+                        else if (dir === 'down') tetrisGame.drop();
+                        else if (dir === 'up') tetrisGame.rotate();
+                        tetrisGame.start();
+                    } else if (gameName === 'ASTEROIDS') {
+                        if (dir === 'left') asteroidsGame.keys['ArrowLeft'] = true;
+                        else if (dir === 'right') asteroidsGame.keys['ArrowRight'] = true;
+                        else if (dir === 'up') {
+                            asteroidsGame.keys['ArrowUp'] = true;
+                            asteroidsGame.shoot();
+                        }
+                        asteroidsGame.start();
+                        setTimeout(() => {
+                            asteroidsGame.keys['ArrowLeft'] = false;
+                            asteroidsGame.keys['ArrowRight'] = false;
+                            asteroidsGame.keys['ArrowUp'] = false;
+                        }, 100);
+                    } else if (gameName === 'PONG') {
+                        if (dir === 'up') pongGame.movePlayer(-1);
+                        else if (dir === 'down') pongGame.movePlayer(1);
+                        pongGame.start();
+                    }
+                };
+                
+                btn.addEventListener('click', handleTouch);
+                btn.addEventListener('touchstart', handleTouch);
+            });
+            
+            // Swipe controls
+            let touchStartX = 0;
+            let touchStartY = 0;
+            
+            const gameContainer = document.getElementById('game-container');
+            gameContainer.addEventListener('touchstart', (e) => {
+                if (e.target.closest('.snake-btn')) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            gameContainer.addEventListener('touchend', (e) => {
+                if (e.target.closest('.game-ctrl-btn')) return;
+                if (!gameActive) return;
+                
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                const dx = touchEndX - touchStartX;
+                const dy = touchEndY - touchStartY;
+                
+                const minSwipe = 30;
+                const gameName = GAMES[currentGameIndex];
+                
+                if (gameName === 'SNAKE') {
+                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipe) {
+                        snakeGame.setDirection(dx > 0 ? 'right' : 'left');
+                        snakeGame.start();
+                    } else if (Math.abs(dy) > minSwipe) {
+                        snakeGame.setDirection(dy > 0 ? 'down' : 'up');
+                        snakeGame.start();
+                    } else if (snakeGame.gameOver) {
+                        snakeGame.reset();
+                        snakeGame.draw();
+                    }
+                } else if (gameName === 'TETRIS') {
+                    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipe) {
+                        tetrisGame.move(dx > 0 ? 1 : -1);
+                    } else if (dy > minSwipe) {
+                        tetrisGame.drop();
+                    } else if (dy < -minSwipe) {
+                        tetrisGame.rotate();
+                    }
+                    tetrisGame.start();
+                }
+            }, { passive: true });
+        }
+        
+        function cycleGame(dir) {
+            // Stop current game
+            if (currentGame && currentGame.running) {
+                currentGame.running = false;
+            }
+            
+            // Reset highscore view state
+            showingHighscores = false;
+            lastSubmittedHighscore = null;
+            
+            // Cycle index
+            currentGameIndex = (currentGameIndex + dir + GAMES.length) % GAMES.length;
+            const gameName = GAMES[currentGameIndex];
+            
+            // Set new current game
+            switch(gameName) {
+                case 'SNAKE': currentGame = snakeGame; break;
+                case 'TETRIS': currentGame = tetrisGame; break;
+                case 'ASTEROIDS': currentGame = asteroidsGame; break;
+                case 'PONG': currentGame = pongGame; break;
+            }
+            
+            currentGame.reset();
+            currentGame.draw();
+            
+            // Update UI
+            updateGameUI();
+        }
+        
+        function updateGameUI() {
+            const gameName = GAMES[currentGameIndex];
+            const titleEl = document.getElementById('game-title');
+            const instructEl = document.getElementById('game-instructions');
+            
+            if (titleEl) {
+                titleEl.textContent = gameName;
+            }
+            
+            const instructions = {
+                'SNAKE': 'ARROWS TO MOVE • TAB TO SWITCH GAME',
+                'TETRIS': '←→ MOVE • ↑ ROTATE • ↓ DROP • SPACE HARD DROP • TAB SWITCH',
+                'ASTEROIDS': '←→ TURN • ↑ THRUST • SPACE SHOOT • TAB SWITCH',
+                'PONG': '↑↓ MOVE PADDLE • FIRST TO 5 WINS • TAB SWITCH'
+            };
+            
+            if (instructEl) {
+                instructEl.textContent = instructions[gameName];
+                instructEl.style.display = 'block'; // Always show
+            }
+            
+            // Update score display
+            updateGameScore();
+        }
+        
+        function updateGameScore() {
+            const scoreEl = document.getElementById('game-score');
+            if (!scoreEl || !currentGame) return;
+            
+            const gameName = GAMES[currentGameIndex];
+            if (gameName === 'PONG') {
+                scoreEl.textContent = `${pongGame.playerScore} - ${pongGame.cpuScore}`;
+            } else {
+                scoreEl.textContent = currentGame.score || 0;
+            }
+        }
+        
+        function toggleGame() {
+            gameActive = !gameActive;
+            
+            const gameContainer = document.getElementById('game-container');
+            const mainDisplay = document.querySelector('.main-display');
+            const gameBtn = document.getElementById('game-btn');
+            
+            if (gameActive) {
+                gameContainer.classList.add('active');
+                if (mainDisplay) mainDisplay.classList.add('hidden-panel');
+                if (gameBtn) gameBtn.classList.add('active');
+                currentGame.reset();
+                currentGame.draw();
+                updateGameUI();
+            } else {
+                gameContainer.classList.remove('active');
+                if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
+                if (gameBtn) gameBtn.classList.remove('active');
+                if (currentGame) currentGame.running = false;
+            }
+        }
+        
+        function initGameControls() {
+            const snakeLed = document.querySelector('.snake-led');
+            if (snakeLed) {
+                snakeLed.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleGame();
+                });
+            }
+            
+            // Game button in windowed view
+            const gameBtn = document.getElementById('game-btn');
+            if (gameBtn) {
+                gameBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleGame();
+                });
+            }
+            
+            // Also allow pressing 'G' to toggle game from any view
+            document.addEventListener('keydown', (e) => {
+                if ((e.key === 'g' || e.key === 'G') && !e.ctrlKey && !e.metaKey) {
+                    // Don't trigger if typing in an input
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                    toggleGame();
+                }
+                // Escape to exit game
+                if (e.key === 'Escape' && gameActive) {
+                    toggleGame();
+                }
+            });
+            
+            // Score update interval
+            setInterval(updateGameScore, 100);
+        }
+        
         // Initialize
         detectTemperatureUnit();
         initRadio();
@@ -2695,7 +4814,10 @@
         initPlayPauseButton();
         initViewToggle();
         initColorToggle();
+        initHdrToggle();
         initPanelToggle();
+        initGames();
+        initGameControls();
         initGlobe();
         initLocationTracking();
         updateClock();
