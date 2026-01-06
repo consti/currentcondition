@@ -2,8 +2,6 @@
 
 A retro CRT-style weather terminal with a rotating 3D globe, live weather data, news ticker, internet radio, and mini arcade games.
 
-![Current Condition](https://currentcondition.exe.xyz:8000/)
-
 ## Features
 
 - **Live Weather Data** - Temperature, humidity, wind, air quality from your location
