@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"log"
 	"math"
@@ -18,6 +20,13 @@ type Location struct {
 	Lat       float64   `json:"lat"`
 	Lng       float64   `json:"lng"`
 	Timestamp time.Time `json:"timestamp"`
+}
+
+// LocationResponse includes visitor count info
+type LocationResponse struct {
+	Added        bool `json:"added"`
+	IsFirst      bool `json:"isFirst"`
+	VisitorCount int  `json:"visitorCount"`
 }
 
 // Highscore represents a game high score entry
@@ -108,7 +117,7 @@ func initDB() error {
 		return err
 	}
 
-	// Create locations table
+	// Create locations table with visitor count
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS locations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,8 +125,26 @@ func initDB() error {
 			lng REAL NOT NULL,
 			lat_rounded REAL NOT NULL,
 			lng_rounded REAL NOT NULL,
+			visitor_count INTEGER DEFAULT 1,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			UNIQUE(lat_rounded, lng_rounded)
+		);
+	`)
+	if err != nil {
+		return err
+	}
+
+	// Add visitor_count column if it doesn't exist (migration for existing DBs)
+	_, _ = db.Exec(`ALTER TABLE locations ADD COLUMN visitor_count INTEGER DEFAULT 1`)
+
+	// Create visitors table to track unique visitors by cookie
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS visitors (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			visitor_id TEXT UNIQUE NOT NULL,
+			lat_rounded REAL,
+			lng_rounded REAL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
 	`)
 	if err != nil {
@@ -205,25 +232,106 @@ func saveHighscore(game, name string, score int) error {
 	return err
 }
 
-func addLocationToDB(lat, lng float64) (bool, error) {
+// generateVisitorID creates a random visitor ID
+func generateVisitorID() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+// checkVisitorExists checks if a visitor ID already exists and has a location
+func checkVisitorExists(visitorID string) (bool, float64, float64, error) {
+	var latRounded, lngRounded sql.NullFloat64
+	err := db.QueryRow(`SELECT lat_rounded, lng_rounded FROM visitors WHERE visitor_id = ?`, visitorID).Scan(&latRounded, &lngRounded)
+	if err == sql.ErrNoRows {
+		return false, 0, 0, nil
+	}
+	if err != nil {
+		return false, 0, 0, err
+	}
+	return true, latRounded.Float64, lngRounded.Float64, nil
+}
+
+// addOrUpdateVisitor adds a new visitor or updates existing one
+func addOrUpdateVisitor(visitorID string, latRounded, lngRounded float64) error {
+	_, err := db.Exec(`
+		INSERT INTO visitors (visitor_id, lat_rounded, lng_rounded) 
+		VALUES (?, ?, ?)
+		ON CONFLICT(visitor_id) DO UPDATE SET lat_rounded = ?, lng_rounded = ?
+	`, visitorID, latRounded, lngRounded, latRounded, lngRounded)
+	return err
+}
+
+func addLocationToDB(lat, lng float64, visitorID string) (LocationResponse, error) {
 	latRounded := roundCoord(lat, 2)
 	lngRounded := roundCoord(lng, 2)
+	response := LocationResponse{}
 
-	// Try to insert, will fail if duplicate due to UNIQUE constraint
+	// Check if this visitor already registered a location
+	exists, oldLat, oldLng, err := checkVisitorExists(visitorID)
+	if err != nil {
+		return response, err
+	}
+
+	// If visitor exists and already has the same location, don't count again
+	if exists && oldLat == latRounded && oldLng == lngRounded {
+		// Just return current count for this location
+		var count int
+		err = db.QueryRow(`SELECT visitor_count FROM locations WHERE lat_rounded = ? AND lng_rounded = ?`, latRounded, lngRounded).Scan(&count)
+		if err != nil && err != sql.ErrNoRows {
+			return response, err
+		}
+		response.Added = false
+		response.IsFirst = false
+		response.VisitorCount = count
+		return response, nil
+	}
+
+	// Try to insert new location
 	result, err := db.Exec(`
-		INSERT OR IGNORE INTO locations (lat, lng, lat_rounded, lng_rounded) 
-		VALUES (?, ?, ?, ?)
+		INSERT OR IGNORE INTO locations (lat, lng, lat_rounded, lng_rounded, visitor_count) 
+		VALUES (?, ?, ?, ?, 1)
 	`, lat, lng, latRounded, lngRounded)
 	if err != nil {
-		return false, err
+		return response, err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return false, err
+		return response, err
 	}
 
-	return rowsAffected > 0, nil
+	if rowsAffected > 0 {
+		// New location - this visitor is the first from here
+		response.Added = true
+		response.IsFirst = true
+		response.VisitorCount = 1
+	} else {
+		// Location exists - increment visitor count
+		_, err = db.Exec(`UPDATE locations SET visitor_count = visitor_count + 1 WHERE lat_rounded = ? AND lng_rounded = ?`, latRounded, lngRounded)
+		if err != nil {
+			return response, err
+		}
+
+		// Get updated count
+		var count int
+		err = db.QueryRow(`SELECT visitor_count FROM locations WHERE lat_rounded = ? AND lng_rounded = ?`, latRounded, lngRounded).Scan(&count)
+		if err != nil {
+			return response, err
+		}
+
+		response.Added = false
+		response.IsFirst = false
+		response.VisitorCount = count
+	}
+
+	// Record this visitor
+	err = addOrUpdateVisitor(visitorID, latRounded, lngRounded)
+	if err != nil {
+		return response, err
+	}
+
+	return response, nil
 }
 
 func getLocationsFromDB() ([]Location, error) {
@@ -263,7 +371,26 @@ func handleAddLocation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	added, err := addLocationToDB(loc.Lat, loc.Lng)
+	// Get or create visitor ID from cookie
+	visitorID := ""
+	cookie, err := r.Cookie("visitor_id")
+	if err == nil {
+		visitorID = cookie.Value
+	} else {
+		visitorID = generateVisitorID()
+	}
+
+	// Set cookie (valid for 1 year)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "visitor_id",
+		Value:    visitorID,
+		Path:     "/",
+		MaxAge:   365 * 24 * 60 * 60,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	response, err := addLocationToDB(loc.Lat, loc.Lng, visitorID)
 	if err != nil {
 		log.Printf("Error adding location: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -271,7 +398,7 @@ func handleAddLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]bool{"added": added})
+	json.NewEncoder(w).Encode(response)
 }
 
 func handleGetLocations(w http.ResponseWriter, r *http.Request) {

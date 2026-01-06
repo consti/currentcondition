@@ -2872,13 +2872,24 @@
         let locationMarkers = [];
         
         // Send current user's location to server
+        // Store location response for ticker message
+        let locationInfo = null;
+        
         async function sendUserLocation(lat, lng) {
             try {
-                await fetch('/api/location', {
+                const response = await fetch('/api/location', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ lat, lng })
+                    body: JSON.stringify({ lat, lng }),
+                    credentials: 'include'
                 });
+                const data = await response.json();
+                locationInfo = data;
+                
+                // Trigger ticker update to include location info
+                if (typeof updateTicker === 'function') {
+                    updateTicker();
+                }
             } catch (error) {
                 console.error('Error sending location:', error);
             }
@@ -3329,7 +3340,23 @@
             // Add location/system info
             items.push(`${locationData.city}, ${locationData.country_name}`);
             items.push(`${timezone}`);
-            items.push(`${locationData.org || 'UNKNOWN'}`)
+            items.push(`${locationData.org || 'UNKNOWN'}`);
+            
+            // Add visitor location info
+            if (locationInfo) {
+                if (locationInfo.isFirst) {
+                    items.unshift(`🎉 YOU'RE THE FIRST VISITOR FROM YOUR LOCATION!`);
+                } else if (locationInfo.visitorCount > 1) {
+                    const count = locationInfo.visitorCount;
+                    if (count === 2) {
+                        items.unshift(`👋 YOU'RE THE 2ND VISITOR FROM YOUR AREA`);
+                    } else if (count === 3) {
+                        items.unshift(`👋 YOU'RE THE 3RD VISITOR FROM YOUR AREA`);
+                    } else {
+                        items.unshift(`👋 ${count} PEOPLE HAVE VISITED FROM YOUR AREA`);
+                    }
+                }
+            }
             
             // Build ticker with two identical tracks for seamless loop
             const trackHTML = items.map(item => 
