@@ -39,7 +39,7 @@ Then visit http://localhost:8000
 
 ## Live Demo
 
-https://currentcondition.exe.xyz:8000/
+**https://currentcondition.tv**
 
 ---
 
