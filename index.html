@@ -3432,12 +3432,19 @@
             const station = radioStations[index];
             radioPlayer.src = station.url;
             currentTrack = station.name + ' - ' + station.genre;
-            // Update ticker with new station
-            if (typeof updateTicker === 'function') {
-                updateTicker();
-            }
+            // Update "NOW PLAYING" text in ticker without resetting
+            updateNowPlayingInTicker();
             // Update modal music info
             updateModalMusicInfo(station);
+        }
+        
+        function updateNowPlayingInTicker() {
+            const tickerItems = document.querySelectorAll('.ticker-item');
+            tickerItems.forEach(item => {
+                if (item.textContent.startsWith('NOW PLAYING:')) {
+                    item.textContent = `NOW PLAYING: ${currentTrack.toUpperCase()}`;
+                }
+            });
         }
         
         function updateModalMusicInfo(station) {
