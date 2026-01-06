@@ -3432,6 +3432,19 @@
             const station = radioStations[index];
             radioPlayer.src = station.url;
             currentTrack = station.name + ' - ' + station.genre;
+            // Update ticker with new station
+            if (typeof updateTicker === 'function') {
+                updateTicker();
+            }
+        }
+        
+        function cycleRadioStation() {
+            currentStationIndex = (currentStationIndex + 1) % radioStations.length;
+            setStation(currentStationIndex);
+            // If currently playing, start the new station
+            if (isPlaying) {
+                tryPlay();
+            }
         }
         
         function tryPlay() {
@@ -5331,6 +5344,10 @@
                 // C to cycle color themes
                 if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey) {
                     cycleColorMode();
+                }
+                // N to cycle radio stations
+                if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey) {
+                    cycleRadioStation();
                 }
             });
             
