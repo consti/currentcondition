@@ -3345,15 +3345,15 @@
             // Add visitor location info
             if (locationInfo) {
                 if (locationInfo.isFirst) {
-                    items.unshift(`🎉 YOU'RE THE FIRST VISITOR FROM YOUR LOCATION!`);
+                    items.unshift(`YOU'RE THE FIRST VISITOR FROM YOUR LOCATION`);
                 } else if (locationInfo.visitorCount > 1) {
                     const count = locationInfo.visitorCount;
                     if (count === 2) {
-                        items.unshift(`👋 YOU'RE THE 2ND VISITOR FROM YOUR AREA`);
+                        items.unshift(`YOU'RE THE 2ND VISITOR FROM YOUR AREA`);
                     } else if (count === 3) {
-                        items.unshift(`👋 YOU'RE THE 3RD VISITOR FROM YOUR AREA`);
+                        items.unshift(`YOU'RE THE 3RD VISITOR FROM YOUR AREA`);
                     } else {
-                        items.unshift(`👋 ${count} PEOPLE HAVE VISITED FROM YOUR AREA`);
+                        items.unshift(`${count} PEOPLE HAVE VISITED FROM YOUR AREA`);
                     }
                 }
             }
