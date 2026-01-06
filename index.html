@@ -2262,11 +2262,11 @@
             position: absolute;
             bottom: 60px;
             left: 15px;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             background: rgba(0, 20, 0, 0.8);
             border: 1px solid #00aa00;
-            border-radius: 50%;
+            border-radius: 4px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -2287,16 +2287,16 @@
         
         /* Info Modal */
         .info-modal-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 10, 0, 0.9);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 100;
         }
         
         .info-modal-overlay.active {
@@ -2304,15 +2304,15 @@
         }
         
         .info-modal {
-            background: #001a00;
+            background: rgba(0, 20, 0, 0.95);
             border: 2px solid #00ff00;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
+            border-radius: 8px;
+            padding: 25px;
+            max-width: 450px;
+            width: 85%;
+            max-height: 70%;
             overflow-y: auto;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3), inset 0 0 50px rgba(0, 255, 0, 0.05);
             position: relative;
         }
         
@@ -2617,6 +2617,30 @@
                             <span class="ticker-item">CURRENT CONDITION</span>
                             <span class="ticker-separator">◆</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info Modal (inside screen) -->
+            <div class="info-modal-overlay" id="info-modal-overlay">
+                <div class="info-modal">
+                    <button class="info-modal-close" id="info-modal-close">×</button>
+                    <h2>CURRENT CONDITION</h2>
+                    
+                    <div class="info-section">
+                        <p><span class="info-icon">🌍</span> <strong>The Globe:</strong> Watch the Earth rotate! The blue glowing dots you see are other visitors currently on the site.</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <p><span class="info-icon">🎮</span> <strong>Easter Eggs:</strong> There are hidden surprises throughout the app. Try different keyboard shortcuts, explore the color themes, and see what you can discover...</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <p><span class="info-icon">💻</span> <strong>Source Code:</strong> This project is open source! Check it out at <a href="https://github.com/consti/currentcondition" target="_blank">github.com/consti/currentcondition</a></p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <p><span class="info-icon">✨</span> <strong>Built with:</strong> This app was 100% vibe coded with the help of <a href="https://exe.dev" target="_blank">Shelley</a>, an AI coding agent on <a href="https://exe.dev" target="_blank">exe.dev</a>. Not a single line of code was written by a human!</p>
                     </div>
                 </div>
             </div>
@@ -5305,30 +5329,6 @@
         setInterval(() => getWeather(true), 300000); // Refresh all data every 5 minutes with scan effect
         setTimeout(randomGlitch, 2000);
     </script>
-    
-    <!-- Info Modal -->
-    <div class="info-modal-overlay" id="info-modal-overlay">
-        <div class="info-modal">
-            <button class="info-modal-close" id="info-modal-close">×</button>
-            <h2>CURRENT CONDITION</h2>
-            
-            <div class="info-section">
-                <p><span class="info-icon">🌍</span> <strong>The Globe:</strong> Watch the Earth rotate! The blue glowing dots you see are other visitors currently on the site.</p>
-            </div>
-            
-            <div class="info-section">
-                <p><span class="info-icon">🎮</span> <strong>Easter Eggs:</strong> There are hidden surprises throughout the app. Try different keyboard shortcuts, explore the color themes, and see what you can discover...</p>
-            </div>
-            
-            <div class="info-section">
-                <p><span class="info-icon">💻</span> <strong>Source Code:</strong> This project is open source! Check it out at <a href="https://github.com/consti/currentcondition" target="_blank">github.com/consti/currentcondition</a></p>
-            </div>
-            
-            <div class="info-section">
-                <p><span class="info-icon">✨</span> <strong>Built with:</strong> This app was 100% vibe coded with the help of <a href="https://exe.dev" target="_blank">Shelley</a>, an AI coding agent on <a href="https://exe.dev" target="_blank">exe.dev</a>. Not a single line of code was written by a human!</p>
-            </div>
-        </div>
-    </div>
     
     <script>
         // Info Modal functionality
