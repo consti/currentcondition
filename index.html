@@ -2771,11 +2771,48 @@
             requestAnimationFrame(spinGlobe);
         }
         
-        // Toggle globe spin on/off
+        // Toggle globe spin mode - zoom out and spin, or return to user location
+        let globeSpinMode = false;
+        
         function toggleGlobeSpin() {
-            spinEnabled = !spinEnabled;
-            if (spinEnabled) {
-                spinGlobe();
+            globeSpinMode = !globeSpinMode;
+            
+            if (globeSpinMode) {
+                // Zoom out and start continuous spin
+                spinEnabled = true;
+                pendingFlyTo = null;
+                totalRotation = 0;
+                
+                map.flyTo({
+                    center: map.getCenter(),
+                    zoom: 1.2,
+                    duration: 1500,
+                    essential: true
+                });
+                
+                setTimeout(() => {
+                    if (globeSpinMode) {
+                        spinGlobe();
+                    }
+                }, 1500);
+            } else {
+                // Stop spinning and fly back to user
+                spinEnabled = false;
+                
+                if (userLocation) {
+                    map.flyTo({
+                        center: [userLocation.lng, userLocation.lat],
+                        zoom: 3.0,
+                        duration: 2000,
+                        essential: true
+                    });
+                    
+                    setTimeout(() => {
+                        if (!globeSpinMode) {
+                            slowRotateAroundLocation(userLocation.lng, userLocation.lat);
+                        }
+                    }, 2500);
+                }
             }
         }
         
@@ -5252,12 +5289,16 @@
                 if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
                     togglePlayPause();
                 }
-                // S to toggle globe spin
+                // S to toggle globe spin mode
                 if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !gameActive) {
                     toggleGlobeSpin();
                 }
-                // T to cycle color themes
+                // T to cycle view modes (windowed/monitor/fullscreen)
                 if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey) {
+                    cycleViewMode();
+                }
+                // C to cycle color themes
+                if ((e.key === 'c' || e.key === 'C') && !e.ctrlKey && !e.metaKey) {
                     cycleColorMode();
                 }
             });
