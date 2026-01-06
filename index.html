@@ -2747,6 +2747,14 @@
             requestAnimationFrame(spinGlobe);
         }
         
+        // Toggle globe spin on/off
+        function toggleGlobeSpin() {
+            spinEnabled = !spinEnabled;
+            if (spinEnabled) {
+                spinGlobe();
+            }
+        }
+        
         // Queue fly to user's location (after spin completes)
         function flyToLocation(lat, lng) {
             pendingFlyTo = { lat, lng };
@@ -5206,14 +5214,27 @@
             
             // Also allow pressing 'G' to toggle game from any view
             document.addEventListener('keydown', (e) => {
+                // Don't trigger shortcuts if typing in an input or modal is open
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
                 if ((e.key === 'g' || e.key === 'G') && !e.ctrlKey && !e.metaKey) {
-                    // Don't trigger if typing in an input
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                     toggleGame();
                 }
                 // Escape to exit game
                 if (e.key === 'Escape' && gameActive) {
                     toggleGame();
+                }
+                // M to toggle audio
+                if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
+                    togglePlayPause();
+                }
+                // S to toggle globe spin
+                if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !gameActive) {
+                    toggleGlobeSpin();
+                }
+                // T to cycle color themes
+                if ((e.key === 't' || e.key === 'T') && !e.ctrlKey && !e.metaKey) {
+                    cycleColorMode();
                 }
             });
             
@@ -5292,7 +5313,7 @@
             <h2>CURRENT CONDITION</h2>
             
             <div class="info-section">
-                <p><span class="info-icon">🌍</span> <strong>The Globe:</strong> Watch the Earth rotate with real-time weather data from your location. The blue glowing dots you see are other visitors currently on the site!</p>
+                <p><span class="info-icon">🌍</span> <strong>The Globe:</strong> Watch the Earth rotate! The blue glowing dots you see are other visitors currently on the site.</p>
             </div>
             
             <div class="info-section">
