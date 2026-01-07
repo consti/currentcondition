@@ -242,6 +242,15 @@
             font-size: 2rem;
         }
         
+        .temp-toggle {
+            cursor: pointer;
+            transition: text-shadow 0.2s ease;
+        }
+        
+        .temp-toggle:hover {
+            text-shadow: 0 0 20px rgba(0, 255, 0, 1), 0 0 40px rgba(0, 255, 0, 0.8);
+        }
+        
         .location-info {
             font-size: 1.1rem;
             margin-top: 8px;
@@ -2714,6 +2723,15 @@
             return `${Math.round(celsius)}°C`;
         }
         
+        function toggleTemperatureUnit() {
+            useFahrenheit = !useFahrenheit;
+            // Re-render the display and ticker with new unit
+            updateDisplay();
+            if (weatherData && locationData) {
+                updateTicker();
+            }
+        }
+        
         // Initialize the 3D globe
         function initGlobe() {
             mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -3236,8 +3254,8 @@
             
             document.getElementById('weather-main').innerHTML = `
                 <span class="weather-icon">${getWeatherIcon(weatherCode)}</span>
-                <span>${formatTemp(temp)}</span>
-                <span style="font-size: 1rem; opacity: 0.7;">FEELS LIKE ${formatTemp(feelsLike)}</span>
+                <span class="temp-toggle" onclick="toggleTemperatureUnit()" title="Click to toggle °C/°F">${formatTemp(temp)}</span>
+                <span class="temp-toggle" style="font-size: 1rem; opacity: 0.7;" onclick="toggleTemperatureUnit()" title="Click to toggle °C/°F">FEELS LIKE ${formatTemp(feelsLike)}</span>
             `;
             
             document.getElementById('location-info').innerHTML = `
