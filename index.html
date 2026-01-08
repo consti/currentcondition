@@ -2338,6 +2338,157 @@
             image-rendering: crisp-edges;
         }
         
+        /* Eliza AI Button */
+        .eliza-btn {
+            position: absolute;
+            top: 140px;
+            left: 10px;
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            background: var(--button-bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        .eliza-btn:hover {
+            background: var(--button-hover-bg);
+            box-shadow: var(--glow);
+        }
+        .eliza-btn.active {
+            background: var(--button-active-bg);
+            box-shadow: var(--glow);
+        }
+        body.red-mode .eliza-btn { background: rgba(255, 50, 50, 0.2); border-color: rgba(255, 50, 50, 0.5); }
+        body.red-mode .eliza-btn:hover, body.red-mode .eliza-btn.active { background: rgba(255, 50, 50, 0.4); }
+        body.purple-mode .eliza-btn { background: rgba(200, 100, 255, 0.2); border-color: rgba(200, 100, 255, 0.5); }
+        body.purple-mode .eliza-btn:hover, body.purple-mode .eliza-btn.active { background: rgba(200, 100, 255, 0.4); }
+        body.grey-mode .eliza-btn { background: rgba(200, 200, 200, 0.2); border-color: rgba(200, 200, 200, 0.5); }
+        body.grey-mode .eliza-btn:hover, body.grey-mode .eliza-btn.active { background: rgba(200, 200, 200, 0.4); }
+        body.fullcolor-mode .eliza-btn { background: rgba(100, 200, 100, 0.2); border-color: rgba(100, 200, 100, 0.5); }
+        body.fullcolor-mode .eliza-btn:hover, body.fullcolor-mode .eliza-btn.active { background: rgba(100, 200, 100, 0.4); }
+        body.hdr-mode .eliza-btn { background: rgba(255, 255, 255, 0.3); border-color: rgba(0, 0, 0, 0.5); }
+        body.hdr-mode .eliza-btn:hover { background: rgba(255, 255, 255, 0.5); }
+        
+        /* Eliza Container */
+        .eliza-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 40px;
+            display: none;
+            flex-direction: column;
+            z-index: 50;
+            background: #000000;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .eliza-container.active {
+            display: flex;
+        }
+        .eliza-header {
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .eliza-title {
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            color: var(--primary-color);
+        }
+        .eliza-subtitle {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        .eliza-chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .eliza-message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .eliza-message.eliza {
+            align-self: flex-start;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .eliza-message.user {
+            align-self: flex-end;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #666;
+            color: #fff;
+        }
+        body.red-mode .eliza-message.eliza { background: rgba(255, 50, 50, 0.1); border-color: #ff3333; color: #ff3333; }
+        body.purple-mode .eliza-message.eliza { background: rgba(200, 100, 255, 0.1); border-color: #c864ff; color: #c864ff; }
+        body.grey-mode .eliza-message.eliza { background: rgba(200, 200, 200, 0.1); border-color: #c8c8c8; color: #c8c8c8; }
+        body.fullcolor-mode .eliza-message.eliza { background: rgba(100, 200, 100, 0.1); border-color: #64c864; color: #64c864; }
+        .eliza-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-top: 1px solid var(--primary-color);
+        }
+        .eliza-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 15px;
+            font-family: inherit;
+            font-size: 1rem;
+            border-radius: 5px;
+            outline: none;
+        }
+        .eliza-input:focus {
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        .eliza-input::placeholder {
+            color: rgba(0, 255, 0, 0.4);
+        }
+        body.red-mode .eliza-input { border-color: #ff3333; color: #ff3333; }
+        body.red-mode .eliza-input::placeholder { color: rgba(255, 50, 50, 0.4); }
+        body.purple-mode .eliza-input { border-color: #c864ff; color: #c864ff; }
+        body.purple-mode .eliza-input::placeholder { color: rgba(200, 100, 255, 0.4); }
+        body.grey-mode .eliza-input { border-color: #c8c8c8; color: #c8c8c8; }
+        body.grey-mode .eliza-input::placeholder { color: rgba(200, 200, 200, 0.4); }
+        body.fullcolor-mode .eliza-input { border-color: #64c864; color: #64c864; }
+        body.fullcolor-mode .eliza-input::placeholder { color: rgba(100, 200, 100, 0.4); }
+        .eliza-send {
+            background: var(--primary-color);
+            border: none;
+            color: #000;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .eliza-send:hover {
+            filter: brightness(1.2);
+        }
+        body.red-mode .eliza-send { background: #ff3333; }
+        body.purple-mode .eliza-send { background: #c864ff; }
+        body.grey-mode .eliza-send { background: #c8c8c8; }
+        body.fullcolor-mode .eliza-send { background: #64c864; }
+        
         /* Snake LED indicator */
         .monitor-btn.snake-led {
             cursor: pointer;
@@ -2715,6 +2866,19 @@
                 <div class="illusion-instructions" id="illusion-instructions">RED APPEARS CLOSER, BLUE APPEARS FARTHER</div>
             </div>
             
+            <!-- Eliza AI Container -->
+            <div class="eliza-container" id="eliza-container">
+                <div class="eliza-header">
+                    <div class="eliza-title">E L I Z A</div>
+                    <div class="eliza-subtitle">ARTIFICIAL INTELLIGENCE THERAPIST - CIRCA 1966</div>
+                </div>
+                <div class="eliza-chat" id="eliza-chat"></div>
+                <div class="eliza-input-area">
+                    <input type="text" class="eliza-input" id="eliza-input" placeholder="Tell me what's on your mind..." autocomplete="off">
+                    <button class="eliza-send" id="eliza-send">SEND</button>
+                </div>
+            </div>
+            
             <div class="main-display hidden-panel">
                 <div class="title">CURRENT CONDITION</div>
                 <div class="clock" id="clock">--:--:--</div>
@@ -2739,6 +2903,11 @@
             <!-- Illusion Button -->
             <button class="illusion-btn" id="illusion-btn" title="Optical Illusions (I)">
                 <span class="illusion-icon">👁️</span>
+            </button>
+            
+            <!-- Eliza AI Button -->
+            <button class="eliza-btn" id="eliza-btn" title="Talk to ELIZA (E)">
+                <span class="eliza-icon">🧠</span>
             </button>
             
             <!-- View Toggle Button -->
@@ -5509,7 +5678,7 @@
         }
         
         // Illusion system
-        const ILLUSIONS = ['TORUS', 'SPHERE', 'PYRAMID', 'CUBE', 'KNOT', 'PENROSE', 'CAFE_WALL', 'SPINNING_RINGS', 'MANDELBROT', 'JULIA', 'BURNING_SHIP', 'SIERPINSKI', 'MENGER', 'MANDELBULB'];
+        const ILLUSIONS = ['TORUS', 'SPHERE', 'PYRAMID', 'CUBE', 'KNOT', 'CAFE_WALL', 'MANDELBROT', 'JULIA', 'BURNING_SHIP', 'SIERPINSKI', 'MENGER', 'MANDELBULB'];
         let currentIllusionIndex = 0;
         
         // Three.js renderer shared state
@@ -5544,9 +5713,7 @@
                 'PYRAMID': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
                 'CUBE': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
                 'KNOT': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
-                'PENROSE': 'IMPOSSIBLE GEOMETRY - ROTATING TRIANGULAR ILLUSION',
                 'CAFE_WALL': 'PARALLEL LINES APPEAR TILTED',
-                'SPINNING_RINGS': 'CONCENTRIC RINGS CREATE DEPTH MOTION',
                 'MANDELBROT': 'INFINITE ZOOM INTO THE MANDELBROT SET',
                 'JULIA': 'MORPHING JULIA SET FRACTAL',
                 'BURNING_SHIP': 'THE BURNING SHIP FRACTAL',
@@ -5678,7 +5845,7 @@
                 const geo = new THREE.TorusKnotGeometry(1.0, 0.35, 100, 16);
                 illusionMesh = new THREE.Mesh(geo, redMat);
                 boundingRadius = 1.8;
-            } else if (illusionType === 'PENROSE' || illusionType === 'CAFE_WALL' || illusionType === 'SPINNING_RINGS') {
+            } else if (illusionType === 'CAFE_WALL') {
                 is2DIllusion = true;
                 boundingRadius = 2.0;
             } else if (illusionType === 'MANDELBROT' || illusionType === 'JULIA' || illusionType === 'BURNING_SHIP' || illusionType === 'SIERPINSKI' || illusionType === 'MENGER' || illusionType === 'MANDELBULB') {
@@ -5691,8 +5858,7 @@
                 const illusion2DShader = {
                     uniforms: {
                         uTime: { value: 0.0 },
-                        uResolution: { value: new THREE.Vector2(width, height) },
-                        uIllusionType: { value: illusionType === 'PENROSE' ? 0 : (illusionType === 'CAFE_WALL' ? 1 : 2) }
+                        uResolution: { value: new THREE.Vector2(width, height) }
                     },
                     vertexShader: `
                         varying vec2 vUv;
@@ -5706,42 +5872,15 @@
                         varying vec2 vUv;
                         uniform float uTime;
                         uniform vec2 uResolution;
-                        uniform int uIllusionType;
                         
-                        #define PI 3.14159265359
-                        
-                        // Penrose Triangle illusion
-                        vec3 penrose(vec2 uv) {
-                            vec2 p = (uv - 0.5) * 2.0;
-                            float angle = atan(p.y, p.x) + uTime * 0.3;
-                            float r = length(p);
-                            
-                            // Create impossible triangle pattern
-                            float sides = 3.0;
-                            float a = mod(angle + PI, 2.0 * PI / sides) - PI / sides;
-                            float d = cos(a) * r;
-                            
-                            float stripe = sin(d * 20.0 - uTime * 2.0) * 0.5 + 0.5;
-                            float depth = sin(angle * 3.0 + uTime) * 0.5 + 0.5;
-                            
-                            vec3 col1 = vec3(1.0, 0.0, 0.0); // Red
-                            vec3 col2 = vec3(0.0, 0.0, 1.0); // Blue
-                            
-                            float mask = smoothstep(0.3, 0.35, r) * smoothstep(0.9, 0.85, r);
-                            vec3 color = mix(col2, col1, stripe * depth) * mask;
-                            
-                            return color;
-                        }
-                        
-                        // Café Wall illusion
-                        vec3 cafeWall(vec2 uv) {
+                        void main() {
                             float rows = 8.0;
                             float cols = 12.0;
                             
-                            float y = uv.y * rows;
+                            float y = vUv.y * rows;
                             float row = floor(y);
                             float offset = mod(row, 2.0) * 0.5 + sin(uTime * 0.5 + row * 0.5) * 0.1;
-                            float x = uv.x * cols + offset;
+                            float x = vUv.x * cols + offset;
                             
                             float checker = mod(floor(x) + floor(y), 2.0);
                             
@@ -5757,43 +5896,6 @@
                             vec3 color = mix(col2, col1, checker);
                             color = mix(color, mortarCol, clamp(mortar, 0.0, 1.0));
                             
-                            return color;
-                        }
-                        
-                        // Spinning Rings illusion
-                        vec3 spinningRings(vec2 uv) {
-                            vec2 p = (uv - 0.5) * 2.0;
-                            float r = length(p);
-                            float angle = atan(p.y, p.x);
-                            
-                            float rings = 0.0;
-                            for (float i = 0.0; i < 6.0; i++) {
-                                float ringR = 0.15 + i * 0.13;
-                                float ringWidth = 0.04;
-                                float spin = uTime * (1.0 + i * 0.3) * (mod(i, 2.0) == 0.0 ? 1.0 : -1.0);
-                                float wave = sin(angle * (6.0 + i * 2.0) + spin) * 0.03;
-                                float ring = smoothstep(ringWidth, 0.0, abs(r - ringR - wave));
-                                rings = max(rings, ring * (mod(i, 2.0) == 0.0 ? 1.0 : -1.0));
-                            }
-                            
-                            vec3 col1 = vec3(1.0, 0.0, 0.0);
-                            vec3 col2 = vec3(0.0, 0.0, 1.0);
-                            
-                            vec3 color = rings > 0.0 ? col1 * rings : col2 * abs(rings);
-                            color += vec3(0.0, 0.0, 0.2) * (1.0 - smoothstep(0.0, 1.0, r));
-                            
-                            return color;
-                        }
-                        
-                        void main() {
-                            vec3 color;
-                            if (uIllusionType == 0) {
-                                color = penrose(vUv);
-                            } else if (uIllusionType == 1) {
-                                color = cafeWall(vUv);
-                            } else {
-                                color = spinningRings(vUv);
-                            }
                             gl_FragColor = vec4(color, 1.0);
                         }
                     `
@@ -5929,26 +6031,29 @@
                         uniform float uTime;
                         uniform vec2 uResolution;
                         
-                        #define MAX_ITER 120
+                        #define MAX_ITER 150
                         
                         void main() {
                             vec2 uv = (vUv - 0.5) * 2.0;
                             uv.x *= uResolution.x / uResolution.y;
                             
-                            // Zoom into the ship's smokestack
-                            vec2 target = vec2(-1.762, -0.028);
-                            float zoomCycle = mod(uTime * 0.4, 25.0);
-                            float zoom = pow(1.8, zoomCycle);
+                            // Start zoomed out to see the whole ship, then zoom into detail
+                            float zoomCycle = mod(uTime * 0.3, 35.0);
+                            float zoom = pow(1.6, zoomCycle);
+                            
+                            // Interesting location in the burning ship
+                            vec2 target = vec2(-1.755, -0.04);
                             
                             vec2 c = uv / zoom + target;
-                            c.y = -c.y; // Flip for proper orientation
+                            // Flip Y to show ship right-side up
+                            c.y = -c.y;
                             vec2 z = vec2(0.0);
                             
                             float iter = 0.0;
                             for (int i = 0; i < MAX_ITER; i++) {
                                 if (dot(z, z) > 256.0) break;
-                                // Burning ship: take absolute value before squaring
-                                z = abs(z);
+                                // Burning ship formula: |Re(z)|, |Im(z)| before squaring
+                                z = vec2(abs(z.x), abs(z.y));
                                 z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
                                 iter += 1.0;
                             }
@@ -5958,15 +6063,17 @@
                                 return;
                             }
                             
+                            // Smooth iteration count
                             float sl = iter - log2(log2(dot(z,z))) + 4.0;
                             
-                            // Orange/Yellow/Red fire colors
-                            float hue = sl * 0.04;
+                            // Fire colors - orange, yellow, red gradient
+                            float t = sl * 0.03 + uTime * 0.05;
                             vec3 color = vec3(
-                                0.9 + 0.1 * sin(hue),
-                                0.4 + 0.4 * cos(hue * 0.7),
-                                0.1 + 0.1 * sin(hue * 0.5)
+                                0.5 + 0.5 * sin(t * 3.0),
+                                0.3 + 0.3 * sin(t * 3.0 - 1.0),
+                                0.1 + 0.1 * sin(t * 3.0 - 2.0)
                             );
+                            color = clamp(color * 1.5, 0.0, 1.0);
                             
                             gl_FragColor = vec4(color, 1.0);
                         }
@@ -6065,37 +6172,32 @@
                         }
                     `;
                 } else if (fractalType === 'MENGER') {
-                    // 3D Menger Sponge fly-through
+                    // 3D Menger Sponge - orbiting camera view
                     fragmentShader = `
                         precision highp float;
                         varying vec2 vUv;
                         uniform float uTime;
                         uniform vec2 uResolution;
                         
-                        #define MAX_STEPS 80
-                        #define MAX_DIST 50.0
-                        #define SURF_DIST 0.002
+                        #define MAX_STEPS 100
+                        #define MAX_DIST 20.0
+                        #define SURF_DIST 0.001
                         
                         float sdBox(vec3 p, vec3 b) {
                             vec3 d = abs(p) - b;
                             return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);
                         }
                         
-                        float sdCross(vec3 p) {
-                            float da = sdBox(p.xyz, vec3(1000.0, 1.0, 1.0));
-                            float db = sdBox(p.yzx, vec3(1.0, 1000.0, 1.0));
-                            float dc = sdBox(p.zxy, vec3(1.0, 1.0, 1000.0));
-                            return min(da, min(db, dc));
-                        }
-                        
                         float menger(vec3 p) {
                             float d = sdBox(p, vec3(1.0));
-                            float s = 1.0;
+                            float scale = 1.0;
+                            
                             for (int i = 0; i < 4; i++) {
-                                vec3 a = mod(p * s, 2.0) - 1.0;
-                                s *= 3.0;
-                                vec3 r = abs(1.0 - 3.0 * abs(a));
-                                float c = sdCross(r) / s;
+                                vec3 a = mod(p * scale, 2.0) - 1.0;
+                                scale *= 3.0;
+                                vec3 r = 1.0 - 3.0 * abs(a);
+                                
+                                float c = sdBox(r, vec3(1.0)) / scale;
                                 d = max(d, c);
                             }
                             return d;
@@ -6106,41 +6208,40 @@
                             for (int i = 0; i < MAX_STEPS; i++) {
                                 vec3 p = ro + rd * d;
                                 float ds = menger(p);
-                                d += ds * 0.8;
+                                d += ds;
                                 if (d > MAX_DIST || ds < SURF_DIST) break;
                             }
                             return d;
                         }
                         
                         vec3 getNormal(vec3 p) {
-                            float d = menger(p);
                             vec2 e = vec2(0.001, 0.0);
-                            vec3 n = d - vec3(
-                                menger(p - e.xyy),
-                                menger(p - e.yxy),
-                                menger(p - e.yyx)
-                            );
-                            return normalize(n);
+                            return normalize(vec3(
+                                menger(p + e.xyy) - menger(p - e.xyy),
+                                menger(p + e.yxy) - menger(p - e.yxy),
+                                menger(p + e.yyx) - menger(p - e.yyx)
+                            ));
                         }
                         
                         void main() {
                             vec2 uv = (vUv - 0.5) * 2.0;
                             uv.x *= uResolution.x / uResolution.y;
                             
-                            // Fly through the sponge
-                            float t = uTime * 0.3;
+                            // Orbit camera around the sponge
+                            float t = uTime * 0.25;
+                            float camDist = 3.0 + sin(uTime * 0.15) * 0.5;
                             vec3 ro = vec3(
-                                sin(t * 0.7) * 0.3,
-                                cos(t * 0.5) * 0.3,
-                                -2.0 + mod(t * 2.0, 4.0)
+                                sin(t) * camDist,
+                                sin(t * 0.7) * 1.5,
+                                cos(t) * camDist
                             );
                             
-                            vec3 rd = normalize(vec3(uv, 1.5));
-                            
-                            // Rotate view
-                            float a = sin(t * 0.3) * 0.3;
-                            mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));
-                            rd.xz = rot * rd.xz;
+                            // Look at center
+                            vec3 target = vec3(0.0);
+                            vec3 forward = normalize(target - ro);
+                            vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
+                            vec3 up = cross(forward, right);
+                            vec3 rd = normalize(forward + uv.x * right + uv.y * up);
                             
                             float d = rayMarch(ro, rd);
                             
@@ -6148,15 +6249,20 @@
                             if (d < MAX_DIST) {
                                 vec3 p = ro + rd * d;
                                 vec3 n = getNormal(p);
-                                vec3 lightDir = normalize(vec3(1.0, 1.0, -1.0));
+                                
+                                // Lighting
+                                vec3 lightPos = vec3(3.0, 4.0, 2.0);
+                                vec3 lightDir = normalize(lightPos - p);
                                 float diff = max(dot(n, lightDir), 0.0);
+                                float spec = pow(max(dot(reflect(-lightDir, n), -rd), 0.0), 32.0);
                                 
                                 // Gold/Orange coloring
-                                color = vec3(1.0, 0.7, 0.2) * (diff * 0.7 + 0.3);
-                                color += vec3(1.0, 0.9, 0.5) * pow(max(dot(reflect(-lightDir, n), -rd), 0.0), 16.0) * 0.4;
+                                vec3 baseColor = vec3(1.0, 0.7, 0.2);
+                                color = baseColor * (diff * 0.7 + 0.3);
+                                color += vec3(1.0, 0.9, 0.5) * spec * 0.5;
                                 
-                                // Fog
-                                color = mix(color, vec3(0.02, 0.0, 0.05), 1.0 - exp(-d * 0.15));
+                                // Depth fog
+                                color = mix(color, vec3(0.02, 0.0, 0.05), 1.0 - exp(-d * 0.1));
                             }
                             
                             gl_FragColor = vec4(color, 1.0);
@@ -6415,6 +6521,16 @@
                 toggleIllusion(); // This will turn off illusions
                 return;
             }
+            
+            // Update CRT effects based on new illusion type
+            const currentIllusion = ILLUSIONS[currentIllusionIndex];
+            const isFractalIllusion = ['MANDELBROT', 'JULIA', 'BURNING_SHIP', 'SIERPINSKI', 'MENGER', 'MANDELBULB'].includes(currentIllusion);
+            if (!isFractalIllusion) {
+                document.body.classList.add('illusion-mode');
+            } else {
+                document.body.classList.remove('illusion-mode');
+            }
+            
             renderIllusion();
         }
         
@@ -6438,8 +6554,15 @@
                 illusionContainer.classList.add('active');
                 if (mainDisplay) mainDisplay.classList.add('hidden-panel');
                 if (illusionBtn) illusionBtn.classList.add('active');
-                // Disable CRT effects for clear illusion viewing
-                document.body.classList.add('illusion-mode');
+                
+                // Only disable CRT effects for chromostereopsis illusions (not fractals)
+                const currentIllusion = ILLUSIONS[currentIllusionIndex];
+                const isFractalIllusion = ['MANDELBROT', 'JULIA', 'BURNING_SHIP', 'SIERPINSKI', 'MENGER', 'MANDELBULB'].includes(currentIllusion);
+                if (!isFractalIllusion) {
+                    document.body.classList.add('illusion-mode');
+                } else {
+                    document.body.classList.remove('illusion-mode');
+                }
                 renderIllusion();
             } else {
                 illusionContainer.classList.remove('active');
@@ -6449,6 +6572,273 @@
                 document.body.classList.remove('illusion-mode');
                 stopIllusion();
             }
+        }
+        
+        // ============ ELIZA AI ============
+        let elizaActive = false;
+        
+        // ELIZA response patterns
+        const elizaPatterns = [
+            [/\b(hello|hi|hey|greetings)\b/i, [
+                "Hello. How are you feeling today?",
+                "Hi there. What's on your mind?",
+                "Greetings. Please tell me what's troubling you."
+            ]],
+            [/\bmy name is (.+)/i, [
+                "Hello, %1. How can I help you today?",
+                "Nice to meet you, %1. What brings you here?"
+            ]],
+            [/\bi(?:'m| am) (sad|depressed|unhappy|miserable)/i, [
+                "I'm sorry to hear you're feeling %1. Can you tell me more?",
+                "What do you think is making you feel %1?",
+                "How long have you been feeling %1?"
+            ]],
+            [/\bi(?:'m| am) (happy|good|great|fine|well)/i, [
+                "That's wonderful. What's making you feel %1?",
+                "I'm glad you're feeling %1. Tell me more.",
+                "Good to hear. What else is on your mind?"
+            ]],
+            [/\bi(?:'m| am) (.*)/i, [
+                "How long have you been %1?",
+                "Why do you think you're %1?",
+                "How does being %1 make you feel?"
+            ]],
+            [/\bi feel (.*)/i, [
+                "Tell me more about feeling %1.",
+                "Do you often feel %1?",
+                "What makes you feel %1?"
+            ]],
+            [/\bi want (.*)/i, [
+                "Why do you want %1?",
+                "What would it mean to you if you got %1?",
+                "Suppose you got %1 - what then?"
+            ]],
+            [/\bi need (.*)/i, [
+                "Why do you need %1?",
+                "Would it really help you to get %1?",
+                "Are you sure you need %1?"
+            ]],
+            [/\bwhy don(?:'t| not) you ([^?]*)/i, [
+                "Do you really think I don't %1?",
+                "Perhaps eventually I will %1.",
+                "Do you really want me to %1?"
+            ]],
+            [/\bwhy can(?:'t| not) i ([^?]*)/i, [
+                "Do you think you should be able to %1?",
+                "If you could %1, what would you do?",
+                "What's stopping you from being able to %1?"
+            ]],
+            [/\bi can(?:'t| not) (.*)/i, [
+                "How do you know you can't %1?",
+                "Have you tried to %1?",
+                "Perhaps you could %1 if you tried."
+            ]],
+            [/\bare you ([^?]*)/i, [
+                "Why does it matter whether I am %1?",
+                "Would you prefer if I were not %1?",
+                "Perhaps you believe I am %1."
+            ]],
+            [/\bwhat (.*)/i, [
+                "Why do you ask?",
+                "What do you think?",
+                "Does that question interest you?"
+            ]],
+            [/\bhow (.*)/i, [
+                "How do you suppose?",
+                "Perhaps you can answer your own question.",
+                "What is it you're really asking?"
+            ]],
+            [/\bbecause (.*)/i, [
+                "Is that the real reason?",
+                "What other reasons come to mind?",
+                "Does that reason explain anything else?"
+            ]],
+            [/\b(sorry|apologize)\b/i, [
+                "Please don't apologize.",
+                "Apologies are not necessary.",
+                "What feelings do you have when you apologize?"
+            ]],
+            [/\b(mother|father|family|parent)/i, [
+                "Tell me more about your family.",
+                "How do you feel about your %1?",
+                "What role does your %1 play in your life?"
+            ]],
+            [/\b(friend|friends)/i, [
+                "Tell me more about your friends.",
+                "How do your friends make you feel?",
+                "Are your friends important to you?"
+            ]],
+            [/\bdream(?:s|ed|ing)?\b/i, [
+                "What does that dream suggest to you?",
+                "Do you dream often?",
+                "What persons appear in your dreams?"
+            ]],
+            [/\byes\b/i, [
+                "You seem quite sure.",
+                "I see. Please go on.",
+                "I understand."
+            ]],
+            [/\bno\b/i, [
+                "Why not?",
+                "Are you saying no just to be negative?",
+                "You are being a bit negative."
+            ]],
+            [/\bcomputer/i, [
+                "Do computers worry you?",
+                "Why do you mention computers?",
+                "What do you think about machines?"
+            ]],
+            [/\b(fuck|shit|damn|ass|hell)\b/i, [
+                "Let's try to keep this conversation civil.",
+                "I understand you're frustrated. Can you tell me why?",
+                "Such language often masks deeper feelings."
+            ]],
+            [/.*/, [
+                "Please go on.",
+                "Tell me more.",
+                "Can you elaborate on that?",
+                "That's interesting. Please continue.",
+                "I see. And what does that suggest to you?",
+                "How does that make you feel?",
+                "What do you mean by that?",
+                "Very interesting.",
+                "I'm not sure I understand. Can you explain?",
+                "Let's explore that further."
+            ]]
+        ];
+        
+        function elizaRespond(input) {
+            input = input.trim();
+            if (!input) return "Please say something.";
+            
+            for (const [pattern, responses] of elizaPatterns) {
+                const match = input.match(pattern);
+                if (match) {
+                    let response = responses[Math.floor(Math.random() * responses.length)];
+                    // Replace capture groups
+                    if (match[1]) {
+                        // Reflect pronouns
+                        let reflected = match[1]
+                            .replace(/\bi\b/gi, 'YOU')
+                            .replace(/\bme\b/gi, 'YOU')
+                            .replace(/\bmy\b/gi, 'YOUR')
+                            .replace(/\bmyself\b/gi, 'YOURSELF')
+                            .replace(/\byou\b/gi, 'I')
+                            .replace(/\byour\b/gi, 'MY')
+                            .replace(/\byourself\b/gi, 'MYSELF')
+                            .replace(/\bam\b/gi, 'ARE')
+                            .replace(/\bare\b/gi, 'AM');
+                        // Fix case
+                        reflected = reflected.toLowerCase();
+                        response = response.replace(/%1/g, reflected);
+                    }
+                    return response;
+                }
+            }
+            return "I'm not sure I understand. Can you rephrase that?";
+        }
+        
+        function addElizaMessage(text, isUser) {
+            const chat = document.getElementById('eliza-chat');
+            const msg = document.createElement('div');
+            msg.className = 'eliza-message ' + (isUser ? 'user' : 'eliza');
+            msg.textContent = text;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        function sendElizaMessage() {
+            const input = document.getElementById('eliza-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            addElizaMessage(text, true);
+            input.value = '';
+            
+            // Simulate typing delay
+            setTimeout(() => {
+                const response = elizaRespond(text);
+                addElizaMessage(response, false);
+            }, 500 + Math.random() * 1000);
+        }
+        
+        function toggleEliza() {
+            // Close other modes
+            if (gameActive) toggleGame();
+            if (illusionActive) toggleIllusion();
+            
+            elizaActive = !elizaActive;
+            
+            const elizaContainer = document.getElementById('eliza-container');
+            const mainDisplay = document.querySelector('.main-display');
+            const elizaBtn = document.getElementById('eliza-btn');
+            
+            if (elizaActive) {
+                elizaContainer.classList.add('active');
+                if (mainDisplay) mainDisplay.classList.add('hidden-panel');
+                if (elizaBtn) elizaBtn.classList.add('active');
+                
+                // Show welcome message if chat is empty
+                const chat = document.getElementById('eliza-chat');
+                if (chat.children.length === 0) {
+                    setTimeout(() => {
+                        addElizaMessage("Hello. I am ELIZA, a computer therapist. How are you feeling today?", false);
+                    }, 500);
+                }
+                
+                // Focus input
+                setTimeout(() => {
+                    document.getElementById('eliza-input').focus();
+                }, 100);
+            } else {
+                elizaContainer.classList.remove('active');
+                if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
+                if (elizaBtn) elizaBtn.classList.remove('active');
+            }
+        }
+        
+        function initEliza() {
+            const elizaBtn = document.getElementById('eliza-btn');
+            if (elizaBtn) {
+                elizaBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleEliza();
+                });
+            }
+            
+            const sendBtn = document.getElementById('eliza-send');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendElizaMessage);
+            }
+            
+            const input = document.getElementById('eliza-input');
+            if (input) {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendElizaMessage();
+                    }
+                });
+            }
+            
+            // Press 'E' to toggle Eliza, Escape to close
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    // Allow Escape to close even when typing
+                    if (e.key === 'Escape' && elizaActive) {
+                        toggleEliza();
+                    }
+                    return;
+                }
+                
+                if ((e.key === 'e' || e.key === 'E') && !e.ctrlKey && !e.metaKey) {
+                    toggleEliza();
+                }
+                
+                if (e.key === 'Escape' && elizaActive) {
+                    toggleEliza();
+                }
+            });
         }
         
         function initIllusions() {
@@ -6600,6 +6990,7 @@
         initGames();
         initGameControls();
         initIllusions();
+        initEliza();
         initGlobe();
         initLocationTracking();
         updateClock();
