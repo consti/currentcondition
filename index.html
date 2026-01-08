@@ -3236,12 +3236,40 @@
             transform: translateY(0);
         }
         
+        .ping-log.minimized {
+            display: none;
+        }
+        
         .ping-log-header {
             padding: 4px 8px;
             background: rgba(0, 255, 0, 0.1);
             border-bottom: 1px solid rgba(0, 255, 0, 0.2);
             font-size: 12px;
             letter-spacing: 1px;
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        
+        .ping-log-header .ping-log-title {
+            flex: 1;
+        }
+        
+        .ping-log-header .ping-log-minimize {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .ping-log-header .ping-log-minimize:hover {
+            opacity: 1;
         }
         
         .ping-log-entries {
@@ -3260,6 +3288,53 @@
         
         .ping-log-entries::-webkit-scrollbar-thumb {
             background: rgba(0, 255, 0, 0.3);
+        }
+        
+        /* Minimized ping log button */
+        .ping-log-btn {
+            position: absolute;
+            bottom: 95px;
+            left: 15px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            color: #00ff00;
+            z-index: 50;
+            transition: all 0.2s;
+        }
+        
+        .ping-log-btn.visible {
+            display: flex;
+        }
+        
+        .ping-log-btn:hover {
+            background: rgba(0, 40, 0, 0.9);
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .ping-log-btn .ping-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #00ff00;
+            color: #001a00;
+            font-size: 10px;
+            min-width: 14px;
+            height: 14px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 3px;
         }
         
         .ping-entry {
@@ -3362,6 +3437,18 @@
         body.red-mode .ping-entry.new { border-left-color: #ff0000; background: rgba(255, 0, 0, 0.1); }
         body.red-mode .ping-pulse { background: radial-gradient(circle, rgba(255, 100, 100, 0.8) 0%, rgba(255, 0, 0, 0) 70%); }
         body.red-mode .ping-pulse::before { border-color: rgba(255, 0, 0, 0.8); }
+        body.red-mode .ping-log-btn {
+            border-color: rgba(255, 0, 0, 0.5);
+            color: #ff0000;
+        }
+        body.red-mode .ping-log-btn:hover {
+            border-color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+        body.red-mode .ping-log-btn .ping-count {
+            background: #ff0000;
+            color: #1a0000;
+        }
         
         body.purple-mode .user-count {
             color: #ff00ff;
@@ -3391,6 +3478,18 @@
         body.purple-mode .ping-entry.new { border-left-color: #ff00ff; background: rgba(255, 0, 255, 0.1); }
         body.purple-mode .ping-pulse { background: radial-gradient(circle, rgba(255, 100, 255, 0.8) 0%, rgba(255, 0, 255, 0) 70%); }
         body.purple-mode .ping-pulse::before { border-color: rgba(255, 0, 255, 0.8); }
+        body.purple-mode .ping-log-btn {
+            border-color: rgba(255, 0, 255, 0.5);
+            color: #ff00ff;
+        }
+        body.purple-mode .ping-log-btn:hover {
+            border-color: #ff00ff;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        body.purple-mode .ping-log-btn .ping-count {
+            background: #ff00ff;
+            color: #1a001a;
+        }
     </style>
 </head>
 <body class="windowed-mode">
@@ -3420,10 +3519,20 @@
         <div id="remote-cursors"></div>
         
         <!-- Ping Log (synced across users) -->
+        <!-- Ping Log (synced across users) -->
         <div class="ping-log" id="ping-log">
-            <div class="ping-log-header">▶ PING LOG</div>
+            <div class="ping-log-header" id="ping-log-header">
+                <span class="ping-log-title">▶ PING LOG</span>
+                <span class="ping-log-minimize" id="ping-log-minimize" title="Minimize">−</span>
+            </div>
             <div class="ping-log-entries" id="ping-log-entries"></div>
         </div>
+        
+        <!-- Minimized Ping Log Button -->
+        <button class="ping-log-btn" id="ping-log-btn" title="Open Ping Log">
+            📡
+            <span class="ping-count" id="ping-count">0</span>
+        </button>
         
         <div class="scanlines"></div>
         <div class="flicker"></div>
@@ -8102,6 +8211,10 @@
             const pingBtn = document.getElementById('ping-btn');
             const pingLog = document.getElementById('ping-log');
             const pingLogEntries = document.getElementById('ping-log-entries');
+            const pingLogHeader = document.getElementById('ping-log-header');
+            const pingLogMinimize = document.getElementById('ping-log-minimize');
+            const pingLogBtn = document.getElementById('ping-log-btn');
+            const pingCountBadge = document.getElementById('ping-count');
             const cursors = new Map(); // id -> {element, trails: [], lastUpdate}
             let ws = null;
             let myId = null;
@@ -8113,6 +8226,9 @@
             let isInverted = false;
             let pingCooldown = false;
             let pingHistory = []; // Last 10 pings
+            let pingLogMinimized = false;
+            let pingLogDragging = false;
+            let pingLogDragOffset = { x: 0, y: 0 };
             
             // Generate random color for each user
             const cursorColors = [
@@ -8493,6 +8609,9 @@
             function renderPingLog(highlightLast) {
                 pingLogEntries.innerHTML = '';
                 
+                // Update badge count
+                pingCountBadge.textContent = pingHistory.length;
+                
                 // Format timestamp to local time
                 function formatPingTime(unixTimestamp) {
                     const date = new Date(unixTimestamp * 1000);
@@ -8555,6 +8674,105 @@
             
             // Ping button click handler
             pingBtn.addEventListener('click', sendPing);
+            
+            // Ping log minimize/restore
+            function minimizePingLog() {
+                pingLogMinimized = true;
+                pingLog.classList.add('minimized');
+                pingLogBtn.classList.add('visible');
+                updatePingCountBadge();
+            }
+            
+            function restorePingLog() {
+                pingLogMinimized = false;
+                pingLog.classList.remove('minimized');
+                pingLogBtn.classList.remove('visible');
+            }
+            
+            function updatePingCountBadge() {
+                pingCountBadge.textContent = pingHistory.length;
+            }
+            
+            pingLogMinimize.addEventListener('click', (e) => {
+                e.stopPropagation();
+                minimizePingLog();
+            });
+            
+            pingLogBtn.addEventListener('click', restorePingLog);
+            
+            // Ping log dragging
+            pingLogHeader.addEventListener('mousedown', (e) => {
+                if (e.target === pingLogMinimize) return;
+                pingLogDragging = true;
+                const rect = pingLog.getBoundingClientRect();
+                const containerRect = pingLog.parentElement.getBoundingClientRect();
+                pingLogDragOffset.x = e.clientX - rect.left;
+                pingLogDragOffset.y = e.clientY - rect.top;
+                pingLog.style.transition = 'none';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!pingLogDragging) return;
+                
+                const containerRect = pingLog.parentElement.getBoundingClientRect();
+                let newX = e.clientX - containerRect.left - pingLogDragOffset.x;
+                let newY = e.clientY - containerRect.top - pingLogDragOffset.y;
+                
+                // Constrain to container bounds
+                const maxX = containerRect.width - pingLog.offsetWidth;
+                const maxY = containerRect.height - pingLog.offsetHeight;
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
+                
+                pingLog.style.left = newX + 'px';
+                pingLog.style.top = newY + 'px';
+                pingLog.style.bottom = 'auto';
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (pingLogDragging) {
+                    pingLogDragging = false;
+                    pingLog.style.transition = '';
+                }
+            });
+            
+            // Touch support for dragging
+            pingLogHeader.addEventListener('touchstart', (e) => {
+                if (e.target === pingLogMinimize) return;
+                pingLogDragging = true;
+                const touch = e.touches[0];
+                const rect = pingLog.getBoundingClientRect();
+                pingLogDragOffset.x = touch.clientX - rect.left;
+                pingLogDragOffset.y = touch.clientY - rect.top;
+                pingLog.style.transition = 'none';
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!pingLogDragging) return;
+                
+                const touch = e.touches[0];
+                const containerRect = pingLog.parentElement.getBoundingClientRect();
+                let newX = touch.clientX - containerRect.left - pingLogDragOffset.x;
+                let newY = touch.clientY - containerRect.top - pingLogDragOffset.y;
+                
+                // Constrain to container bounds
+                const maxX = containerRect.width - pingLog.offsetWidth;
+                const maxY = containerRect.height - pingLog.offsetHeight;
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
+                
+                pingLog.style.left = newX + 'px';
+                pingLog.style.top = newY + 'px';
+                pingLog.style.bottom = 'auto';
+            }, { passive: true });
+            
+            document.addEventListener('touchend', () => {
+                if (pingLogDragging) {
+                    pingLogDragging = false;
+                    pingLog.style.transition = '';
+                }
+            });
             
             // Start connection
             connect();
