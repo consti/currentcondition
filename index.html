@@ -2339,43 +2339,97 @@
         }
         
         /* Eliza AI Button */
+        /* Eliza Button - matches game/illusion buttons */
         .eliza-btn {
             position: absolute;
-            top: 140px;
-            left: 10px;
-            width: 36px;
-            height: 36px;
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            background: var(--button-bg);
+            top: 95px;
+            left: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            z-index: 100;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            font-size: 18px;
+            z-index: 50;
+            opacity: 0.7;
         }
         .eliza-btn:hover {
-            background: var(--button-hover-bg);
-            box-shadow: var(--glow);
+            opacity: 1;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
         .eliza-btn.active {
-            background: var(--button-active-bg);
-            box-shadow: var(--glow);
+            opacity: 1;
+            background: rgba(0, 100, 0, 0.8);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
         }
-        body.red-mode .eliza-btn { background: rgba(255, 50, 50, 0.2); border-color: rgba(255, 50, 50, 0.5); }
-        body.red-mode .eliza-btn:hover, body.red-mode .eliza-btn.active { background: rgba(255, 50, 50, 0.4); }
-        body.purple-mode .eliza-btn { background: rgba(200, 100, 255, 0.2); border-color: rgba(200, 100, 255, 0.5); }
-        body.purple-mode .eliza-btn:hover, body.purple-mode .eliza-btn.active { background: rgba(200, 100, 255, 0.4); }
-        body.grey-mode .eliza-btn { background: rgba(200, 200, 200, 0.2); border-color: rgba(200, 200, 200, 0.5); }
-        body.grey-mode .eliza-btn:hover, body.grey-mode .eliza-btn.active { background: rgba(200, 200, 200, 0.4); }
-        body.fullcolor-mode .eliza-btn { background: rgba(100, 200, 100, 0.2); border-color: rgba(100, 200, 100, 0.5); }
-        body.fullcolor-mode .eliza-btn:hover, body.fullcolor-mode .eliza-btn.active { background: rgba(100, 200, 100, 0.4); }
-        body.hdr-mode .eliza-btn { background: rgba(255, 255, 255, 0.3); border-color: rgba(0, 0, 0, 0.5); }
-        body.hdr-mode .eliza-btn:hover { background: rgba(255, 255, 255, 0.5); }
+        body.red-mode .eliza-btn { background: rgba(20, 0, 0, 0.8); border-color: #aa0000; }
+        body.red-mode .eliza-btn:hover { border-color: #ff3333; box-shadow: 0 0 10px rgba(255, 51, 51, 0.3); }
+        body.red-mode .eliza-btn.active { background: rgba(100, 0, 0, 0.8); border-color: #ff3333; box-shadow: 0 0 15px rgba(255, 51, 51, 0.5); }
+        body.purple-mode .eliza-btn { background: rgba(20, 0, 20, 0.8); border-color: #aa00aa; }
+        body.purple-mode .eliza-btn:hover { border-color: #c864ff; box-shadow: 0 0 10px rgba(200, 100, 255, 0.3); }
+        body.purple-mode .eliza-btn.active { background: rgba(60, 0, 60, 0.8); border-color: #c864ff; box-shadow: 0 0 15px rgba(200, 100, 255, 0.5); }
+        body.grey-mode .eliza-btn { background: rgba(20, 20, 20, 0.8); border-color: #888888; }
+        body.grey-mode .eliza-btn:hover { border-color: #c8c8c8; box-shadow: 0 0 10px rgba(200, 200, 200, 0.3); }
+        body.grey-mode .eliza-btn.active { background: rgba(60, 60, 60, 0.8); border-color: #c8c8c8; box-shadow: 0 0 15px rgba(200, 200, 200, 0.5); }
+        body.fullcolor-mode .eliza-btn { background: rgba(0, 20, 0, 0.8); border-color: #00aa00; }
+        body.fullcolor-mode .eliza-btn:hover { border-color: #00ff00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.3); }
+        body.fullcolor-mode .eliza-btn.active { background: rgba(0, 60, 0, 0.8); border-color: #00ff00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.5); }
+        body.hdr-mode .eliza-btn { background: rgba(30, 30, 30, 0.8); border-color: rgba(0, 0, 0, 0.5); }
+        body.hdr-mode .eliza-btn:hover { border-color: rgba(0, 0, 0, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
         
-        /* Eliza Container */
+        /* Life Button - matches game/illusion/eliza buttons */
+        .life-btn {
+            position: absolute;
+            top: 135px;
+            left: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+            z-index: 50;
+            opacity: 0.7;
+        }
+        .life-btn:hover {
+            opacity: 1;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        .life-btn.active {
+            opacity: 1;
+            background: rgba(0, 100, 0, 0.8);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        body.red-mode .life-btn { background: rgba(20, 0, 0, 0.8); border-color: #aa0000; }
+        body.red-mode .life-btn:hover { border-color: #ff3333; box-shadow: 0 0 10px rgba(255, 51, 51, 0.3); }
+        body.red-mode .life-btn.active { background: rgba(100, 0, 0, 0.8); border-color: #ff3333; box-shadow: 0 0 15px rgba(255, 51, 51, 0.5); }
+        body.purple-mode .life-btn { background: rgba(20, 0, 20, 0.8); border-color: #aa00aa; }
+        body.purple-mode .life-btn:hover { border-color: #c864ff; box-shadow: 0 0 10px rgba(200, 100, 255, 0.3); }
+        body.purple-mode .life-btn.active { background: rgba(60, 0, 60, 0.8); border-color: #c864ff; box-shadow: 0 0 15px rgba(200, 100, 255, 0.5); }
+        body.grey-mode .life-btn { background: rgba(20, 20, 20, 0.8); border-color: #888888; }
+        body.grey-mode .life-btn:hover { border-color: #c8c8c8; box-shadow: 0 0 10px rgba(200, 200, 200, 0.3); }
+        body.grey-mode .life-btn.active { background: rgba(60, 60, 60, 0.8); border-color: #c8c8c8; box-shadow: 0 0 15px rgba(200, 200, 200, 0.5); }
+        body.fullcolor-mode .life-btn { background: rgba(0, 20, 0, 0.8); border-color: #00aa00; }
+        body.fullcolor-mode .life-btn:hover { border-color: #00ff00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.3); }
+        body.fullcolor-mode .life-btn.active { background: rgba(0, 60, 0, 0.8); border-color: #00ff00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.5); }
+        body.hdr-mode .life-btn { background: rgba(30, 30, 30, 0.8); border-color: rgba(0, 0, 0, 0.5); }
+        body.hdr-mode .life-btn:hover { border-color: rgba(0, 0, 0, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
+        
+        /* Eliza Container - window mode like games */
         .eliza-container {
             position: absolute;
             top: 0;
@@ -2384,29 +2438,92 @@
             bottom: 40px;
             display: none;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             z-index: 50;
-            background: #000000;
-            padding: 20px;
-            overflow: hidden;
+            background: rgba(0, 10, 0, 0.95);
         }
         .eliza-container.active {
             display: flex;
         }
+        
+        /* Life Container - window mode like games */
+        .life-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 40px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            background: rgba(0, 10, 0, 0.95);
+        }
+        .life-container.active {
+            display: flex;
+        }
+        .life-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            opacity: 0.7;
+        }
+        .life-canvas {
+            border: 2px solid currentColor;
+            box-shadow: 0 0 20px currentColor;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .life-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .life-btn-ctrl {
+            background: rgba(0, 50, 0, 0.8);
+            border: 1px solid currentColor;
+            color: inherit;
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .life-btn-ctrl:hover {
+            background: rgba(0, 100, 0, 0.8);
+        }
+        .life-instructions {
+            font-size: 0.85rem;
+            margin-top: 10px;
+            opacity: 0.6;
+        }
+        /* Eliza window styling */
+        .eliza-window {
+            width: 500px;
+            max-width: 90vw;
+            height: 400px;
+            max-height: 70vh;
+            border: 2px solid currentColor;
+            box-shadow: 0 0 20px currentColor;
+            background: rgba(0, 5, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+        }
         .eliza-header {
             text-align: center;
             padding: 10px;
-            border-bottom: 1px solid var(--primary-color);
-            margin-bottom: 10px;
+            border-bottom: 1px solid currentColor;
         }
         .eliza-title {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             letter-spacing: 4px;
-            color: var(--primary-color);
         }
         .eliza-subtitle {
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 5px;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 3px;
         }
         .eliza-chat {
             flex: 1;
@@ -2414,80 +2531,68 @@
             padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         .eliza-message {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            line-height: 1.4;
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.3;
         }
         .eliza-message.eliza {
             align-self: flex-start;
             background: rgba(0, 255, 0, 0.1);
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
+            border: 1px solid currentColor;
         }
         .eliza-message.user {
             align-self: flex-end;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #666;
-            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #aaa;
         }
-        body.red-mode .eliza-message.eliza { background: rgba(255, 50, 50, 0.1); border-color: #ff3333; color: #ff3333; }
-        body.purple-mode .eliza-message.eliza { background: rgba(200, 100, 255, 0.1); border-color: #c864ff; color: #c864ff; }
-        body.grey-mode .eliza-message.eliza { background: rgba(200, 200, 200, 0.1); border-color: #c8c8c8; color: #c8c8c8; }
-        body.fullcolor-mode .eliza-message.eliza { background: rgba(100, 200, 100, 0.1); border-color: #64c864; color: #64c864; }
         .eliza-input-area {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             padding: 10px;
-            border-top: 1px solid var(--primary-color);
+            border-top: 1px solid currentColor;
         }
         .eliza-input {
             flex: 1;
             background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 10px 15px;
+            border: 1px solid currentColor;
+            color: inherit;
+            padding: 8px 12px;
             font-family: inherit;
-            font-size: 1rem;
-            border-radius: 5px;
+            font-size: 0.9rem;
+            border-radius: 4px;
             outline: none;
         }
         .eliza-input:focus {
-            box-shadow: 0 0 10px var(--primary-color);
+            box-shadow: 0 0 10px currentColor;
         }
         .eliza-input::placeholder {
-            color: rgba(0, 255, 0, 0.4);
+            opacity: 0.4;
         }
-        body.red-mode .eliza-input { border-color: #ff3333; color: #ff3333; }
-        body.red-mode .eliza-input::placeholder { color: rgba(255, 50, 50, 0.4); }
-        body.purple-mode .eliza-input { border-color: #c864ff; color: #c864ff; }
-        body.purple-mode .eliza-input::placeholder { color: rgba(200, 100, 255, 0.4); }
-        body.grey-mode .eliza-input { border-color: #c8c8c8; color: #c8c8c8; }
-        body.grey-mode .eliza-input::placeholder { color: rgba(200, 200, 200, 0.4); }
-        body.fullcolor-mode .eliza-input { border-color: #64c864; color: #64c864; }
-        body.fullcolor-mode .eliza-input::placeholder { color: rgba(100, 200, 100, 0.4); }
         .eliza-send {
-            background: var(--primary-color);
+            background: currentColor;
             border: none;
             color: #000;
-            padding: 10px 20px;
+            padding: 8px 16px;
             font-family: inherit;
-            font-size: 1rem;
-            border-radius: 5px;
+            font-size: 0.9rem;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
         }
         .eliza-send:hover {
             filter: brightness(1.2);
         }
-        body.red-mode .eliza-send { background: #ff3333; }
-        body.purple-mode .eliza-send { background: #c864ff; }
-        body.grey-mode .eliza-send { background: #c8c8c8; }
-        body.fullcolor-mode .eliza-send { background: #64c864; }
+        .eliza-instructions {
+            font-size: 0.8rem;
+            margin-top: 10px;
+            opacity: 0.5;
+        }
         
         /* Snake LED indicator */
         .monitor-btn.snake-led {
@@ -2868,15 +2973,31 @@
             
             <!-- Eliza AI Container -->
             <div class="eliza-container" id="eliza-container">
-                <div class="eliza-header">
-                    <div class="eliza-title">E L I Z A</div>
-                    <div class="eliza-subtitle">ARTIFICIAL INTELLIGENCE THERAPIST - CIRCA 1966</div>
+                <div class="eliza-window">
+                    <div class="eliza-header">
+                        <div class="eliza-title">E L I Z A</div>
+                        <div class="eliza-subtitle">ARTIFICIAL INTELLIGENCE THERAPIST - CIRCA 1966</div>
+                    </div>
+                    <div class="eliza-chat" id="eliza-chat"></div>
+                    <div class="eliza-input-area">
+                        <input type="text" class="eliza-input" id="eliza-input" placeholder="Tell me what's on your mind..." autocomplete="off">
+                        <button class="eliza-send" id="eliza-send">SEND</button>
+                    </div>
                 </div>
-                <div class="eliza-chat" id="eliza-chat"></div>
-                <div class="eliza-input-area">
-                    <input type="text" class="eliza-input" id="eliza-input" placeholder="Tell me what's on your mind..." autocomplete="off">
-                    <button class="eliza-send" id="eliza-send">SEND</button>
+                <div class="eliza-instructions">PRESS ESC TO EXIT</div>
+            </div>
+            
+            <!-- Conway's Game of Life Container -->
+            <div class="life-container" id="life-container">
+                <div class="life-title">CONWAY'S GAME OF LIFE</div>
+                <canvas id="life-canvas" width="400" height="400"></canvas>
+                <div class="life-controls">
+                    <button class="life-btn-ctrl" id="life-play">PLAY</button>
+                    <button class="life-btn-ctrl" id="life-step">STEP</button>
+                    <button class="life-btn-ctrl" id="life-clear">CLEAR</button>
+                    <button class="life-btn-ctrl" id="life-random">RANDOM</button>
                 </div>
+                <div class="life-instructions">CLICK TO TOGGLE CELLS • PRESS ESC TO EXIT</div>
             </div>
             
             <div class="main-display hidden-panel">
@@ -2908,6 +3029,11 @@
             <!-- Eliza AI Button -->
             <button class="eliza-btn" id="eliza-btn" title="Talk to ELIZA (E)">
                 <span class="eliza-icon">🧠</span>
+            </button>
+            
+            <!-- Conway's Game of Life Button -->
+            <button class="life-btn" id="life-btn" title="Conway's Game of Life (L)">
+                <span class="life-icon">🧬</span>
             </button>
             
             <!-- View Toggle Button -->
@@ -6766,6 +6892,7 @@
             // Close other modes
             if (gameActive) toggleGame();
             if (illusionActive) toggleIllusion();
+            if (lifeActive) toggleLife();
             
             elizaActive = !elizaActive;
             
@@ -6837,6 +6964,216 @@
                 
                 if (e.key === 'Escape' && elizaActive) {
                     toggleEliza();
+                }
+            });
+        }
+        
+        // ============ CONWAY'S GAME OF LIFE ============
+        let lifeActive = false;
+        let lifeGrid = null;
+        let lifeRunning = false;
+        let lifeAnimationId = null;
+        const LIFE_COLS = 80;
+        const LIFE_ROWS = 80;
+        const LIFE_CELL_SIZE = 5;
+        
+        function createLifeGrid() {
+            return Array(LIFE_ROWS).fill(null).map(() => Array(LIFE_COLS).fill(false));
+        }
+        
+        function randomizeLife() {
+            lifeGrid = createLifeGrid();
+            for (let y = 0; y < LIFE_ROWS; y++) {
+                for (let x = 0; x < LIFE_COLS; x++) {
+                    lifeGrid[y][x] = Math.random() < 0.3;
+                }
+            }
+            drawLife();
+        }
+        
+        function clearLife() {
+            lifeGrid = createLifeGrid();
+            drawLife();
+        }
+        
+        function countNeighbors(grid, x, y) {
+            let count = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = (x + dx + LIFE_COLS) % LIFE_COLS;
+                    const ny = (y + dy + LIFE_ROWS) % LIFE_ROWS;
+                    if (grid[ny][nx]) count++;
+                }
+            }
+            return count;
+        }
+        
+        function stepLife() {
+            const newGrid = createLifeGrid();
+            for (let y = 0; y < LIFE_ROWS; y++) {
+                for (let x = 0; x < LIFE_COLS; x++) {
+                    const neighbors = countNeighbors(lifeGrid, x, y);
+                    const alive = lifeGrid[y][x];
+                    // Conway's rules
+                    if (alive && (neighbors === 2 || neighbors === 3)) {
+                        newGrid[y][x] = true;
+                    } else if (!alive && neighbors === 3) {
+                        newGrid[y][x] = true;
+                    }
+                }
+            }
+            lifeGrid = newGrid;
+            drawLife();
+        }
+        
+        function drawLife() {
+            const canvas = document.getElementById('life-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            // Get color based on theme
+            let color = '#00ff00';
+            if (document.body.classList.contains('red-mode')) color = '#ff3333';
+            else if (document.body.classList.contains('purple-mode')) color = '#c864ff';
+            else if (document.body.classList.contains('grey-mode')) color = '#c8c8c8';
+            else if (document.body.classList.contains('fullcolor-mode')) color = '#64c864';
+            else if (document.body.classList.contains('hdr-mode')) color = '#ffffff';
+            
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = color;
+            for (let y = 0; y < LIFE_ROWS; y++) {
+                for (let x = 0; x < LIFE_COLS; x++) {
+                    if (lifeGrid[y][x]) {
+                        ctx.fillRect(
+                            x * LIFE_CELL_SIZE,
+                            y * LIFE_CELL_SIZE,
+                            LIFE_CELL_SIZE - 1,
+                            LIFE_CELL_SIZE - 1
+                        );
+                    }
+                }
+            }
+        }
+        
+        function toggleLifeRunning() {
+            lifeRunning = !lifeRunning;
+            const playBtn = document.getElementById('life-play');
+            if (playBtn) {
+                playBtn.textContent = lifeRunning ? 'PAUSE' : 'PLAY';
+            }
+            if (lifeRunning) {
+                runLife();
+            }
+        }
+        
+        function runLife() {
+            if (!lifeRunning || !lifeActive) return;
+            stepLife();
+            lifeAnimationId = setTimeout(runLife, 100);
+        }
+        
+        function toggleLife() {
+            // Close other modes
+            if (gameActive) toggleGame();
+            if (illusionActive) toggleIllusion();
+            if (elizaActive) toggleEliza();
+            
+            lifeActive = !lifeActive;
+            
+            const lifeContainer = document.getElementById('life-container');
+            const mainDisplay = document.querySelector('.main-display');
+            const lifeBtn = document.getElementById('life-btn');
+            
+            if (lifeActive) {
+                lifeContainer.classList.add('active');
+                if (mainDisplay) mainDisplay.classList.add('hidden-panel');
+                if (lifeBtn) lifeBtn.classList.add('active');
+                
+                if (!lifeGrid) {
+                    lifeGrid = createLifeGrid();
+                    randomizeLife();
+                } else {
+                    drawLife();
+                }
+            } else {
+                lifeContainer.classList.remove('active');
+                if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
+                if (lifeBtn) lifeBtn.classList.remove('active');
+                lifeRunning = false;
+                if (lifeAnimationId) {
+                    clearTimeout(lifeAnimationId);
+                    lifeAnimationId = null;
+                }
+                const playBtn = document.getElementById('life-play');
+                if (playBtn) playBtn.textContent = 'PLAY';
+            }
+        }
+        
+        function initLife() {
+            const lifeBtn = document.getElementById('life-btn');
+            if (lifeBtn) {
+                lifeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleLife();
+                });
+            }
+            
+            const playBtn = document.getElementById('life-play');
+            if (playBtn) {
+                playBtn.addEventListener('click', toggleLifeRunning);
+            }
+            
+            const stepBtn = document.getElementById('life-step');
+            if (stepBtn) {
+                stepBtn.addEventListener('click', () => {
+                    if (!lifeRunning) stepLife();
+                });
+            }
+            
+            const clearBtn = document.getElementById('life-clear');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    lifeRunning = false;
+                    const playBtn = document.getElementById('life-play');
+                    if (playBtn) playBtn.textContent = 'PLAY';
+                    clearLife();
+                });
+            }
+            
+            const randomBtn = document.getElementById('life-random');
+            if (randomBtn) {
+                randomBtn.addEventListener('click', randomizeLife);
+            }
+            
+            // Canvas click to toggle cells
+            const canvas = document.getElementById('life-canvas');
+            if (canvas) {
+                canvas.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    const x = Math.floor((e.clientX - rect.left) * scaleX / LIFE_CELL_SIZE);
+                    const y = Math.floor((e.clientY - rect.top) * scaleY / LIFE_CELL_SIZE);
+                    if (x >= 0 && x < LIFE_COLS && y >= 0 && y < LIFE_ROWS) {
+                        lifeGrid[y][x] = !lifeGrid[y][x];
+                        drawLife();
+                    }
+                });
+            }
+            
+            // Press 'L' to toggle Life, Escape to close
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                if ((e.key === 'l' || e.key === 'L') && !e.ctrlKey && !e.metaKey) {
+                    toggleLife();
+                }
+                
+                if (e.key === 'Escape' && lifeActive) {
+                    toggleLife();
                 }
             });
         }
@@ -6991,6 +7328,7 @@
         initGameControls();
         initIllusions();
         initEliza();
+        initLife();
         initGlobe();
         initLocationTracking();
         updateClock();
