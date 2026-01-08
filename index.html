@@ -2559,9 +2559,9 @@
         }
         .eliza-input {
             flex: 1;
-            background: rgba(0, 10, 0, 0.8);
-            border: 1px solid rgba(0, 180, 0, 0.5);
-            color: inherit;
+            background: rgba(0, 15, 0, 0.9);
+            border: 1px solid rgba(0, 200, 0, 0.4);
+            color: #00ff00;
             padding: 10px 14px;
             font-family: inherit;
             font-size: 1.1rem;
@@ -2569,11 +2569,21 @@
             outline: none;
         }
         .eliza-input:focus {
-            border-color: currentColor;
+            border-color: #00ff00;
+            background: rgba(0, 20, 0, 0.95);
         }
         .eliza-input::placeholder {
-            opacity: 0.3;
+            color: rgba(0, 255, 0, 0.35);
         }
+        body.red-mode .eliza-input { color: #ff4444; background: rgba(15, 0, 0, 0.9); border-color: rgba(200, 0, 0, 0.4); }
+        body.red-mode .eliza-input:focus { border-color: #ff4444; background: rgba(20, 0, 0, 0.95); }
+        body.red-mode .eliza-input::placeholder { color: rgba(255, 68, 68, 0.35); }
+        body.purple-mode .eliza-input { color: #dd88ff; background: rgba(15, 0, 15, 0.9); border-color: rgba(180, 0, 180, 0.4); }
+        body.purple-mode .eliza-input:focus { border-color: #dd88ff; background: rgba(20, 0, 20, 0.95); }
+        body.purple-mode .eliza-input::placeholder { color: rgba(221, 136, 255, 0.35); }
+        body.grey-mode .eliza-input { color: #dddddd; background: rgba(15, 15, 15, 0.9); border-color: rgba(150, 150, 150, 0.4); }
+        body.grey-mode .eliza-input:focus { border-color: #dddddd; background: rgba(20, 20, 20, 0.95); }
+        body.grey-mode .eliza-input::placeholder { color: rgba(221, 221, 221, 0.35); }
         .eliza-send {
             background: currentColor;
             border: none;
@@ -6661,10 +6671,10 @@
         }
         
         function toggleIllusion() {
-            // Close game if open
-            if (gameActive) {
-                toggleGame();
-            }
+            // Close other modes
+            if (gameActive) toggleGame();
+            if (elizaActive) toggleEliza();
+            if (lifeActive) toggleLife();
             
             illusionActive = !illusionActive;
             
