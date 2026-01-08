@@ -7,6 +7,9 @@
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
     <script src='https://unpkg.com/three@0.160.0/build/three.min.js'></script>
+    <!-- js-dos for DOOM emulation -->
+    <script src="/js-dos/js-dos.js"></script>
+    <link rel="stylesheet" href="/js-dos/js-dos.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -2429,6 +2432,194 @@
         body.hdr-mode .life-btn { background: rgba(30, 30, 30, 0.8); border-color: rgba(0, 0, 0, 0.5); }
         body.hdr-mode .life-btn:hover { border-color: rgba(0, 0, 0, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
         
+        /* Doom Button - desktop only */
+        .doom-btn {
+            position: absolute;
+            top: 175px;
+            left: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none; /* Hidden by default, shown on desktop */
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+            z-index: 50;
+            opacity: 0.7;
+        }
+        @media (min-width: 769px) {
+            .doom-btn {
+                display: flex;
+            }
+        }
+        .doom-btn:hover {
+            opacity: 1;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        .doom-btn.active {
+            opacity: 1;
+            background: rgba(0, 100, 0, 0.8);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        body.red-mode .doom-btn { background: rgba(20, 0, 0, 0.8); border-color: #aa0000; }
+        body.red-mode .doom-btn:hover { border-color: #ff3333; box-shadow: 0 0 10px rgba(255, 51, 51, 0.3); }
+        body.red-mode .doom-btn.active { background: rgba(100, 0, 0, 0.8); border-color: #ff3333; box-shadow: 0 0 15px rgba(255, 51, 51, 0.5); }
+        body.purple-mode .doom-btn { background: rgba(20, 0, 20, 0.8); border-color: #aa00aa; }
+        body.purple-mode .doom-btn:hover { border-color: #c864ff; box-shadow: 0 0 10px rgba(200, 100, 255, 0.3); }
+        body.purple-mode .doom-btn.active { background: rgba(60, 0, 60, 0.8); border-color: #c864ff; box-shadow: 0 0 15px rgba(200, 100, 255, 0.5); }
+        body.grey-mode .doom-btn { background: rgba(20, 20, 20, 0.8); border-color: #888888; }
+        body.grey-mode .doom-btn:hover { border-color: #c8c8c8; box-shadow: 0 0 10px rgba(200, 200, 200, 0.3); }
+        body.grey-mode .doom-btn.active { background: rgba(60, 60, 60, 0.8); border-color: #c8c8c8; box-shadow: 0 0 15px rgba(200, 200, 200, 0.5); }
+        body.fullcolor-mode .doom-btn { background: rgba(0, 20, 0, 0.8); border-color: #00aa00; }
+        body.fullcolor-mode .doom-btn:hover { border-color: #00ff00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.3); }
+        body.fullcolor-mode .doom-btn.active { background: rgba(0, 60, 0, 0.8); border-color: #00ff00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.5); }
+        body.hdr-mode .doom-btn { background: rgba(30, 30, 30, 0.8); border-color: rgba(0, 0, 0, 0.5); }
+        body.hdr-mode .doom-btn:hover { border-color: rgba(0, 0, 0, 0.8); box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); }
+        
+        /* Doom Container */
+        .doom-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            padding: 20px;
+        }
+        .doom-container.active {
+            display: flex;
+        }
+        .doom-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            padding: 0;
+        }
+        .doom-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 10px;
+            padding: 0 10px;
+        }
+        .doom-container.fullscreen .doom-header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .doom-container.fullscreen:hover .doom-header {
+            opacity: 1;
+        }
+        .doom-title {
+            font-size: 1.5rem;
+            color: #b22222;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(178, 34, 34, 0.5);
+        }
+        .doom-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .doom-ctrl-btn {
+            background: rgba(178, 34, 34, 0.3);
+            border: 1px solid #b22222;
+            color: #ff6666;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .doom-ctrl-btn:hover {
+            background: rgba(178, 34, 34, 0.5);
+            border-color: #ff6666;
+        }
+        .doom-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 4 / 3;
+            background: #000;
+            border: 2px solid #b22222;
+            box-shadow: 0 0 20px rgba(178, 34, 34, 0.3);
+        }
+        .doom-container.fullscreen .doom-wrapper {
+            max-width: none;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: auto;
+            border: none;
+        }
+        .doom-canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+        #doom-canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .doom-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #b22222;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        .doom-loading-bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border: 1px solid #b22222;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .doom-loading-progress {
+            height: 100%;
+            background: #b22222;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .doom-instructions {
+            margin-top: 10px;
+            color: #888;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .doom-container.fullscreen .doom-instructions {
+            display: none;
+        }
+        
         /* Eliza Container - window mode like games */
         .eliza-container {
             position: absolute;
@@ -3010,6 +3201,30 @@
                 <div class="life-instructions">CLICK TO TOGGLE CELLS • PRESS ESC TO EXIT</div>
             </div>
             
+            <!-- Doom Container -->
+            <div class="doom-container" id="doom-container">
+                <div class="doom-header">
+                    <div class="doom-title">D O O M</div>
+                    <div class="doom-controls">
+                        <button class="doom-ctrl-btn" id="doom-fullscreen" title="Toggle Fullscreen (F)">⛶ FULLSCREEN</button>
+                        <button class="doom-ctrl-btn" id="doom-close" title="Close (ESC)">✕ CLOSE</button>
+                    </div>
+                </div>
+                <div class="doom-wrapper">
+                    <div class="doom-canvas-container">
+                        <canvas id="doom-canvas"></canvas>
+                    </div>
+                    <div class="doom-loading" id="doom-loading">
+                        <div>LOADING DOOM...</div>
+                        <div class="doom-loading-bar">
+                            <div class="doom-loading-progress" id="doom-progress"></div>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 0.8rem;">SHAREWARE VERSION</div>
+                    </div>
+                </div>
+                <div class="doom-instructions">WASD/ARROWS: MOVE • MOUSE: AIM • CLICK: SHOOT • E: USE • ESC: MENU</div>
+            </div>
+            
             <div class="main-display hidden-panel">
                 <div class="title">CURRENT CONDITION</div>
                 <div class="clock" id="clock">--:--:--</div>
@@ -3044,6 +3259,11 @@
             <!-- Conway's Game of Life Button -->
             <button class="life-btn" id="life-btn" title="Conway's Game of Life (L)">
                 <span class="life-icon">🧬</span>
+            </button>
+            
+            <!-- Doom Button (Desktop Only) -->
+            <button class="doom-btn" id="doom-btn" title="Play DOOM (D)">
+                <span class="doom-icon">💀</span>
             </button>
             
             <!-- View Toggle Button -->
@@ -3118,6 +3338,10 @@
                     
                     <div class="info-section">
                         <p><span class="info-icon">🎮</span> <strong>Easter Eggs:</strong> There are hidden surprises throughout the app. Try different keyboard shortcuts, explore the color themes, and see what you can discover...</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <p><span class="info-icon">💀</span> <strong>DOOM:</strong> Play DOOM Shareware in your browser! Powered by <a href="https://js-dos.com" target="_blank">js-dos</a>, a JavaScript DOS emulator. DOOM is a registered trademark of <a href="https://bethesda.net" target="_blank">id Software / Bethesda</a>. Desktop only.</p>
                     </div>
                     
                     <div class="info-section">
@@ -7188,6 +7412,161 @@
             });
         }
         
+        // Doom game state
+        let doomActive = false;
+        let doomLoaded = false;
+        let doomInstance = null;
+        let doomFullscreen = false;
+        
+        function toggleDoom() {
+            doomActive = !doomActive;
+            
+            const doomContainer = document.getElementById('doom-container');
+            const doomBtn = document.getElementById('doom-btn');
+            const mainDisplay = document.querySelector('.main-display');
+            
+            // Close other overlays
+            if (doomActive) {
+                if (gameActive) toggleGame();
+                if (illusionActive) toggleIllusion();
+                if (elizaActive) toggleEliza();
+                if (lifeActive) toggleLife();
+            }
+            
+            if (doomActive) {
+                if (doomContainer) doomContainer.classList.add('active');
+                if (doomBtn) doomBtn.classList.add('active');
+                if (mainDisplay) mainDisplay.classList.add('hidden-panel');
+                
+                if (!doomLoaded) {
+                    loadDoom();
+                }
+            } else {
+                if (doomContainer) {
+                    doomContainer.classList.remove('active');
+                    doomContainer.classList.remove('fullscreen');
+                }
+                if (doomBtn) doomBtn.classList.remove('active');
+                if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
+                doomFullscreen = false;
+            }
+        }
+        
+        function toggleDoomFullscreen() {
+            const doomContainer = document.getElementById('doom-container');
+            if (!doomContainer) return;
+            
+            doomFullscreen = !doomFullscreen;
+            
+            if (doomFullscreen) {
+                doomContainer.classList.add('fullscreen');
+            } else {
+                doomContainer.classList.remove('fullscreen');
+            }
+        }
+        
+        async function loadDoom() {
+            const loadingEl = document.getElementById('doom-loading');
+            const progressEl = document.getElementById('doom-progress');
+            const canvasContainer = document.querySelector('.doom-canvas-container');
+            
+            try {
+                // Show loading
+                if (loadingEl) loadingEl.style.display = 'block';
+                if (progressEl) progressEl.style.width = '10%';
+                
+                // Create a new div for js-dos
+                const dosContainer = document.createElement('div');
+                dosContainer.id = 'jsdos';
+                dosContainer.style.cssText = 'width: 100%; height: 100%; position: absolute; top: 0; left: 0;';
+                if (canvasContainer) {
+                    canvasContainer.innerHTML = '';
+                    canvasContainer.appendChild(dosContainer);
+                }
+                
+                if (progressEl) progressEl.style.width = '30%';
+                
+                // Set path prefix for wasm files to load from js-dos CDN
+                if (typeof emulators !== 'undefined') {
+                    emulators.pathPrefix = '/js-dos/';
+                }
+                
+                // Use js-dos v7 API - Dos() returns an object with run() method
+                const dos = Dos(dosContainer);
+                
+                if (progressEl) progressEl.style.width = '50%';
+                
+                // DOOM shareware bundle served locally (CORS-free)
+                const bundleUrl = "/doom.jsdos";
+                
+                dos.run(bundleUrl).then((ci) => {
+                    doomInstance = ci;
+                    doomLoaded = true;
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (progressEl) progressEl.style.width = '100%';
+                }).catch((err) => {
+                    console.error('Failed to load DOOM:', err);
+                    if (loadingEl) {
+                        loadingEl.innerHTML = '<div style="color: #ff6666;">FAILED TO LOAD DOOM</div><div style="font-size: 0.8rem; margin-top: 10px;">Check console for details</div>';
+                    }
+                });
+                
+            } catch (err) {
+                console.error('Error initializing DOOM:', err);
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<div style="color: #ff6666;">ERROR LOADING DOOM</div>';
+                }
+            }
+        }
+        
+        function initDoom() {
+            const doomBtn = document.getElementById('doom-btn');
+            if (doomBtn) {
+                doomBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDoom();
+                });
+            }
+            
+            const fullscreenBtn = document.getElementById('doom-fullscreen');
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDoomFullscreen();
+                });
+            }
+            
+            const closeBtn = document.getElementById('doom-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDoom();
+                });
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                // 'D' to toggle Doom (only if not in game or other overlay)
+                if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !gameActive && !illusionActive && !elizaActive && !lifeActive) {
+                    toggleDoom();
+                    e.preventDefault();
+                }
+                
+                // 'F' to toggle fullscreen when Doom is active
+                if ((e.key === 'f' || e.key === 'F') && doomActive && !e.ctrlKey && !e.metaKey) {
+                    toggleDoomFullscreen();
+                    e.preventDefault();
+                }
+                
+                // Escape to close Doom (but not when in fullscreen, let the game handle it)
+                if (e.key === 'Escape' && doomActive && !doomFullscreen) {
+                    toggleDoom();
+                }
+            });
+        }
+        
         function initIllusions() {
             const illusionBtn = document.getElementById('illusion-btn');
             if (illusionBtn) {
@@ -7339,6 +7718,7 @@
         initIllusions();
         initEliza();
         initLife();
+        initDoom();
         initGlobe();
         initLocationTracking();
         updateClock();
