@@ -5530,10 +5530,10 @@
                 
                 // Theta goes around the tube, phi goes around the torus
                 // Use smaller steps for denser rendering
-                for (let theta = 0; theta < 6.28; theta += 0.02) {
+                for (let theta = 0; theta < 6.28; theta += 0.01) {
                     const cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
                     
-                    for (let phi = 0; phi < 6.28; phi += 0.007) {
+                    for (let phi = 0; phi < 6.28; phi += 0.003) {
                         const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
                         
                         // 3D coordinates of a point on the torus
