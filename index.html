@@ -6,6 +6,7 @@
     <title>Current Condition</title>
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://unpkg.com/three@0.160.0/build/three.min.js'></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -1910,6 +1911,19 @@
             display: none;
         }
         
+        /* Hide CRT effects in illusion mode for clear viewing */
+        body.illusion-mode .scanlines,
+        body.illusion-mode .flicker,
+        body.illusion-mode .static-noise,
+        body.illusion-mode .glitch-line,
+        body.illusion-mode .zap {
+            display: none !important;
+        }
+        
+        body.illusion-mode .crt-container::before {
+            display: none !important;
+        }
+        
         /* AQI badge in HDR mode */
         body.hdr-mode .aqi-badge {
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
@@ -2791,6 +2805,10 @@
                     
                     <div class="info-section">
                         <p><span class="info-icon">🎧</span> <strong>Music:</strong> <span id="modal-music-info">Streaming live from <a href="https://plaza.one" target="_blank">Nightwave Plaza</a> — 24/7 vaporwave radio.</span></p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <p><span class="info-icon">👁️</span> <strong>Optical Illusions:</strong> Press I to view the chromostereopsis torus illusion. Inspired by <a href="https://bigjobby.com/toys/torus" target="_blank">BigJobby's Torus</a>.</p>
                     </div>
                     
                     <div class="info-section">
@@ -5492,142 +5510,201 @@
             }
         }
         
-        // Torus renderer
+        // Three.js Torus renderer
         let torusAnimationId = null;
+        let torusScene = null;
+        let torusCamera = null;
+        let torusRenderer = null;
+        let torusMesh = null;
+        let torusAutoRotate = true;
+        let torusDragMode = false;
+        let torusLastX = 0, torusLastY = 0;
         
         function renderTorus() {
             const canvas = document.getElementById('torus-canvas');
             if (!canvas) return;
             
-            // Size canvas to fill container
             const container = canvas.parentElement;
             const rect = container.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            const width = rect.width;
+            const height = rect.height;
             
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
+            // Initialize Three.js scene
+            torusScene = new THREE.Scene();
+            torusCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
             
-            // Create coarse background with blue/black noise (4x4 pixel blocks)
-            const blockSize = 4;
-            const bgData = ctx.createImageData(width, height);
-            for (let by = 0; by < height; by += blockSize) {
-                for (let bx = 0; bx < width; bx += blockSize) {
-                    const isBlue = Math.random() > 0.5;
-                    const blue = isBlue ? 255 : 0;
-                    for (let dy = 0; dy < blockSize && by + dy < height; dy++) {
-                        for (let dx = 0; dx < blockSize && bx + dx < width; dx++) {
-                            const i = ((by + dy) * width + (bx + dx)) * 4;
-                            bgData.data[i] = 0;
-                            bgData.data[i + 1] = 0;
-                            bgData.data[i + 2] = blue;
-                            bgData.data[i + 3] = 255;
-                        }
-                    }
+            torusRenderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true,
+                powerPreference: 'high-performance'
+            });
+            torusRenderer.setClearColor(0x000000, 1);
+            torusRenderer.setSize(width, height);
+            torusRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            // Shader uniforms
+            const baseUniforms = {
+                uColor: { value: new THREE.Color(1, 0, 0) },
+                uIntensity: { value: 1.0 },
+                uPixSize: { value: 188.0 },
+                uProb: { value: 0.6 },
+                uJitter: { value: new THREE.Vector2(0.013, 0.027) },
+                uLightDir: { value: new THREE.Vector3(0.4, 0.3, 0.85).normalize() },
+                uSpecPow: { value: 32.0 },
+                uSpecStr: { value: 0.4 }
+            };
+            
+            const vertexShader = `
+                precision highp float;
+                varying vec2 vUv;
+                varying vec3 vNw;
+                varying vec3 vPw;
+                void main() {
+                    vUv = uv;
+                    vec4 worldPos = modelMatrix * vec4(position, 1.0);
+                    vPw = worldPos.xyz;
+                    vNw = normalize(mat3(modelMatrix) * normal);
+                    gl_Position = projectionMatrix * viewMatrix * worldPos;
                 }
+            `;
+            
+            const fragmentShader = `
+                precision highp float;
+                varying vec2 vUv;
+                varying vec3 vNw;
+                varying vec3 vPw;
+                uniform vec3 uColor;
+                uniform float uIntensity;
+                uniform float uPixSize;
+                uniform float uProb;
+                uniform vec2 uJitter;
+                uniform vec3 uLightDir;
+                uniform float uSpecPow;
+                uniform float uSpecStr;
+                
+                float hash12(vec2 p) {
+                    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+                    p3 += dot(p3, p3.yzx + 33.33);
+                    return fract((p3.x + p3.y) * p3.z);
+                }
+                
+                void main() {
+                    vec2 uv = vUv + uJitter;
+                    vec2 cell = floor(uv * uPixSize);
+                    float r = hash12(cell);
+                    float keep = step(uProb, r);
+                    
+                    if (keep < 0.5) {
+                        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                        return;
+                    }
+                    
+                    vec3 col = uColor * uIntensity;
+                    vec3 N = normalize(vNw);
+                    vec3 L = normalize(uLightDir);
+                    vec3 V = normalize(cameraPosition - vPw);
+                    vec3 H = normalize(L + V);
+                    float spec = pow(max(dot(N, H), 0.0), max(1.0, uSpecPow)) * uSpecStr;
+                    vec3 outCol = clamp(col + vec3(1.0) * spec, 0.0, 1.0);
+                    gl_FragColor = vec4(outCol, 1.0);
+                }
+            `;
+            
+            // Create materials
+            function makeMat(rgb, jitterVec2) {
+                const uniforms = THREE.UniformsUtils.clone(baseUniforms);
+                uniforms.uColor.value.setRGB(rgb[0], rgb[1], rgb[2]);
+                uniforms.uJitter.value.copy(jitterVec2);
+                return new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader });
             }
             
-            // Pre-generate noise pattern for torus (seeded by position)
-            const noiseSize = 256;
-            const torusNoise = new Array(noiseSize * noiseSize);
-            for (let i = 0; i < torusNoise.length; i++) {
-                torusNoise[i] = Math.random() > 0.5;
+            const redMat = makeMat([1, 0, 0], new THREE.Vector2(0.013, 0.027));
+            const blueMat = makeMat([0, 0, 1], new THREE.Vector2(0.173, 0.419));
+            blueMat.uniforms.uPixSize.value = 1200;
+            blueMat.uniforms.uIntensity.value = 0.88;
+            
+            // Create torus
+            const R = 1.55, r = 0.60;
+            const torusGeo = new THREE.TorusGeometry(R, r, 80, 220);
+            torusMesh = new THREE.Mesh(torusGeo, redMat);
+            torusScene.add(torusMesh);
+            
+            // Create background plane
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), blueMat);
+            plane.position.z = -14;
+            torusScene.add(plane);
+            
+            // Position camera
+            const boundingRadius = R + r;
+            const fitPadding = 1.8;  // Larger = smaller torus on screen
+            const vFov = THREE.MathUtils.degToRad(torusCamera.fov);
+            const dist = (boundingRadius * fitPadding) / Math.tan(vFov * 0.5);
+            torusCamera.position.set(0, 0, dist);
+            torusCamera.lookAt(0, 0, 0);
+            
+            // Drag interaction
+            function onPointerDown(e) {
+                if (!illusionActive) return;
+                torusDragMode = true;
+                torusAutoRotate = false;
+                torusLastX = e.clientX || (e.touches && e.touches[0].clientX);
+                torusLastY = e.clientY || (e.touches && e.touches[0].clientY);
+                canvas.style.cursor = 'grabbing';
             }
             
-            let A = 0, B = 0;
+            function onPointerMove(e) {
+                if (!torusDragMode || !illusionActive) return;
+                const x = e.clientX || (e.touches && e.touches[0].clientX);
+                const y = e.clientY || (e.touches && e.touches[0].clientY);
+                if (x == null || y == null) return;
+                
+                const dx = x - torusLastX;
+                const dy = y - torusLastY;
+                const s = 0.009;
+                
+                torusMesh.rotation.y += dx * s;
+                torusMesh.rotation.x += dy * s;
+                
+                torusLastX = x;
+                torusLastY = y;
+            }
             
-            function frame() {
+            function onPointerUp() {
+                torusDragMode = false;
+                torusAutoRotate = true;
+                canvas.style.cursor = '';
+            }
+            
+            canvas.addEventListener('pointerdown', onPointerDown);
+            canvas.addEventListener('pointermove', onPointerMove);
+            canvas.addEventListener('pointerup', onPointerUp);
+            canvas.addEventListener('pointercancel', onPointerUp);
+            canvas.addEventListener('pointerleave', onPointerUp);
+            
+            // Animation
+            let lastTime = performance.now();
+            
+            function animate(now) {
                 if (!illusionActive) {
                     torusAnimationId = null;
                     return;
                 }
                 
-                // Draw background
-                ctx.putImageData(bgData, 0, 0);
+                const dt = Math.min(0.05, (now - lastTime) / 1000);
+                lastTime = now;
                 
-                const zbuffer = new Array(width * height).fill(0);
-                const output = new Array(width * height).fill(null);
-                
-                const R1 = 1;      // Radius of the tube
-                const R2 = 2;      // Distance from center of torus to center of tube
-                const K2 = 7;      // Distance from viewer (larger = smaller torus)
-                const K1 = width * K2 * 3 / (8 * (R1 + R2));
-                
-                const cosA = Math.cos(A), sinA = Math.sin(A);
-                const cosB = Math.cos(B), sinB = Math.sin(B);
-                
-                // Theta goes around the tube, phi goes around the torus
-                // Very small steps to ensure solid fill
-                for (let theta = 0; theta < 6.28; theta += 0.004) {
-                    const cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
-                    
-                    for (let phi = 0; phi < 6.28; phi += 0.002) {
-                        const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
-                        
-                        // 3D coordinates of a point on the torus
-                        const circleX = R2 + R1 * cosTheta;
-                        const circleY = R1 * sinTheta;
-                        
-                        // Final 3D coordinates after rotation
-                        const x = circleX * (cosB * cosPhi + sinA * sinB * sinPhi) - circleY * cosA * sinB;
-                        const y = circleX * (sinB * cosPhi - sinA * cosB * sinPhi) + circleY * cosA * cosB;
-                        const z = K2 + cosA * circleX * sinPhi + circleY * sinA;
-                        const ooz = 1 / z;
-                        
-                        // Project to 2D
-                        const xp = Math.floor(width / 2 + K1 * ooz * x);
-                        const yp = Math.floor(height / 2 - K1 * ooz * y);
-                        
-                        if (xp >= 0 && xp < width && yp >= 0 && yp < height) {
-                            const idx = xp + yp * width;
-                            
-                            if (ooz > zbuffer[idx]) {
-                                zbuffer[idx] = ooz;
-                                
-                                // Noise pattern based on UV coordinates (coarse blocks)
-                                const u = Math.floor(theta * 6) % noiseSize;
-                                const v = Math.floor(phi * 6) % noiseSize;
-                                const isRed = torusNoise[u * noiseSize + v];
-                                
-                                // Luminance for shading
-                                const L = cosPhi * cosTheta * sinB - cosA * cosTheta * sinPhi - sinA * sinTheta + cosB * (cosA * sinTheta - cosTheta * sinA * sinPhi);
-                                
-                                output[idx] = { isRed, L: L > 0 ? L : 0.1 };
-                            }
-                        }
-                    }
+                if (torusAutoRotate) {
+                    // Slow rotation
+                    torusMesh.rotation.x += 0.12 * dt;
+                    torusMesh.rotation.y += 0.20 * dt;
+                    torusMesh.rotation.z += 0.03 * dt;
                 }
                 
-                // Draw torus pixels - completely opaque
-                const imageData = ctx.getImageData(0, 0, width, height);
-                for (let i = 0; i < output.length; i++) {
-                    if (output[i] !== null) {
-                        const px = i * 4;
-                        if (output[i].isRed) {
-                            // Red with shading
-                            const brightness = Math.floor(100 + output[i].L * 155);
-                            imageData.data[px] = brightness;
-                            imageData.data[px + 1] = 0;
-                            imageData.data[px + 2] = 0;
-                        } else {
-                            // Black
-                            imageData.data[px] = 0;
-                            imageData.data[px + 1] = 0;
-                            imageData.data[px + 2] = 0;
-                        }
-                        imageData.data[px + 3] = 255; // Fully opaque
-                    }
-                }
-                ctx.putImageData(imageData, 0, 0);
-                
-                A += 0.04;
-                B += 0.02;
-                
-                torusAnimationId = requestAnimationFrame(frame);
+                torusRenderer.render(torusScene, torusCamera);
+                torusAnimationId = requestAnimationFrame(animate);
             }
             
-            frame();
+            torusAnimationId = requestAnimationFrame(animate);
         }
         
         function stopTorus() {
@@ -5635,6 +5712,15 @@
                 cancelAnimationFrame(torusAnimationId);
                 torusAnimationId = null;
             }
+            if (torusRenderer) {
+                torusRenderer.dispose();
+                torusRenderer = null;
+            }
+            torusScene = null;
+            torusCamera = null;
+            torusMesh = null;
+            torusAutoRotate = true;
+            torusDragMode = false;
         }
         
         function toggleIllusion() {
@@ -5649,15 +5735,23 @@
             const mainDisplay = document.querySelector('.main-display');
             const illusionBtn = document.getElementById('illusion-btn');
             
+            const scanlines = document.querySelector('.scanlines');
+            const flicker = document.querySelector('.flicker');
+            const crtContainer = document.querySelector('.crt-container');
+            
             if (illusionActive) {
                 illusionContainer.classList.add('active');
                 if (mainDisplay) mainDisplay.classList.add('hidden-panel');
                 if (illusionBtn) illusionBtn.classList.add('active');
+                // Disable CRT effects for clear illusion viewing
+                document.body.classList.add('illusion-mode');
                 renderTorus();
             } else {
                 illusionContainer.classList.remove('active');
                 if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
                 if (illusionBtn) illusionBtn.classList.remove('active');
+                // Re-enable CRT effects
+                document.body.classList.remove('illusion-mode');
                 stopTorus();
             }
         }
