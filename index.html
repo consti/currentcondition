@@ -2712,7 +2712,7 @@
                 <div class="chromostereopsis-scene">
                     <canvas id="torus-canvas" width="500" height="500"></canvas>
                 </div>
-                <div class="illusion-instructions">RED APPEARS CLOSER, BLUE APPEARS FARTHER - PRESS I TO CLOSE</div>
+                <div class="illusion-instructions" id="illusion-instructions">RED APPEARS CLOSER, BLUE APPEARS FARTHER</div>
             </div>
             
             <div class="main-display hidden-panel">
@@ -5509,7 +5509,7 @@
         }
         
         // Illusion system
-        const ILLUSIONS = ['TORUS', 'SPHERE', 'PYRAMID', 'CUBE'];
+        const ILLUSIONS = ['TORUS', 'SPHERE', 'PYRAMID', 'CUBE', 'KNOT', 'PENROSE', 'CAFE_WALL', 'SPINNING_RINGS', 'FRACTAL'];
         let currentIllusionIndex = 0;
         
         // Three.js renderer shared state
@@ -5531,9 +5531,25 @@
             const width = rect.width;
             const height = rect.height;
             
-            // Update title
+            // Update title and instructions
             const titleEl = document.getElementById('illusion-title');
-            if (titleEl) titleEl.textContent = ILLUSIONS[currentIllusionIndex];
+            const instructionsEl = document.getElementById('illusion-instructions');
+            const illusionName = ILLUSIONS[currentIllusionIndex];
+            if (titleEl) titleEl.textContent = illusionName.replace('_', ' ');
+            
+            // Set instructions based on illusion type
+            const instructions = {
+                'TORUS': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
+                'SPHERE': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
+                'PYRAMID': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
+                'CUBE': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
+                'KNOT': 'RED APPEARS CLOSER, BLUE APPEARS FARTHER',
+                'PENROSE': 'IMPOSSIBLE GEOMETRY - ROTATING TRIANGULAR ILLUSION',
+                'CAFE_WALL': 'PARALLEL LINES APPEAR TILTED',
+                'SPINNING_RINGS': 'CONCENTRIC RINGS CREATE DEPTH MOTION',
+                'FRACTAL': 'INFINITE MANDELBROT ZOOM'
+            };
+            if (instructionsEl) instructionsEl.textContent = instructions[illusionName] || '';
             
             // Initialize Three.js scene
             illusionScene = new THREE.Scene();
@@ -5632,6 +5648,8 @@
             // Create geometry based on current illusion
             let boundingRadius;
             const illusionType = ILLUSIONS[currentIllusionIndex];
+            let is2DIllusion = false;
+            let isFractal = false;
             
             if (illusionType === 'TORUS') {
                 const R = 1.2, r = 0.45;
@@ -5651,21 +5669,238 @@
                 const geo = new THREE.BoxGeometry(1.8, 1.8, 1.8, 1, 1, 1);
                 illusionMesh = new THREE.Mesh(geo, redMat);
                 boundingRadius = 1.6;
+            } else if (illusionType === 'KNOT') {
+                const geo = new THREE.TorusKnotGeometry(1.0, 0.35, 100, 16);
+                illusionMesh = new THREE.Mesh(geo, redMat);
+                boundingRadius = 1.8;
+            } else if (illusionType === 'PENROSE' || illusionType === 'CAFE_WALL' || illusionType === 'SPINNING_RINGS') {
+                is2DIllusion = true;
+                boundingRadius = 2.0;
+            } else if (illusionType === 'FRACTAL') {
+                isFractal = true;
+                boundingRadius = 2.0;
             }
             
-            illusionScene.add(illusionMesh);
+            // Handle 2D illusions with fullscreen shader
+            if (is2DIllusion) {
+                const illusion2DShader = {
+                    uniforms: {
+                        uTime: { value: 0.0 },
+                        uResolution: { value: new THREE.Vector2(width, height) },
+                        uIllusionType: { value: illusionType === 'PENROSE' ? 0 : (illusionType === 'CAFE_WALL' ? 1 : 2) }
+                    },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        precision highp float;
+                        varying vec2 vUv;
+                        uniform float uTime;
+                        uniform vec2 uResolution;
+                        uniform int uIllusionType;
+                        
+                        #define PI 3.14159265359
+                        
+                        // Penrose Triangle illusion
+                        vec3 penrose(vec2 uv) {
+                            vec2 p = (uv - 0.5) * 2.0;
+                            float angle = atan(p.y, p.x) + uTime * 0.3;
+                            float r = length(p);
+                            
+                            // Create impossible triangle pattern
+                            float sides = 3.0;
+                            float a = mod(angle + PI, 2.0 * PI / sides) - PI / sides;
+                            float d = cos(a) * r;
+                            
+                            float stripe = sin(d * 20.0 - uTime * 2.0) * 0.5 + 0.5;
+                            float depth = sin(angle * 3.0 + uTime) * 0.5 + 0.5;
+                            
+                            vec3 col1 = vec3(1.0, 0.0, 0.0); // Red
+                            vec3 col2 = vec3(0.0, 0.0, 1.0); // Blue
+                            
+                            float mask = smoothstep(0.3, 0.35, r) * smoothstep(0.9, 0.85, r);
+                            vec3 color = mix(col2, col1, stripe * depth) * mask;
+                            
+                            return color;
+                        }
+                        
+                        // Café Wall illusion
+                        vec3 cafeWall(vec2 uv) {
+                            float rows = 8.0;
+                            float cols = 12.0;
+                            
+                            float y = uv.y * rows;
+                            float row = floor(y);
+                            float offset = mod(row, 2.0) * 0.5 + sin(uTime * 0.5 + row * 0.5) * 0.1;
+                            float x = uv.x * cols + offset;
+                            
+                            float checker = mod(floor(x) + floor(y), 2.0);
+                            
+                            // Add mortar lines that create the illusion
+                            float mortarY = abs(fract(y) - 0.5);
+                            float mortarX = abs(fract(x) - 0.5);
+                            float mortar = smoothstep(0.48, 0.5, mortarY) + smoothstep(0.48, 0.5, mortarX);
+                            
+                            vec3 col1 = vec3(1.0, 0.0, 0.0);
+                            vec3 col2 = vec3(0.0, 0.0, 1.0);
+                            vec3 mortarCol = vec3(0.3, 0.0, 0.3);
+                            
+                            vec3 color = mix(col2, col1, checker);
+                            color = mix(color, mortarCol, clamp(mortar, 0.0, 1.0));
+                            
+                            return color;
+                        }
+                        
+                        // Spinning Rings illusion
+                        vec3 spinningRings(vec2 uv) {
+                            vec2 p = (uv - 0.5) * 2.0;
+                            float r = length(p);
+                            float angle = atan(p.y, p.x);
+                            
+                            float rings = 0.0;
+                            for (float i = 0.0; i < 6.0; i++) {
+                                float ringR = 0.15 + i * 0.13;
+                                float ringWidth = 0.04;
+                                float spin = uTime * (1.0 + i * 0.3) * (mod(i, 2.0) == 0.0 ? 1.0 : -1.0);
+                                float wave = sin(angle * (6.0 + i * 2.0) + spin) * 0.03;
+                                float ring = smoothstep(ringWidth, 0.0, abs(r - ringR - wave));
+                                rings = max(rings, ring * (mod(i, 2.0) == 0.0 ? 1.0 : -1.0));
+                            }
+                            
+                            vec3 col1 = vec3(1.0, 0.0, 0.0);
+                            vec3 col2 = vec3(0.0, 0.0, 1.0);
+                            
+                            vec3 color = rings > 0.0 ? col1 * rings : col2 * abs(rings);
+                            color += vec3(0.0, 0.0, 0.2) * (1.0 - smoothstep(0.0, 1.0, r));
+                            
+                            return color;
+                        }
+                        
+                        void main() {
+                            vec3 color;
+                            if (uIllusionType == 0) {
+                                color = penrose(vUv);
+                            } else if (uIllusionType == 1) {
+                                color = cafeWall(vUv);
+                            } else {
+                                color = spinningRings(vUv);
+                            }
+                            gl_FragColor = vec4(color, 1.0);
+                        }
+                    `
+                };
+                
+                const quadGeo = new THREE.PlaneGeometry(2, 2);
+                const quadMat = new THREE.ShaderMaterial(illusion2DShader);
+                illusionMesh = new THREE.Mesh(quadGeo, quadMat);
+                illusionScene.add(illusionMesh);
+                
+                illusionCamera.position.set(0, 0, 1);
+                illusionCamera.lookAt(0, 0, 0);
+            } else if (isFractal) {
+                // Fractal fly-through using fullscreen shader
+                const fractalShader = {
+                    uniforms: {
+                        uTime: { value: 0.0 },
+                        uResolution: { value: new THREE.Vector2(width, height) }
+                    },
+                    vertexShader: `
+                        varying vec2 vUv;
+                        void main() {
+                            vUv = uv;
+                            gl_Position = vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        precision highp float;
+                        varying vec2 vUv;
+                        uniform float uTime;
+                        uniform vec2 uResolution;
+                        
+                        #define MAX_ITER 100
+                        
+                        vec3 palette(float t) {
+                            vec3 a = vec3(0.5, 0.0, 0.5);
+                            vec3 b = vec3(0.5, 0.0, 0.5);
+                            vec3 c = vec3(1.0, 0.0, 1.0);
+                            vec3 d = vec3(0.0, 0.33, 0.67);
+                            return a + b * cos(6.28318 * (c * t + d));
+                        }
+                        
+                        void main() {
+                            vec2 uv = (vUv - 0.5) * 2.0;
+                            uv.x *= uResolution.x / uResolution.y;
+                            
+                            // Zoom and pan animation for fly-through effect
+                            float zoom = pow(1.5, mod(uTime * 0.8, 30.0));
+                            vec2 center = vec2(-0.7435669, 0.1314023); // Interesting Mandelbrot location
+                            
+                            // Spiral towards the center
+                            float spiralAngle = uTime * 0.2;
+                            center += vec2(cos(spiralAngle), sin(spiralAngle)) * 0.1 / zoom;
+                            
+                            vec2 c = uv / zoom + center;
+                            vec2 z = vec2(0.0);
+                            
+                            float iter = 0.0;
+                            for (int i = 0; i < MAX_ITER; i++) {
+                                if (dot(z, z) > 4.0) break;
+                                z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+                                iter += 1.0;
+                            }
+                            
+                            // Smooth coloring
+                            float smoothIter = iter;
+                            if (iter < float(MAX_ITER)) {
+                                float log_zn = log(dot(z, z)) / 2.0;
+                                float nu = log(log_zn / log(2.0)) / log(2.0);
+                                smoothIter = iter + 1.0 - nu;
+                            }
+                            
+                            float t = smoothIter / float(MAX_ITER);
+                            vec3 color = palette(t + uTime * 0.1);
+                            
+                            // Red/blue chromatic depth effect
+                            float depth = sin(smoothIter * 0.5 + uTime) * 0.5 + 0.5;
+                            color = mix(vec3(0.0, 0.0, color.b + 0.3), vec3(color.r + 0.3, 0.0, 0.0), depth);
+                            
+                            if (iter >= float(MAX_ITER)) {
+                                color = vec3(0.0);
+                            }
+                            
+                            gl_FragColor = vec4(color, 1.0);
+                        }
+                    `
+                };
+                
+                const quadGeo = new THREE.PlaneGeometry(2, 2);
+                const quadMat = new THREE.ShaderMaterial(fractalShader);
+                illusionMesh = new THREE.Mesh(quadGeo, quadMat);
+                illusionScene.add(illusionMesh);
+                
+                illusionCamera.position.set(0, 0, 1);
+                illusionCamera.lookAt(0, 0, 0);
+            } else {
+                illusionScene.add(illusionMesh);
+                
+                // Create background plane
+                const plane = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), blueMat);
+                plane.position.z = -14;
+                illusionScene.add(plane);
+            }
             
-            // Create background plane
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), blueMat);
-            plane.position.z = -14;
-            illusionScene.add(plane);
-            
-            // Position camera
-            const fitPadding = 1.8;
-            const vFov = THREE.MathUtils.degToRad(illusionCamera.fov);
-            const dist = (boundingRadius * fitPadding) / Math.tan(vFov * 0.5);
-            illusionCamera.position.set(0, 0, dist);
-            illusionCamera.lookAt(0, 0, 0);
+            // Position camera for 3D illusions
+            if (!is2DIllusion && !isFractal) {
+                const fitPadding = 1.8;
+                const vFov = THREE.MathUtils.degToRad(illusionCamera.fov);
+                const dist = (boundingRadius * fitPadding) / Math.tan(vFov * 0.5);
+                illusionCamera.position.set(0, 0, dist);
+                illusionCamera.lookAt(0, 0, 0);
+            }
             
             // Drag interaction
             function onPointerDown(e) {
@@ -5708,6 +5943,7 @@
             
             // Animation
             let lastTime = performance.now();
+            let illusionStartTime = performance.now();
             
             function animate(now) {
                 if (!illusionActive) {
@@ -5716,9 +5952,14 @@
                 }
                 
                 const dt = Math.min(0.05, (now - lastTime) / 1000);
+                const elapsed = (now - illusionStartTime) / 1000;
                 lastTime = now;
                 
-                if (illusionAutoRotate) {
+                // Update time uniform for shader-based illusions
+                if (illusionMesh && illusionMesh.material && illusionMesh.material.uniforms && illusionMesh.material.uniforms.uTime) {
+                    illusionMesh.material.uniforms.uTime.value = elapsed;
+                } else if (illusionAutoRotate && illusionMesh) {
+                    // 3D object rotation
                     illusionMesh.rotation.x += 0.25 * dt;
                     illusionMesh.rotation.y += 0.40 * dt;
                     illusionMesh.rotation.z += 0.08 * dt;
