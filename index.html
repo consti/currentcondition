@@ -2292,28 +2292,34 @@
         }
         
         .illusion-title {
+            position: absolute;
+            top: 20px;
             font-size: 1.2rem;
-            margin-bottom: 20px;
             letter-spacing: 4px;
             color: #ffffff;
+            z-index: 10;
         }
         
         .illusion-instructions {
+            position: absolute;
+            bottom: 20px;
             font-size: 0.9rem;
-            margin-top: 20px;
             color: #888888;
+            z-index: 10;
         }
         
         /* Chromostereopsis Scene */
         .chromostereopsis-scene {
-            width: 500px;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
         
         #torus-canvas {
+            width: 100%;
+            height: 100%;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
@@ -5492,6 +5498,13 @@
         function renderTorus() {
             const canvas = document.getElementById('torus-canvas');
             if (!canvas) return;
+            
+            // Size canvas to fill container
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
             const ctx = canvas.getContext('2d');
             const width = canvas.width;
             const height = canvas.height;
