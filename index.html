@@ -5496,14 +5496,30 @@
             const width = canvas.width;
             const height = canvas.height;
             
-            // Create background with blue/black noise
+            // Create coarse background with blue/black noise (4x4 pixel blocks)
+            const blockSize = 4;
             const bgData = ctx.createImageData(width, height);
-            for (let i = 0; i < bgData.data.length; i += 4) {
-                const isBlue = Math.random() > 0.5;
-                bgData.data[i] = 0;                    // R
-                bgData.data[i + 1] = 0;                // G
-                bgData.data[i + 2] = isBlue ? 255 : 0; // B
-                bgData.data[i + 3] = 255;              // A
+            for (let by = 0; by < height; by += blockSize) {
+                for (let bx = 0; bx < width; bx += blockSize) {
+                    const isBlue = Math.random() > 0.5;
+                    const blue = isBlue ? 255 : 0;
+                    for (let dy = 0; dy < blockSize && by + dy < height; dy++) {
+                        for (let dx = 0; dx < blockSize && bx + dx < width; dx++) {
+                            const i = ((by + dy) * width + (bx + dx)) * 4;
+                            bgData.data[i] = 0;
+                            bgData.data[i + 1] = 0;
+                            bgData.data[i + 2] = blue;
+                            bgData.data[i + 3] = 255;
+                        }
+                    }
+                }
+            }
+            
+            // Pre-generate noise pattern for torus (seeded by position)
+            const noiseSize = 256;
+            const torusNoise = new Array(noiseSize * noiseSize);
+            for (let i = 0; i < torusNoise.length; i++) {
+                torusNoise[i] = Math.random() > 0.5;
             }
             
             let A = 0, B = 0;
@@ -5518,7 +5534,7 @@
                 ctx.putImageData(bgData, 0, 0);
                 
                 const zbuffer = new Array(width * height).fill(0);
-                const output = new Array(width * height).fill(-1);
+                const output = new Array(width * height).fill(null);
                 
                 const R1 = 1;      // Radius of the tube
                 const R2 = 2;      // Distance from center of torus to center of tube
@@ -5529,11 +5545,11 @@
                 const cosB = Math.cos(B), sinB = Math.sin(B);
                 
                 // Theta goes around the tube, phi goes around the torus
-                // Use smaller steps for denser rendering
-                for (let theta = 0; theta < 6.28; theta += 0.015) {
+                // Very small steps to ensure solid fill
+                for (let theta = 0; theta < 6.28; theta += 0.004) {
                     const cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
                     
-                    for (let phi = 0; phi < 6.28; phi += 0.005) {
+                    for (let phi = 0; phi < 6.28; phi += 0.002) {
                         const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
                         
                         // 3D coordinates of a point on the torus
@@ -5556,37 +5572,38 @@
                             if (ooz > zbuffer[idx]) {
                                 zbuffer[idx] = ooz;
                                 
-                                // Checkerboard pattern based on theta and phi
-                                const checkerTheta = Math.floor(theta * 4) % 2;
-                                const checkerPhi = Math.floor(phi * 4) % 2;
-                                const isRed = (checkerTheta + checkerPhi) % 2 === 0;
+                                // Noise pattern based on UV coordinates (coarse blocks)
+                                const u = Math.floor(theta * 6) % noiseSize;
+                                const v = Math.floor(phi * 6) % noiseSize;
+                                const isRed = torusNoise[u * noiseSize + v];
                                 
                                 // Luminance for shading
                                 const L = cosPhi * cosTheta * sinB - cosA * cosTheta * sinPhi - sinA * sinTheta + cosB * (cosA * sinTheta - cosTheta * sinA * sinPhi);
                                 
-                                output[idx] = isRed ? (L > 0 ? L : 0.1) : -1; // -1 for black, 0+ for red with luminance
+                                output[idx] = { isRed, L: L > 0 ? L : 0.1 };
                             }
                         }
                     }
                 }
                 
-                // Draw torus pixels
+                // Draw torus pixels - completely opaque
                 const imageData = ctx.getImageData(0, 0, width, height);
                 for (let i = 0; i < output.length; i++) {
-                    if (zbuffer[i] > 0) {
+                    if (output[i] !== null) {
                         const px = i * 4;
-                        if (output[i] >= 0) {
-                            // Red with shading - brighter
-                            const brightness = Math.floor(100 + output[i] * 155);
-                            imageData.data[px] = brightness;     // R
-                            imageData.data[px + 1] = 0;          // G
-                            imageData.data[px + 2] = 0;          // B
+                        if (output[i].isRed) {
+                            // Red with shading
+                            const brightness = Math.floor(100 + output[i].L * 155);
+                            imageData.data[px] = brightness;
+                            imageData.data[px + 1] = 0;
+                            imageData.data[px + 2] = 0;
                         } else {
                             // Black
                             imageData.data[px] = 0;
                             imageData.data[px + 1] = 0;
                             imageData.data[px + 2] = 0;
                         }
+                        imageData.data[px + 3] = 255; // Fully opaque
                     }
                 }
                 ctx.putImageData(imageData, 0, 0);
