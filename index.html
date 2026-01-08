@@ -2517,37 +2517,37 @@
             border-bottom: 1px solid currentColor;
         }
         .eliza-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             letter-spacing: 4px;
         }
         .eliza-subtitle {
-            font-size: 0.7rem;
-            opacity: 0.6;
-            margin-top: 3px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-top: 4px;
         }
         .eliza-chat {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         .eliza-message {
             max-width: 85%;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 8px;
-            font-size: 0.9rem;
-            line-height: 1.3;
+            font-size: 1.1rem;
+            line-height: 1.4;
         }
         .eliza-message.eliza {
             align-self: flex-start;
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(0, 255, 0, 0.08);
             border: 1px solid currentColor;
         }
         .eliza-message.user {
             align-self: flex-end;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #aaa;
         }
@@ -2559,20 +2559,20 @@
         }
         .eliza-input {
             flex: 1;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid currentColor;
+            background: rgba(0, 10, 0, 0.8);
+            border: 1px solid rgba(0, 180, 0, 0.5);
             color: inherit;
-            padding: 8px 12px;
+            padding: 10px 14px;
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             border-radius: 4px;
             outline: none;
         }
         .eliza-input:focus {
-            box-shadow: 0 0 10px currentColor;
+            border-color: currentColor;
         }
         .eliza-input::placeholder {
-            opacity: 0.4;
+            opacity: 0.3;
         }
         .eliza-send {
             background: currentColor;
