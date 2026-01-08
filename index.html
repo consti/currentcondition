@@ -5509,7 +5509,7 @@
         }
         
         // Illusion system
-        const ILLUSIONS = ['TORUS', 'SPHERE'];
+        const ILLUSIONS = ['TORUS', 'SPHERE', 'PYRAMID', 'CUBE'];
         let currentIllusionIndex = 0;
         
         // Three.js renderer shared state
@@ -5541,12 +5541,12 @@
             
             illusionRenderer = new THREE.WebGLRenderer({
                 canvas: canvas,
-                antialias: true,
+                antialias: false,
                 powerPreference: 'high-performance'
             });
             illusionRenderer.setClearColor(0x000000, 1);
             illusionRenderer.setSize(width, height);
-            illusionRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            illusionRenderer.setPixelRatio(1);
             
             // Shader uniforms
             const baseUniforms = {
@@ -5634,15 +5634,23 @@
             const illusionType = ILLUSIONS[currentIllusionIndex];
             
             if (illusionType === 'TORUS') {
-                const R = 1.55, r = 0.60;
-                const geo = new THREE.TorusGeometry(R, r, 80, 220);
+                const R = 1.2, r = 0.45;
+                const geo = new THREE.TorusGeometry(R, r, 48, 96);
                 illusionMesh = new THREE.Mesh(geo, redMat);
                 boundingRadius = R + r;
             } else if (illusionType === 'SPHERE') {
-                const radius = 1.8;
-                const geo = new THREE.SphereGeometry(radius, 64, 64);
+                const radius = 1.4;
+                const geo = new THREE.SphereGeometry(radius, 48, 48);
                 illusionMesh = new THREE.Mesh(geo, redMat);
                 boundingRadius = radius;
+            } else if (illusionType === 'PYRAMID') {
+                const geo = new THREE.ConeGeometry(1.2, 2.0, 4, 1);
+                illusionMesh = new THREE.Mesh(geo, redMat);
+                boundingRadius = 1.5;
+            } else if (illusionType === 'CUBE') {
+                const geo = new THREE.BoxGeometry(1.8, 1.8, 1.8, 1, 1, 1);
+                illusionMesh = new THREE.Mesh(geo, redMat);
+                boundingRadius = 1.6;
             }
             
             illusionScene.add(illusionMesh);
@@ -5653,7 +5661,7 @@
             illusionScene.add(plane);
             
             // Position camera
-            const fitPadding = 1.4;
+            const fitPadding = 1.8;
             const vFov = THREE.MathUtils.degToRad(illusionCamera.fov);
             const dist = (boundingRadius * fitPadding) / Math.tan(vFov * 0.5);
             illusionCamera.position.set(0, 0, dist);
@@ -5742,7 +5750,13 @@
         function cycleIllusion() {
             if (!illusionActive) return;
             stopIllusion();
-            currentIllusionIndex = (currentIllusionIndex + 1) % ILLUSIONS.length;
+            currentIllusionIndex++;
+            // If we've gone past all illusions, close the illusion view
+            if (currentIllusionIndex >= ILLUSIONS.length) {
+                currentIllusionIndex = 0;
+                toggleIllusion(); // This will turn off illusions
+                return;
+            }
             renderIllusion();
         }
         
@@ -5793,7 +5807,7 @@
                 });
             }
             
-            // Press 'I' to toggle illusions, Tab to cycle
+            // Press 'I' to toggle illusions, Tab to cycle, Escape to close
             document.addEventListener('keydown', (e) => {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                 
@@ -5804,6 +5818,10 @@
                 if (e.key === 'Tab' && illusionActive && !e.ctrlKey && !e.metaKey) {
                     e.preventDefault();
                     cycleIllusion();
+                }
+                
+                if (e.key === 'Escape' && illusionActive) {
+                    toggleIllusion();
                 }
             });
         }
