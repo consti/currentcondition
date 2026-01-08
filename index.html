@@ -2500,6 +2500,15 @@
         .doom-container.active {
             display: flex;
         }
+        .doom-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            padding: 0;
+        }
         .doom-header {
             display: flex;
             align-items: center;
@@ -2508,6 +2517,18 @@
             max-width: 800px;
             margin-bottom: 10px;
             padding: 0 10px;
+        }
+        .doom-container.fullscreen .doom-header {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10001;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .doom-container.fullscreen:hover .doom-header {
+            opacity: 1;
         }
         .doom-title {
             font-size: 1.5rem;
@@ -2543,6 +2564,13 @@
             border: 2px solid #b22222;
             box-shadow: 0 0 20px rgba(178, 34, 34, 0.3);
         }
+        .doom-container.fullscreen .doom-wrapper {
+            max-width: none;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: auto;
+            border: none;
+        }
         .doom-canvas-container {
             position: absolute;
             top: 0;
@@ -2553,19 +2581,6 @@
             align-items: center;
             justify-content: center;
             background: #000;
-        }
-        /* Hide js-dos UI elements */
-        .doom-canvas-container .eui-sidebar,
-        .doom-canvas-container .eui-sidebar-left,
-        .doom-canvas-container .eui-window,
-        .doom-canvas-container .eui-dialog,
-        .doom-canvas-container .sidebar,
-        .doom-canvas-container [class*="sidebar"],
-        .doom-canvas-container [class*="controls"],
-        .doom-canvas-container [class*="button-row"],
-        #jsdos > div:first-child > div:first-child,
-        #jsdos .eui-player-bar {
-            display: none !important;
         }
         #doom-canvas {
             max-width: 100%;
@@ -2600,6 +2615,9 @@
             color: #888;
             font-size: 0.9rem;
             text-align: center;
+        }
+        .doom-container.fullscreen .doom-instructions {
+            display: none;
         }
         
         /* Eliza Container - window mode like games */
@@ -3188,6 +3206,7 @@
                 <div class="doom-header">
                     <div class="doom-title">D O O M</div>
                     <div class="doom-controls">
+                        <button class="doom-ctrl-btn" id="doom-fullscreen" title="Toggle Fullscreen (F)">⛶ FULLSCREEN</button>
                         <button class="doom-ctrl-btn" id="doom-close" title="Close (ESC)">✕ CLOSE</button>
                     </div>
                 </div>
@@ -3203,7 +3222,7 @@
                         <div style="margin-top: 10px; font-size: 0.8rem;">SHAREWARE VERSION</div>
                     </div>
                 </div>
-                <div class="doom-instructions">ARROWS: MOVE • CTRL: SHOOT • SPACE: USE/OPEN • ALT: STRAFE • ESC: MENU</div>
+                <div class="doom-instructions">WASD/ARROWS: MOVE • MOUSE: AIM • CLICK: SHOOT • E: USE • ESC: MENU</div>
             </div>
             
             <div class="main-display hidden-panel">
@@ -7397,6 +7416,7 @@
         let doomActive = false;
         let doomLoaded = false;
         let doomInstance = null;
+        let doomFullscreen = false;
         
         function toggleDoom() {
             doomActive = !doomActive;
@@ -7424,9 +7444,24 @@
             } else {
                 if (doomContainer) {
                     doomContainer.classList.remove('active');
+                    doomContainer.classList.remove('fullscreen');
                 }
                 if (doomBtn) doomBtn.classList.remove('active');
                 if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
+                doomFullscreen = false;
+            }
+        }
+        
+        function toggleDoomFullscreen() {
+            const doomContainer = document.getElementById('doom-container');
+            if (!doomContainer) return;
+            
+            doomFullscreen = !doomFullscreen;
+            
+            if (doomFullscreen) {
+                doomContainer.classList.add('fullscreen');
+            } else {
+                doomContainer.classList.remove('fullscreen');
             }
         }
         
@@ -7456,12 +7491,8 @@
                     emulators.pathPrefix = '/js-dos/';
                 }
                 
-                // Use js-dos v7 API with options to hide UI elements
-                const dos = Dos(dosContainer, {
-                    noSideBar: true,
-                    noFullscreen: true,
-                    noSocialLinks: true
-                });
+                // Use js-dos v7 API - Dos() returns an object with run() method
+                const dos = Dos(dosContainer);
                 
                 if (progressEl) progressEl.style.width = '50%';
                 
@@ -7497,6 +7528,14 @@
                 });
             }
             
+            const fullscreenBtn = document.getElementById('doom-fullscreen');
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDoomFullscreen();
+                });
+            }
+            
             const closeBtn = document.getElementById('doom-close');
             if (closeBtn) {
                 closeBtn.addEventListener('click', (e) => {
@@ -7515,8 +7554,14 @@
                     e.preventDefault();
                 }
                 
-                // Escape to close Doom
-                if (e.key === 'Escape' && doomActive) {
+                // 'F' to toggle fullscreen when Doom is active
+                if ((e.key === 'f' || e.key === 'F') && doomActive && !e.ctrlKey && !e.metaKey) {
+                    toggleDoomFullscreen();
+                    e.preventDefault();
+                }
+                
+                // Escape to close Doom (but not when in fullscreen, let the game handle it)
+                if (e.key === 'Escape' && doomActive && !doomFullscreen) {
                     toggleDoom();
                 }
             });
