@@ -5522,7 +5522,7 @@
                 
                 const R1 = 1;      // Radius of the tube
                 const R2 = 2;      // Distance from center of torus to center of tube
-                const K2 = 5;
+                const K2 = 7;      // Distance from viewer (larger = smaller torus)
                 const K1 = width * K2 * 3 / (8 * (R1 + R2));
                 
                 const cosA = Math.cos(A), sinA = Math.sin(A);
@@ -5530,10 +5530,10 @@
                 
                 // Theta goes around the tube, phi goes around the torus
                 // Use smaller steps for denser rendering
-                for (let theta = 0; theta < 6.28; theta += 0.01) {
+                for (let theta = 0; theta < 6.28; theta += 0.015) {
                     const cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
                     
-                    for (let phi = 0; phi < 6.28; phi += 0.003) {
+                    for (let phi = 0; phi < 6.28; phi += 0.005) {
                         const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
                         
                         // 3D coordinates of a point on the torus
@@ -5557,8 +5557,8 @@
                                 zbuffer[idx] = ooz;
                                 
                                 // Checkerboard pattern based on theta and phi
-                                const checkerTheta = Math.floor(theta * 8) % 2;
-                                const checkerPhi = Math.floor(phi * 8) % 2;
+                                const checkerTheta = Math.floor(theta * 4) % 2;
+                                const checkerPhi = Math.floor(phi * 4) % 2;
                                 const isRed = (checkerTheta + checkerPhi) % 2 === 0;
                                 
                                 // Luminance for shading
