@@ -2306,66 +2306,16 @@
         
         /* Chromostereopsis Scene */
         .chromostereopsis-scene {
-            width: 400px;
-            height: 400px;
+            width: 500px;
+            height: 500px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: repeating-conic-gradient(
-                #0000ff 0deg 90deg,
-                #000000 90deg 180deg
-            );
-            background-size: 40px 40px;
         }
         
-        .chromostereopsis-donut {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: #ff0000;
-            position: relative;
-            animation: rotateDonut 4s infinite linear;
-            box-shadow: 
-                inset 30px 30px 40px rgba(0, 0, 0, 0.4),
-                inset -10px -10px 30px rgba(255, 100, 100, 0.3),
-                10px 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        .chromostereopsis-donut::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: repeating-conic-gradient(
-                #0000ff 0deg 90deg,
-                #000000 90deg 180deg
-            );
-            background-size: 40px 40px;
-        }
-        
-        .chromostereopsis-donut::after {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: 30px;
-            width: 40px;
-            height: 20px;
-            border-radius: 50%;
-            background: rgba(255, 200, 200, 0.4);
-            transform: rotate(-30deg);
-        }
-        
-        @keyframes rotateDonut {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+        #torus-canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
         
         /* Snake LED indicator */
@@ -2740,7 +2690,7 @@
             <div class="illusion-container" id="illusion-container">
                 <div class="illusion-title" id="illusion-title">CHROMOSTEREOPSIS</div>
                 <div class="chromostereopsis-scene">
-                    <div class="chromostereopsis-donut"></div>
+                    <canvas id="torus-canvas" width="500" height="500"></canvas>
                 </div>
                 <div class="illusion-instructions">RED APPEARS CLOSER, BLUE APPEARS FARTHER - PRESS I TO CLOSE</div>
             </div>
@@ -5536,6 +5486,127 @@
             }
         }
         
+        // Torus renderer
+        let torusAnimationId = null;
+        
+        function renderTorus() {
+            const canvas = document.getElementById('torus-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Create background with blue/black noise
+            const bgData = ctx.createImageData(width, height);
+            for (let i = 0; i < bgData.data.length; i += 4) {
+                const isBlue = Math.random() > 0.5;
+                bgData.data[i] = 0;                    // R
+                bgData.data[i + 1] = 0;                // G
+                bgData.data[i + 2] = isBlue ? 255 : 0; // B
+                bgData.data[i + 3] = 255;              // A
+            }
+            
+            let A = 0, B = 0;
+            
+            function frame() {
+                if (!illusionActive) {
+                    torusAnimationId = null;
+                    return;
+                }
+                
+                // Draw background
+                ctx.putImageData(bgData, 0, 0);
+                
+                const zbuffer = new Array(width * height).fill(0);
+                const output = new Array(width * height).fill(-1);
+                
+                const R1 = 1;      // Radius of the tube
+                const R2 = 2;      // Distance from center of torus to center of tube
+                const K2 = 5;
+                const K1 = width * K2 * 3 / (8 * (R1 + R2));
+                
+                const cosA = Math.cos(A), sinA = Math.sin(A);
+                const cosB = Math.cos(B), sinB = Math.sin(B);
+                
+                // Theta goes around the tube, phi goes around the torus
+                // Use smaller steps for denser rendering
+                for (let theta = 0; theta < 6.28; theta += 0.02) {
+                    const cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
+                    
+                    for (let phi = 0; phi < 6.28; phi += 0.007) {
+                        const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
+                        
+                        // 3D coordinates of a point on the torus
+                        const circleX = R2 + R1 * cosTheta;
+                        const circleY = R1 * sinTheta;
+                        
+                        // Final 3D coordinates after rotation
+                        const x = circleX * (cosB * cosPhi + sinA * sinB * sinPhi) - circleY * cosA * sinB;
+                        const y = circleX * (sinB * cosPhi - sinA * cosB * sinPhi) + circleY * cosA * cosB;
+                        const z = K2 + cosA * circleX * sinPhi + circleY * sinA;
+                        const ooz = 1 / z;
+                        
+                        // Project to 2D
+                        const xp = Math.floor(width / 2 + K1 * ooz * x);
+                        const yp = Math.floor(height / 2 - K1 * ooz * y);
+                        
+                        if (xp >= 0 && xp < width && yp >= 0 && yp < height) {
+                            const idx = xp + yp * width;
+                            
+                            if (ooz > zbuffer[idx]) {
+                                zbuffer[idx] = ooz;
+                                
+                                // Checkerboard pattern based on theta and phi
+                                const checkerTheta = Math.floor(theta * 8) % 2;
+                                const checkerPhi = Math.floor(phi * 8) % 2;
+                                const isRed = (checkerTheta + checkerPhi) % 2 === 0;
+                                
+                                // Luminance for shading
+                                const L = cosPhi * cosTheta * sinB - cosA * cosTheta * sinPhi - sinA * sinTheta + cosB * (cosA * sinTheta - cosTheta * sinA * sinPhi);
+                                
+                                output[idx] = isRed ? (L > 0 ? L : 0.1) : -1; // -1 for black, 0+ for red with luminance
+                            }
+                        }
+                    }
+                }
+                
+                // Draw torus pixels
+                const imageData = ctx.getImageData(0, 0, width, height);
+                for (let i = 0; i < output.length; i++) {
+                    if (zbuffer[i] > 0) {
+                        const px = i * 4;
+                        if (output[i] >= 0) {
+                            // Red with shading - brighter
+                            const brightness = Math.floor(100 + output[i] * 155);
+                            imageData.data[px] = brightness;     // R
+                            imageData.data[px + 1] = 0;          // G
+                            imageData.data[px + 2] = 0;          // B
+                        } else {
+                            // Black
+                            imageData.data[px] = 0;
+                            imageData.data[px + 1] = 0;
+                            imageData.data[px + 2] = 0;
+                        }
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+                
+                A += 0.04;
+                B += 0.02;
+                
+                torusAnimationId = requestAnimationFrame(frame);
+            }
+            
+            frame();
+        }
+        
+        function stopTorus() {
+            if (torusAnimationId) {
+                cancelAnimationFrame(torusAnimationId);
+                torusAnimationId = null;
+            }
+        }
+        
         function toggleIllusion() {
             // Close game if open
             if (gameActive) {
@@ -5552,10 +5623,12 @@
                 illusionContainer.classList.add('active');
                 if (mainDisplay) mainDisplay.classList.add('hidden-panel');
                 if (illusionBtn) illusionBtn.classList.add('active');
+                renderTorus();
             } else {
                 illusionContainer.classList.remove('active');
                 if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
                 if (illusionBtn) illusionBtn.classList.remove('active');
+                stopTorus();
             }
         }
         
