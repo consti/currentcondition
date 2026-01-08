@@ -7,9 +7,8 @@
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
     <script src='https://unpkg.com/three@0.160.0/build/three.min.js'></script>
-    <!-- js-dos for DOOM emulation -->
-    <script src="/js-dos/js-dos.js"></script>
-    <link rel="stylesheet" href="/js-dos/js-dos.css">
+    <!-- js-dos v8 for DOOM emulation -->
+    <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -2500,35 +2499,14 @@
         .doom-container.active {
             display: flex;
         }
-        .doom-container.fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 9999;
-            padding: 0;
-        }
         .doom-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
-            max-width: 800px;
+            max-width: 640px;
             margin-bottom: 10px;
             padding: 0 10px;
-        }
-        .doom-container.fullscreen .doom-header {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10001;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .doom-container.fullscreen:hover .doom-header {
-            opacity: 1;
         }
         .doom-title {
             font-size: 1.5rem;
@@ -2558,18 +2536,11 @@
         .doom-wrapper {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            aspect-ratio: 4 / 3;
+            max-width: 640px;
+            aspect-ratio: 8 / 5;
             background: #000;
             border: 2px solid #b22222;
             box-shadow: 0 0 20px rgba(178, 34, 34, 0.3);
-        }
-        .doom-container.fullscreen .doom-wrapper {
-            max-width: none;
-            width: 100%;
-            height: 100%;
-            aspect-ratio: auto;
-            border: none;
         }
         .doom-canvas-container {
             position: absolute;
@@ -2615,9 +2586,7 @@
             color: #888;
             font-size: 0.9rem;
             text-align: center;
-        }
-        .doom-container.fullscreen .doom-instructions {
-            display: none;
+            max-width: 640px;
         }
         
         /* Eliza Container - window mode like games */
@@ -3206,8 +3175,7 @@
                 <div class="doom-header">
                     <div class="doom-title">D O O M</div>
                     <div class="doom-controls">
-                        <button class="doom-ctrl-btn" id="doom-fullscreen" title="Toggle Fullscreen (F)">⛶ FULLSCREEN</button>
-                        <button class="doom-ctrl-btn" id="doom-close" title="Close (ESC)">✕ CLOSE</button>
+                        <button class="doom-ctrl-btn" id="doom-close" title="Close">✕ CLOSE</button>
                     </div>
                 </div>
                 <div class="doom-wrapper">
@@ -3222,7 +3190,7 @@
                         <div style="margin-top: 10px; font-size: 0.8rem;">SHAREWARE VERSION</div>
                     </div>
                 </div>
-                <div class="doom-instructions">WASD/ARROWS: MOVE • MOUSE: AIM • CLICK: SHOOT • E: USE • ESC: MENU</div>
+                <div class="doom-instructions">WASD/ARROWS: MOVE • CTRL: FIRE • SPACE: USE • ESC: MENU</div>
             </div>
             
             <div class="main-display hidden-panel">
@@ -7416,7 +7384,6 @@
         let doomActive = false;
         let doomLoaded = false;
         let doomInstance = null;
-        let doomFullscreen = false;
         
         function toggleDoom() {
             doomActive = !doomActive;
@@ -7442,26 +7409,16 @@
                     loadDoom();
                 }
             } else {
-                if (doomContainer) {
-                    doomContainer.classList.remove('active');
-                    doomContainer.classList.remove('fullscreen');
-                }
+                if (doomContainer) doomContainer.classList.remove('active');
                 if (doomBtn) doomBtn.classList.remove('active');
                 if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
-                doomFullscreen = false;
-            }
-        }
-        
-        function toggleDoomFullscreen() {
-            const doomContainer = document.getElementById('doom-container');
-            if (!doomContainer) return;
-            
-            doomFullscreen = !doomFullscreen;
-            
-            if (doomFullscreen) {
-                doomContainer.classList.add('fullscreen');
-            } else {
-                doomContainer.classList.remove('fullscreen');
+                
+                // Stop the js-dos emulation
+                if (doomInstance && doomInstance.stop) {
+                    doomInstance.stop();
+                    doomInstance = null;
+                    doomLoaded = false;
+                }
             }
         }
         
@@ -7486,30 +7443,28 @@
                 
                 if (progressEl) progressEl.style.width = '30%';
                 
-                // Set path prefix for wasm files to load from js-dos CDN
-                if (typeof emulators !== 'undefined') {
-                    emulators.pathPrefix = '/js-dos/';
-                }
-                
-                // Use js-dos v7 API - Dos() returns an object with run() method
-                const dos = Dos(dosContainer);
-                
-                if (progressEl) progressEl.style.width = '50%';
-                
                 // DOOM shareware bundle served locally (CORS-free)
                 const bundleUrl = "/doom.jsdos";
                 
-                dos.run(bundleUrl).then((ci) => {
-                    doomInstance = ci;
-                    doomLoaded = true;
-                    if (loadingEl) loadingEl.style.display = 'none';
-                    if (progressEl) progressEl.style.width = '100%';
-                }).catch((err) => {
-                    console.error('Failed to load DOOM:', err);
-                    if (loadingEl) {
-                        loadingEl.innerHTML = '<div style="color: #ff6666;">FAILED TO LOAD DOOM</div><div style="font-size: 0.8rem; margin-top: 10px;">Check console for details</div>';
+                // Use js-dos v8 API with kiosk mode, no mouse capture, and auto start
+                doomInstance = Dos(dosContainer, {
+                    url: bundleUrl,
+                    kiosk: true,
+                    mouseCapture: false,
+                    autoStart: true,
+                    theme: "dark",
+                    noCloud: true,
+                    noNetworking: true,
+                    onEvent: (event, ci) => {
+                        if (event === "ci-ready") {
+                            doomLoaded = true;
+                            if (loadingEl) loadingEl.style.display = 'none';
+                            if (progressEl) progressEl.style.width = '100%';
+                        }
                     }
                 });
+                
+                if (progressEl) progressEl.style.width = '50%';
                 
             } catch (err) {
                 console.error('Error initializing DOOM:', err);
@@ -7528,14 +7483,6 @@
                 });
             }
             
-            const fullscreenBtn = document.getElementById('doom-fullscreen');
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleDoomFullscreen();
-                });
-            }
-            
             const closeBtn = document.getElementById('doom-close');
             if (closeBtn) {
                 closeBtn.addEventListener('click', (e) => {
@@ -7548,21 +7495,13 @@
             document.addEventListener('keydown', (e) => {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                 
+                // Don't intercept any keys when DOOM is active - let the game handle them
+                if (doomActive) return;
+                
                 // 'D' to toggle Doom (only if not in game or other overlay)
                 if ((e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !gameActive && !illusionActive && !elizaActive && !lifeActive) {
                     toggleDoom();
                     e.preventDefault();
-                }
-                
-                // 'F' to toggle fullscreen when Doom is active
-                if ((e.key === 'f' || e.key === 'F') && doomActive && !e.ctrlKey && !e.metaKey) {
-                    toggleDoomFullscreen();
-                    e.preventDefault();
-                }
-                
-                // Escape to close Doom (but not when in fullscreen, let the game handle it)
-                if (e.key === 'Escape' && doomActive && !doomFullscreen) {
-                    toggleDoom();
                 }
             });
         }
