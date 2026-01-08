@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -48,6 +49,274 @@ var store = &LocationStore{
 }
 
 var db *sql.DB
+
+// WebSocket cursor tracking
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
+// CursorPosition represents a user's cursor position
+type CursorPosition struct {
+	X        float64 `json:"x"`
+	Y        float64 `json:"y"`
+	Location string  `json:"location,omitempty"`
+}
+
+// PingData represents a user ping
+type PingData struct {
+	IP        string  `json:"ip"`
+	Location  string  `json:"location"`
+	Lat       float64 `json:"lat"`
+	Lng       float64 `json:"lng"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+// CursorMessage is sent over websocket
+type CursorMessage struct {
+	Type        string                      `json:"type"`
+	ID          string                      `json:"id,omitempty"`
+	Position    *CursorPosition             `json:"position,omitempty"`
+	Cursors     map[string]*CursorPosition  `json:"cursors,omitempty"`
+	UserCount   int                         `json:"userCount,omitempty"`
+	Ping        *PingData                   `json:"ping,omitempty"`
+	Pings       []PingData                  `json:"pings,omitempty"`
+}
+
+// Client represents a connected websocket client
+type Client struct {
+	ID       string
+	Conn     *websocket.Conn
+	Position *CursorPosition
+	Location string
+	Send     chan []byte
+}
+
+// Hub manages all websocket connections
+type Hub struct {
+	clients       map[string]*Client
+	broadcast     chan []byte
+	register      chan *Client
+	unregister    chan *Client
+	mutex         sync.RWMutex
+	recentPings   []PingData
+}
+
+var hub = &Hub{
+	clients:       make(map[string]*Client),
+	broadcast:     make(chan []byte),
+	register:      make(chan *Client),
+	unregister:    make(chan *Client),
+	recentPings:   make([]PingData, 0, 10),
+}
+
+func (h *Hub) run() {
+	for {
+		select {
+		case client := <-h.register:
+			h.mutex.Lock()
+			h.clients[client.ID] = client
+			userCount := len(h.clients)
+			h.mutex.Unlock()
+			
+			// Send existing cursors and state to new client
+			h.mutex.RLock()
+			cursors := make(map[string]*CursorPosition)
+			for id, c := range h.clients {
+				if id != client.ID && c.Position != nil {
+					cursors[id] = c.Position
+				}
+			}
+			pings := make([]PingData, len(h.recentPings))
+			copy(pings, h.recentPings)
+			h.mutex.RUnlock()
+			
+			// Send init message with cursors, user count, and recent pings
+			initMsg := CursorMessage{Type: "init", Cursors: cursors, UserCount: userCount, Pings: pings}
+			data, _ := json.Marshal(initMsg)
+			select {
+			case client.Send <- data:
+			default:
+			}
+			
+			// Broadcast join and user count to others
+			joinMsg := CursorMessage{Type: "join", ID: client.ID, UserCount: userCount}
+			data, _ = json.Marshal(joinMsg)
+			h.broadcastToOthers(client.ID, data)
+			
+			log.Printf("Client connected: %s (total: %d)", client.ID, userCount)
+
+		case client := <-h.unregister:
+			h.mutex.Lock()
+			if _, ok := h.clients[client.ID]; ok {
+				delete(h.clients, client.ID)
+				close(client.Send)
+			}
+			userCount := len(h.clients)
+			h.mutex.Unlock()
+			
+			// Broadcast leave and user count to others
+			leaveMsg := CursorMessage{Type: "leave", ID: client.ID, UserCount: userCount}
+			data, _ := json.Marshal(leaveMsg)
+			h.broadcastToOthers(client.ID, data)
+			
+			log.Printf("Client disconnected: %s (total: %d)", client.ID, userCount)
+
+		case message := <-h.broadcast:
+			h.mutex.RLock()
+			for _, client := range h.clients {
+				select {
+				case client.Send <- message:
+				default:
+					close(client.Send)
+					delete(h.clients, client.ID)
+				}
+			}
+			h.mutex.RUnlock()
+		}
+	}
+}
+
+func (h *Hub) broadcastToOthers(senderID string, message []byte) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+	
+	for id, client := range h.clients {
+		if id != senderID {
+			select {
+			case client.Send <- message:
+			default:
+			}
+		}
+	}
+}
+
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
+		return
+	}
+	
+	// Generate client ID
+	b := make([]byte, 8)
+	rand.Read(b)
+	clientID := hex.EncodeToString(b)
+	
+	client := &Client{
+		ID:   clientID,
+		Conn: conn,
+		Send: make(chan []byte, 256),
+	}
+	
+	hub.register <- client
+	
+	// Send client their ID
+	idMsg := CursorMessage{Type: "id", ID: clientID}
+	data, _ := json.Marshal(idMsg)
+	client.Send <- data
+	
+	// Start goroutines for reading and writing
+	go client.writePump()
+	go client.readPump()
+}
+
+func (c *Client) readPump() {
+	defer func() {
+		hub.unregister <- c
+		c.Conn.Close()
+	}()
+	
+	c.Conn.SetReadLimit(512)
+	c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	c.Conn.SetPongHandler(func(string) error {
+		c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
+	
+	for {
+		_, message, err := c.Conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("WebSocket error: %v", err)
+			}
+			break
+		}
+		
+		var msg CursorMessage
+		if err := json.Unmarshal(message, &msg); err != nil {
+			continue
+		}
+		
+		if msg.Type == "move" && msg.Position != nil {
+			// Update client's position
+			hub.mutex.Lock()
+			if client, ok := hub.clients[c.ID]; ok {
+				client.Position = msg.Position
+			}
+			hub.mutex.Unlock()
+			
+			// Broadcast to others
+			broadcastMsg := CursorMessage{
+				Type:     "move",
+				ID:       c.ID,
+				Position: msg.Position,
+			}
+			data, _ := json.Marshal(broadcastMsg)
+			hub.broadcastToOthers(c.ID, data)
+		} else if msg.Type == "ping" && msg.Ping != nil {
+			// Add timestamp
+			msg.Ping.Timestamp = time.Now().Unix()
+			
+			// Store in recent pings (keep last 10)
+			hub.mutex.Lock()
+			hub.recentPings = append(hub.recentPings, *msg.Ping)
+			if len(hub.recentPings) > 10 {
+				hub.recentPings = hub.recentPings[len(hub.recentPings)-10:]
+			}
+			hub.mutex.Unlock()
+			
+			// Broadcast ping to all clients
+			pingMsg := CursorMessage{
+				Type: "ping",
+				ID:   c.ID,
+				Ping: msg.Ping,
+			}
+			data, _ := json.Marshal(pingMsg)
+			hub.broadcast <- data
+			
+			log.Printf("Ping from %s @ %s", msg.Ping.IP, msg.Ping.Location)
+		}
+	}
+}
+
+func (c *Client) writePump() {
+	ticker := time.NewTicker(30 * time.Second)
+	defer func() {
+		ticker.Stop()
+		c.Conn.Close()
+	}()
+	
+	for {
+		select {
+		case message, ok := <-c.Send:
+			c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			if !ok {
+				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+			
+			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				return
+			}
+			
+		case <-ticker.C:
+			c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}
+}
 
 // Round coordinates to ~1km precision to group nearby visitors
 func roundCoord(coord float64, precision int) float64 {
@@ -516,11 +785,15 @@ func main() {
 	defer db.Close()
 	log.Println("Database initialized")
 
+	// Start WebSocket hub
+	go hub.run()
+
 	// API endpoints
 	http.HandleFunc("/api/location", handleAddLocation)
 	http.HandleFunc("/api/locations", handleGetLocations)
 	http.HandleFunc("/api/highscores", handleGetHighscores)
 	http.HandleFunc("/api/highscore", handleSaveHighscore)
+	http.HandleFunc("/ws", handleWebSocket)
 
 	// Static files
 	http.Handle("/", http.FileServer(http.Dir(".")))

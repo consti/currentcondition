@@ -3084,6 +3084,313 @@
                 bottom: 95px;
             }
         }
+        
+        /* Remote cursor styles */
+        .remote-cursor {
+            position: fixed;
+            pointer-events: none;
+            z-index: 8; /* Behind CRT effects (scanlines=20, flicker=15, vignette=10) */
+            transition: left 0.05s linear, top 0.05s linear;
+        }
+        
+        .remote-cursor-pointer {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 16px solid var(--cursor-color, #00ff00);
+            transform: rotate(-30deg);
+            filter: drop-shadow(0 0 3px var(--cursor-color, #00ff00));
+            opacity: 0.7;
+        }
+        
+        .remote-cursor-label {
+            position: absolute;
+            top: 18px;
+            left: 5px;
+            font-family: 'VT323', monospace;
+            font-size: 12px;
+            color: var(--cursor-color, #00ff00);
+            text-shadow: 0 0 5px var(--cursor-color, #00ff00);
+            white-space: nowrap;
+            opacity: 0.8;
+        }
+        
+        .remote-cursor-trail {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cursor-color, #00ff00);
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 0 4px var(--cursor-color, #00ff00);
+        }
+        
+        @keyframes trail-fade {
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+            100% { opacity: 0; transform: scale(0.2); }
+        }
+        
+        /* Multiplayer invert button */
+
+        
+        /* User count display */
+        .user-count {
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            color: #00ff00;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 0.3s, max-height 0.3s;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .user-count.visible {
+            opacity: 0.8;
+            max-height: 30px;
+        }
+        
+        .user-count .count-number {
+            display: inline-block;
+            min-width: 1ch;
+        }
+        
+        .user-count.hacker-effect .count-number {
+            animation: hacker-scramble 0.5s steps(1);
+        }
+        
+        @keyframes hacker-scramble {
+            0% { opacity: 0; }
+            10% { content: '█'; opacity: 1; }
+            20% { content: '▓'; }
+            30% { content: '▒'; }
+            40% { content: '░'; }
+            50% { content: '█'; }
+            60% { content: '▓'; }
+            70% { content: '▒'; }
+            80% { content: '░'; }
+            90% { content: '█'; }
+            100% { opacity: 1; }
+        }
+        
+        .ping-btn {
+            display: none;
+            margin: 8px auto 0;
+            padding: 4px 12px;
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            color: #00ff00;
+            background: rgba(0, 30, 0, 0.8);
+            border: 1px solid #00ff00;
+            border-radius: 3px;
+            cursor: pointer;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+            transition: all 0.2s;
+        }
+        
+        .ping-btn.visible {
+            display: block;
+        }
+        
+        .ping-btn:hover {
+            background: rgba(0, 60, 0, 0.9);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .ping-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .ping-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Ping Log */
+        .ping-log {
+            position: absolute;
+            left: 15px;
+            bottom: 55px;
+            width: 280px;
+            max-height: 200px;
+            font-family: 'VT323', monospace;
+            font-size: 11px;
+            color: #00ff00;
+            background: rgba(0, 10, 0, 0.85);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 3px;
+            z-index: 40;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .ping-log.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .ping-log-header {
+            padding: 4px 8px;
+            background: rgba(0, 255, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .ping-log-entries {
+            padding: 4px 0;
+            max-height: 170px;
+            overflow-y: auto;
+        }
+        
+        .ping-log-entries::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .ping-log-entries::-webkit-scrollbar-track {
+            background: rgba(0, 20, 0, 0.5);
+        }
+        
+        .ping-log-entries::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 0, 0.3);
+        }
+        
+        .ping-entry {
+            padding: 2px 8px;
+            border-left: 2px solid transparent;
+            animation: ping-appear 0.3s ease-out;
+        }
+        
+        .ping-entry.new {
+            border-left-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .ping-entry .ping-time {
+            color: #00aa00;
+            margin-right: 6px;
+        }
+        
+        .ping-entry .ping-ip {
+            color: #00ffff;
+        }
+        
+        .ping-entry .ping-location {
+            color: #88ff88;
+            opacity: 0.8;
+        }
+        
+        @keyframes ping-appear {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Globe ping pulse effect */
+        .ping-pulse {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, rgba(0, 255, 255, 0) 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 15;
+            animation: ping-pulse-anim 2s ease-out forwards;
+        }
+        
+        .ping-pulse::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 255, 0.8);
+            transform: translate(-50%, -50%);
+            animation: ping-ring-expand 2s ease-out forwards;
+        }
+        
+        @keyframes ping-pulse-anim {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(3); }
+        }
+        
+        @keyframes ping-ring-expand {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+        }
+        
+        /* Planet invert effect */
+        .globe-container.inverted #globe canvas {
+            filter: invert(1) hue-rotate(180deg);
+        }
+        
+        body.red-mode .user-count {
+            color: #ff0000;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+        body.red-mode .ping-btn {
+            color: #ff0000;
+            border-color: #ff0000;
+            background: rgba(30, 0, 0, 0.8);
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+        body.red-mode .ping-btn:hover {
+            background: rgba(60, 0, 0, 0.9);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        body.red-mode .ping-log {
+            color: #ff0000;
+            border-color: rgba(255, 0, 0, 0.3);
+        }
+        body.red-mode .ping-log-header {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: rgba(255, 0, 0, 0.2);
+        }
+        body.red-mode .ping-entry .ping-time { color: #aa0000; }
+        body.red-mode .ping-entry .ping-ip { color: #ff6666; }
+        body.red-mode .ping-entry .ping-location { color: #ff8888; }
+        body.red-mode .ping-entry.new { border-left-color: #ff0000; background: rgba(255, 0, 0, 0.1); }
+        body.red-mode .ping-pulse { background: radial-gradient(circle, rgba(255, 100, 100, 0.8) 0%, rgba(255, 0, 0, 0) 70%); }
+        body.red-mode .ping-pulse::before { border-color: rgba(255, 0, 0, 0.8); }
+        
+        body.purple-mode .user-count {
+            color: #ff00ff;
+            text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+        }
+        body.purple-mode .ping-btn {
+            color: #ff00ff;
+            border-color: #ff00ff;
+            background: rgba(30, 0, 30, 0.8);
+            text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+        }
+        body.purple-mode .ping-btn:hover {
+            background: rgba(60, 0, 60, 0.9);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+        body.purple-mode .ping-log {
+            color: #ff00ff;
+            border-color: rgba(255, 0, 255, 0.3);
+        }
+        body.purple-mode .ping-log-header {
+            background: rgba(255, 0, 255, 0.1);
+            border-color: rgba(255, 0, 255, 0.2);
+        }
+        body.purple-mode .ping-entry .ping-time { color: #aa00aa; }
+        body.purple-mode .ping-entry .ping-ip { color: #ff66ff; }
+        body.purple-mode .ping-entry .ping-location { color: #ff88ff; }
+        body.purple-mode .ping-entry.new { border-left-color: #ff00ff; background: rgba(255, 0, 255, 0.1); }
+        body.purple-mode .ping-pulse { background: radial-gradient(circle, rgba(255, 100, 255, 0.8) 0%, rgba(255, 0, 255, 0) 70%); }
+        body.purple-mode .ping-pulse::before { border-color: rgba(255, 0, 255, 0.8); }
     </style>
 </head>
 <body class="windowed-mode">
@@ -3108,6 +3415,16 @@
             <div class="globe-pixelate"></div>
             <div class="globe-glow"></div>
         </div>
+        
+        <!-- Remote cursors container (behind CRT effects) -->
+        <div id="remote-cursors"></div>
+        
+        <!-- Ping Log (synced across users) -->
+        <div class="ping-log" id="ping-log">
+            <div class="ping-log-header">▶ PING LOG</div>
+            <div class="ping-log-entries" id="ping-log-entries"></div>
+        </div>
+        
         <div class="scanlines"></div>
         <div class="flicker"></div>
         <div class="static-noise"></div>
@@ -3202,6 +3519,12 @@
                 </div>
                 <div class="location-info" id="location-info"></div>
                 <div class="air-quality" id="air-quality"></div>
+                
+                <!-- User Count and Greeting -->
+                <div class="user-count" id="user-count">
+                    <span class="count-number" id="count-number">0</span> <span id="users-label">USERS</span> ONLINE
+                </div>
+                <button class="ping-btn" id="ping-btn">◉ SEND PING</button>
             </div>
             
             <!-- Info Button -->
@@ -3234,6 +3557,7 @@
                 <span class="doom-icon">💀</span>
             </button>
             
+
             <!-- View Toggle Button -->
             <button class="view-toggle-btn" id="view-toggle" title="Cycle view mode">
                 <div class="icon">
@@ -3446,7 +3770,8 @@
             updateMarkerPositions();
             
             // After one full rotation (360 degrees), fly to location if pending
-            if (totalRotation >= 360 && pendingFlyTo) {
+            // But only if not in multi-user spin mode
+            if (totalRotation >= 360 && pendingFlyTo && !multiUserSpinActive) {
                 spinEnabled = false;
                 const { lat, lng } = pendingFlyTo;
                 pendingFlyTo = null;
@@ -3459,9 +3784,11 @@
         
         // Toggle globe spin mode - zoom out and spin, or return to user location
         let globeSpinMode = false;
+        let multiUserSpinActive = false;
         
         function toggleGlobeSpin() {
             globeSpinMode = !globeSpinMode;
+            multiUserSpinActive = false; // Manual toggle overrides multi-user spin
             
             if (globeSpinMode) {
                 // Zoom out and start continuous spin
@@ -3501,6 +3828,58 @@
                 }
             }
         }
+        
+        // Start multi-user spin mode (doesn't override manual toggle)
+        function startMultiUserSpin() {
+            if (globeSpinMode) return; // Already spinning via manual toggle
+            
+            multiUserSpinActive = true;
+            spinEnabled = true;
+            pendingFlyTo = null;
+            totalRotation = 0;
+            
+            map.flyTo({
+                center: map.getCenter(),
+                zoom: 1.2,
+                duration: 1500,
+                essential: true
+            });
+            
+            setTimeout(() => {
+                if (multiUserSpinActive && !globeSpinMode) {
+                    spinGlobe();
+                }
+            }, 1500);
+        }
+        
+        // Stop multi-user spin mode
+        function stopMultiUserSpin() {
+            if (!multiUserSpinActive) return;
+            
+            multiUserSpinActive = false;
+            if (!globeSpinMode) {
+                spinEnabled = false;
+                
+                if (userLocation) {
+                    map.flyTo({
+                        center: [userLocation.lng, userLocation.lat],
+                        zoom: 3.0,
+                        duration: 2000,
+                        essential: true
+                    });
+                    
+                    setTimeout(() => {
+                        if (!globeSpinMode && !multiUserSpinActive) {
+                            slowRotateAroundLocation(userLocation.lng, userLocation.lat);
+                        }
+                    }, 2500);
+                }
+            }
+        }
+        
+        // Expose for websocket code
+        window.startMultiUserSpin = startMultiUserSpin;
+        window.stopMultiUserSpin = stopMultiUserSpin;
         
         // Queue fly to user's location (after spin completes)
         function flyToLocation(lat, lng) {
@@ -3763,6 +4142,7 @@
                 const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
                 locationData = ipData;
+                window.locationData = ipData; // Expose globally for greeting
                 
                 // Store user location and send to server
                 userLocation = { lat: ipData.latitude, lng: ipData.longitude };
@@ -3970,6 +4350,18 @@
             return options[Math.floor(Math.random() * options.length)];
         }
         
+        // Track current user count for ticker
+        let tickerUserCount = 1;
+        
+        function updateTickerUserCount(count) {
+            tickerUserCount = count;
+            // Update all user count spans in ticker without rebuilding
+            const spans = document.querySelectorAll('.ticker-user-count');
+            spans.forEach(span => {
+                span.textContent = count === 1 ? '1 USER CONNECTED' : `${count} USERS CONNECTED`;
+            });
+        }
+        
         function updateTicker() {
             if (!weatherData || !locationData) return;
             
@@ -3977,6 +4369,10 @@
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             
             let items = [];
+            
+            // Add user count (will be updated live)
+            const userCountText = tickerUserCount === 1 ? '1 USER CONNECTED' : `${tickerUserCount} USERS CONNECTED`;
+            items.push(`<span class="ticker-user-count">${userCountText}</span>`);
             
             // Weather info
             items.push(`TEMPERATURE: ${formatTemp(current.temperature_2m)}`);
@@ -7577,8 +7973,8 @@
                 if ((e.key === 'm' || e.key === 'M') && !e.ctrlKey && !e.metaKey) {
                     togglePlayPause();
                 }
-                // S to toggle globe spin mode
-                if ((e.key === 's' || e.key === 'S') && !e.ctrlKey && !e.metaKey && !gameActive) {
+                // S or B to toggle globe spin mode
+                if (((e.key === 's' || e.key === 'S') || (e.key === 'b' || e.key === 'B')) && !e.ctrlKey && !e.metaKey && !gameActive) {
                     toggleGlobeSpin();
                 }
                 // T to cycle view modes (windowed/monitor/fullscreen)
@@ -7693,6 +8089,476 @@
                 infoModalOverlay.classList.remove('active');
             }
         });
+    </script>
+    
+    <script>
+        // WebSocket cursor sharing
+        (function() {
+            const cursorsContainer = document.getElementById('remote-cursors');
+            const globeContainer = document.querySelector('.globe-container');
+            const userCountEl = document.getElementById('user-count');
+            const countNumberEl = document.getElementById('count-number');
+            const usersLabelEl = document.getElementById('users-label');
+            const pingBtn = document.getElementById('ping-btn');
+            const pingLog = document.getElementById('ping-log');
+            const pingLogEntries = document.getElementById('ping-log-entries');
+            const cursors = new Map(); // id -> {element, trails: [], lastUpdate}
+            let ws = null;
+            let myId = null;
+            let lastSentX = 0;
+            let lastSentY = 0;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 10;
+            let currentUserCount = 1;
+            let isInverted = false;
+            let pingCooldown = false;
+            let pingHistory = []; // Last 10 pings
+            
+            // Generate random color for each user
+            const cursorColors = [
+                '#00ff00', '#00ffff', '#ff00ff', '#ffff00', 
+                '#ff6600', '#00ff66', '#6600ff', '#ff0066'
+            ];
+            
+            function getColorForId(id) {
+                let hash = 0;
+                for (let i = 0; i < id.length; i++) {
+                    hash = ((hash << 5) - hash) + id.charCodeAt(i);
+                    hash |= 0;
+                }
+                return cursorColors[Math.abs(hash) % cursorColors.length];
+            }
+            
+            function createCursorElement(id) {
+                const color = getColorForId(id);
+                const cursor = document.createElement('div');
+                cursor.className = 'remote-cursor';
+                cursor.style.setProperty('--cursor-color', color);
+                cursor.innerHTML = `
+                    <div class="remote-cursor-pointer"></div>
+                    <div class="remote-cursor-label"></div>
+                `;
+                cursorsContainer.appendChild(cursor);
+                return cursor;
+            }
+            
+            function createTrailDot(x, y, color) {
+                const dot = document.createElement('div');
+                dot.className = 'remote-cursor-trail';
+                dot.style.setProperty('--cursor-color', color);
+                dot.style.left = x + 'px';
+                dot.style.top = y + 'px';
+                dot.style.animation = 'trail-fade 1s ease-out forwards';
+                cursorsContainer.appendChild(dot);
+                
+                setTimeout(() => dot.remove(), 1000);
+                return dot;
+            }
+            
+            function updateCursor(id, position) {
+                let cursorData = cursors.get(id);
+                
+                if (!cursorData) {
+                    const element = createCursorElement(id);
+                    cursorData = {
+                        element,
+                        lastX: position.x,
+                        lastY: position.y,
+                        trailCounter: 0
+                    };
+                    cursors.set(id, cursorData);
+                }
+                
+                const { element, lastX, lastY } = cursorData;
+                const color = getColorForId(id);
+                
+                // Create trail dots based on movement distance
+                const dx = position.x - lastX;
+                const dy = position.y - lastY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                cursorData.trailCounter++;
+                if (distance > 3) {
+                    createTrailDot(lastX, lastY, color);
+                }
+                
+                // Update position
+                element.style.left = position.x + 'px';
+                element.style.top = position.y + 'px';
+                
+                // Update label with location if available
+                const label = element.querySelector('.remote-cursor-label');
+                if (position.location) {
+                    label.textContent = position.location;
+                }
+                
+                cursorData.lastX = position.x;
+                cursorData.lastY = position.y;
+                cursorData.lastUpdate = Date.now();
+            }
+            
+            function removeCursor(id) {
+                const cursorData = cursors.get(id);
+                if (cursorData) {
+                    cursorData.element.remove();
+                    cursors.delete(id);
+                }
+            }
+            
+            function connect() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/ws`;
+                
+                try {
+                    ws = new WebSocket(wsUrl);
+                } catch (e) {
+                    console.error('WebSocket connection error:', e);
+                    scheduleReconnect();
+                    return;
+                }
+                
+                ws.onopen = () => {
+                    console.log('Cursor WebSocket connected');
+                    reconnectAttempts = 0;
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const msg = JSON.parse(event.data);
+                        
+                        switch (msg.type) {
+                            case 'id':
+                                myId = msg.id;
+                                console.log('My cursor ID:', myId);
+                                break;
+                                
+                            case 'init':
+                                // Initialize existing cursors
+                                if (msg.cursors) {
+                                    for (const [id, pos] of Object.entries(msg.cursors)) {
+                                        updateCursor(id, pos);
+                                    }
+                                }
+                                // Set initial user count
+                                if (msg.userCount) {
+                                    updateUserCount(msg.userCount);
+                                }
+                                // Initialize ping history
+                                if (msg.pings && msg.pings.length > 0) {
+                                    pingHistory = msg.pings;
+                                    renderPingLog(false);
+                                    pingLog.classList.add('visible');
+                                }
+                                break;
+                                
+                            case 'move':
+                                if (msg.id && msg.id !== myId && msg.position) {
+                                    updateCursor(msg.id, msg.position);
+                                }
+                                break;
+                                
+                            case 'join':
+                                console.log('User joined:', msg.id);
+                                if (msg.userCount) {
+                                    updateUserCount(msg.userCount);
+                                }
+                                break;
+                                
+                            case 'leave':
+                                if (msg.id) {
+                                    removeCursor(msg.id);
+                                    console.log('User left:', msg.id);
+                                }
+                                if (msg.userCount !== undefined) {
+                                    updateUserCount(msg.userCount);
+                                }
+                                break;
+                                
+                            case 'ping':
+                                if (msg.ping) {
+                                    addPing(msg.ping, true);
+                                    showPingOnGlobe(msg.ping.lat, msg.ping.lng);
+                                }
+                                break;
+                        }
+                    } catch (e) {
+                        console.error('Error processing cursor message:', e);
+                    }
+                };
+                
+                ws.onclose = () => {
+                    console.log('Cursor WebSocket disconnected');
+                    ws = null;
+                    scheduleReconnect();
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('Cursor WebSocket error:', error);
+                };
+            }
+            
+            function scheduleReconnect() {
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                    console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+                    setTimeout(connect, delay);
+                }
+            }
+            
+            function sendPosition(x, y) {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    // Throttle - only send if moved significantly
+                    const dx = x - lastSentX;
+                    const dy = y - lastSentY;
+                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                        const msg = {
+                            type: 'move',
+                            position: {
+                                x: x,
+                                y: y,
+                                location: typeof userCity !== 'undefined' ? userCity : ''
+                            }
+                        };
+                        ws.send(JSON.stringify(msg));
+                        lastSentX = x;
+                        lastSentY = y;
+                    }
+                }
+            }
+            
+            // Track mouse movement
+            let throttleTimer = null;
+            document.addEventListener('mousemove', (e) => {
+                if (!throttleTimer) {
+                    throttleTimer = setTimeout(() => {
+                        sendPosition(e.clientX, e.clientY);
+                        throttleTimer = null;
+                    }, 30); // ~33fps max
+                }
+            });
+            
+            // Track touch movement for mobile
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0 && !throttleTimer) {
+                    throttleTimer = setTimeout(() => {
+                        sendPosition(e.touches[0].clientX, e.touches[0].clientY);
+                        throttleTimer = null;
+                    }, 30);
+                }
+            });
+            
+            // Clean up stale cursors (no update in 5 seconds)
+            setInterval(() => {
+                const now = Date.now();
+                for (const [id, data] of cursors) {
+                    if (now - data.lastUpdate > 5000) {
+                        removeCursor(id);
+                    }
+                }
+            }, 1000);
+            
+            // Update user count display with hacker effect
+            function updateUserCount(count) {
+                const prevCount = currentUserCount;
+                currentUserCount = count;
+                
+                // Update ticker user count
+                updateTickerUserCount(count);
+                
+                if (count > 1) {
+                    // Show the count, button, and ping log
+                    userCountEl.classList.add('visible');
+                    pingBtn.classList.add('visible');
+                    if (pingHistory.length > 0) {
+                        pingLog.classList.add('visible');
+                    }
+                    
+                    // Start globe spinning when multiple users join
+                    if (prevCount <= 1 && typeof window.startMultiUserSpin === 'function') {
+                        window.startMultiUserSpin();
+                    }
+                    
+                    // Update users/user label
+                    usersLabelEl.textContent = count === 1 ? 'USER' : 'USERS';
+                    
+                    // Hacker scramble effect
+                    if (prevCount !== count) {
+                        userCountEl.classList.add('hacker-effect');
+                        
+                        // Scramble through random characters
+                        const chars = '█▓▒░▀▄▐▌01█▓▒░';
+                        let iterations = 0;
+                        const maxIterations = 10;
+                        const scrambleInterval = setInterval(() => {
+                            if (iterations < maxIterations) {
+                                countNumberEl.textContent = chars[Math.floor(Math.random() * chars.length)];
+                                iterations++;
+                            } else {
+                                clearInterval(scrambleInterval);
+                                countNumberEl.textContent = count;
+                                userCountEl.classList.remove('hacker-effect');
+                            }
+                        }, 50);
+                    } else {
+                        countNumberEl.textContent = count;
+                    }
+                } else {
+                    // Hide when alone
+                    userCountEl.classList.remove('visible');
+                    pingBtn.classList.remove('visible');
+                    pingLog.classList.remove('visible');
+                    
+                    // Stop globe spinning when back to single user
+                    if (prevCount > 1 && typeof window.stopMultiUserSpin === 'function') {
+                        window.stopMultiUserSpin();
+                    }
+                }
+                
+                console.log('User count updated:', count);
+            }
+            
+            // Toggle local invert (no sync)
+            function toggleLocalInvert() {
+                isInverted = !isInverted;
+                if (isInverted) {
+                    globeContainer.classList.add('inverted');
+                } else {
+                    globeContainer.classList.remove('inverted');
+                }
+                console.log('Local invert toggled:', isInverted);
+            }
+            
+            // Keyboard shortcut for invert (R key)
+            document.addEventListener('keydown', (e) => {
+                // Don't trigger if typing in input/textarea or if modal is open
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (document.querySelector('.info-modal-overlay.active')) return;
+                if (document.querySelector('.game-modal.active')) return;
+                if (document.querySelector('.illusion-modal.active')) return;
+                if (document.querySelector('.eliza-modal.active')) return;
+                if (document.querySelector('.life-modal.active')) return;
+                if (document.querySelector('.doom-modal.active')) return;
+                
+                if (e.key === 'r' || e.key === 'R') {
+                    toggleLocalInvert();
+                }
+            });
+            
+            // Send ping to all users
+            function sendPing() {
+                if (!ws || ws.readyState !== WebSocket.OPEN || pingCooldown) return;
+                
+                // Get user's location
+                const loc = window.locationData;
+                if (!loc) {
+                    console.log('Location data not available');
+                    return;
+                }
+                
+                // Mask IP for privacy (show only first part)
+                const ipParts = loc.ip.split('.');
+                const maskedIP = ipParts[0] + '.' + ipParts[1] + '.xxx.xxx';
+                
+                ws.send(JSON.stringify({
+                    type: 'ping',
+                    ping: {
+                        ip: maskedIP,
+                        location: loc.city + ', ' + loc.country_code,
+                        lat: loc.latitude,
+                        lng: loc.longitude
+                    }
+                }));
+                
+                // Cooldown to prevent spam
+                pingCooldown = true;
+                pingBtn.disabled = true;
+                setTimeout(() => {
+                    pingCooldown = false;
+                    pingBtn.disabled = false;
+                }, 3000);
+            }
+            
+            // Add ping to history and render
+            function addPing(ping, isNew) {
+                pingHistory.push(ping);
+                if (pingHistory.length > 10) {
+                    pingHistory = pingHistory.slice(-10);
+                }
+                renderPingLog(isNew);
+                pingLog.classList.add('visible');
+            }
+            
+            // Render ping log
+            function renderPingLog(highlightLast) {
+                pingLogEntries.innerHTML = '';
+                
+                // Format timestamp to local time
+                function formatPingTime(unixTimestamp) {
+                    const date = new Date(unixTimestamp * 1000);
+                    return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                }
+                
+                // Show newest first
+                const reversed = [...pingHistory].reverse();
+                reversed.forEach((ping, index) => {
+                    const entry = document.createElement('div');
+                    entry.className = 'ping-entry' + (index === 0 && highlightLast ? ' new' : '');
+                    const timeStr = formatPingTime(ping.timestamp);
+                    entry.innerHTML = `
+                        <span class="ping-time">[${timeStr}]</span>
+                        <span class="ping-ip">${ping.ip}</span>
+                        <span class="ping-location">@ ${ping.location}</span>
+                    `;
+                    pingLogEntries.appendChild(entry);
+                    
+                    // Remove 'new' highlight after animation
+                    if (index === 0 && highlightLast) {
+                        setTimeout(() => entry.classList.remove('new'), 2000);
+                    }
+                });
+            }
+            
+            // Show ping effect on globe
+            function showPingOnGlobe(lat, lng) {
+                // Get the globe container and map
+                const globeEl = document.getElementById('globe');
+                if (!globeEl || typeof map === 'undefined') return;
+                
+                // Create pulse effect
+                const pulse = document.createElement('div');
+                pulse.className = 'ping-pulse';
+                globeEl.appendChild(pulse);
+                
+                // Update position on each frame to track globe rotation
+                let frameId;
+                const startTime = Date.now();
+                const duration = 2000;
+                
+                function updatePosition() {
+                    const elapsed = Date.now() - startTime;
+                    if (elapsed >= duration) {
+                        pulse.remove();
+                        return;
+                    }
+                    
+                    // Convert lat/lng to screen coordinates
+                    const point = map.project([lng, lat]);
+                    pulse.style.left = point.x + 'px';
+                    pulse.style.top = point.y + 'px';
+                    
+                    frameId = requestAnimationFrame(updatePosition);
+                }
+                
+                updatePosition();
+            }
+            
+            // Ping button click handler
+            pingBtn.addEventListener('click', sendPing);
+            
+            // Start connection
+            connect();
+        })();
     </script>
 </body>
 </html>
