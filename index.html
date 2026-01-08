@@ -2304,83 +2304,67 @@
             color: #888888;
         }
         
-        /* Chromostereopsis 3D Scene */
+        /* Chromostereopsis Scene */
         .chromostereopsis-scene {
             width: 400px;
             height: 400px;
-            perspective: 800px;
-        }
-        
-        .chromostereopsis-cube {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            animation: rotateCube 12s infinite linear;
-        }
-        
-        .chromostereopsis-cube .face {
-            position: absolute;
-            width: 200px;
-            height: 200px;
-            left: 100px;
-            top: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-            border: 3px solid;
+            background: repeating-conic-gradient(
+                #0000ff 0deg 90deg,
+                #000000 90deg 180deg
+            );
+            background-size: 40px 40px;
         }
         
-        .chromostereopsis-cube .face.front {
+        .chromostereopsis-donut {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
             background: #ff0000;
-            border-color: #cc0000;
-            color: #ffcccc;
-            transform: translateZ(100px);
+            position: relative;
+            animation: rotateDonut 4s infinite linear;
+            box-shadow: 
+                inset 30px 30px 40px rgba(0, 0, 0, 0.4),
+                inset -10px -10px 30px rgba(255, 100, 100, 0.3),
+                10px 10px 30px rgba(0, 0, 0, 0.5);
         }
         
-        .chromostereopsis-cube .face.back {
-            background: #0000ff;
-            border-color: #0000cc;
-            color: #ccccff;
-            transform: translateZ(-100px) rotateY(180deg);
+        .chromostereopsis-donut::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: repeating-conic-gradient(
+                #0000ff 0deg 90deg,
+                #000000 90deg 180deg
+            );
+            background-size: 40px 40px;
         }
         
-        .chromostereopsis-cube .face.right {
-            background: #ff0000;
-            border-color: #cc0000;
-            color: #ffcccc;
-            transform: rotateY(90deg) translateZ(100px);
+        .chromostereopsis-donut::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 30px;
+            width: 40px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 200, 200, 0.4);
+            transform: rotate(-30deg);
         }
         
-        .chromostereopsis-cube .face.left {
-            background: #0000ff;
-            border-color: #0000cc;
-            color: #ccccff;
-            transform: rotateY(-90deg) translateZ(100px);
-        }
-        
-        .chromostereopsis-cube .face.top {
-            background: #ff0000;
-            border-color: #cc0000;
-            color: #ffcccc;
-            transform: rotateX(90deg) translateZ(100px);
-        }
-        
-        .chromostereopsis-cube .face.bottom {
-            background: #0000ff;
-            border-color: #0000cc;
-            color: #ccccff;
-            transform: rotateX(-90deg) translateZ(100px);
-        }
-        
-        @keyframes rotateCube {
+        @keyframes rotateDonut {
             0% {
-                transform: rotateX(-20deg) rotateY(0deg);
+                transform: rotate(0deg);
             }
             100% {
-                transform: rotateX(-20deg) rotateY(360deg);
+                transform: rotate(360deg);
             }
         }
         
@@ -2756,14 +2740,7 @@
             <div class="illusion-container" id="illusion-container">
                 <div class="illusion-title" id="illusion-title">CHROMOSTEREOPSIS</div>
                 <div class="chromostereopsis-scene">
-                    <div class="chromostereopsis-cube">
-                        <div class="face front"></div>
-                        <div class="face back"></div>
-                        <div class="face right"></div>
-                        <div class="face left"></div>
-                        <div class="face top"></div>
-                        <div class="face bottom"></div>
-                    </div>
+                    <div class="chromostereopsis-donut"></div>
                 </div>
                 <div class="illusion-instructions">RED APPEARS CLOSER, BLUE APPEARS FARTHER - PRESS I TO CLOSE</div>
             </div>
