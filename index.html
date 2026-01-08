@@ -2808,7 +2808,7 @@
                     </div>
                     
                     <div class="info-section">
-                        <p><span class="info-icon">👁️</span> <strong>Optical Illusions:</strong> Press I to view the chromostereopsis torus illusion. Inspired by <a href="https://bigjobby.com/toys/torus" target="_blank">BigJobby's Torus</a>.</p>
+                        <p><span class="info-icon">👁️</span> <strong>Optical Illusions:</strong> Chromostereopsis illusions that create a sense of depth. Inspired by <a href="https://bigjobby.com/toys/torus" target="_blank">BigJobby's Torus</a>.</p>
                     </div>
                     
                     <div class="info-section">
@@ -4005,8 +4005,6 @@
         let pendingHighscore = null;
         
         // Optical Illusions
-        const ILLUSIONS = ['CHROMOSTEREOPSIS'];
-        let currentIllusionIndex = 0;
         let illusionActive = false;
         
         // Highscore system - Top 5, 3-character initials
@@ -5510,17 +5508,21 @@
             }
         }
         
-        // Three.js Torus renderer
-        let torusAnimationId = null;
-        let torusScene = null;
-        let torusCamera = null;
-        let torusRenderer = null;
-        let torusMesh = null;
-        let torusAutoRotate = true;
-        let torusDragMode = false;
-        let torusLastX = 0, torusLastY = 0;
+        // Illusion system
+        const ILLUSIONS = ['TORUS', 'SPHERE'];
+        let currentIllusionIndex = 0;
         
-        function renderTorus() {
+        // Three.js renderer shared state
+        let illusionAnimationId = null;
+        let illusionScene = null;
+        let illusionCamera = null;
+        let illusionRenderer = null;
+        let illusionMesh = null;
+        let illusionAutoRotate = true;
+        let illusionDragMode = false;
+        let illusionLastX = 0, illusionLastY = 0;
+        
+        function renderIllusion() {
             const canvas = document.getElementById('torus-canvas');
             if (!canvas) return;
             
@@ -5529,18 +5531,22 @@
             const width = rect.width;
             const height = rect.height;
             
-            // Initialize Three.js scene
-            torusScene = new THREE.Scene();
-            torusCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+            // Update title
+            const titleEl = document.getElementById('illusion-title');
+            if (titleEl) titleEl.textContent = ILLUSIONS[currentIllusionIndex];
             
-            torusRenderer = new THREE.WebGLRenderer({
+            // Initialize Three.js scene
+            illusionScene = new THREE.Scene();
+            illusionCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+            
+            illusionRenderer = new THREE.WebGLRenderer({
                 canvas: canvas,
                 antialias: true,
                 powerPreference: 'high-performance'
             });
-            torusRenderer.setClearColor(0x000000, 1);
-            torusRenderer.setSize(width, height);
-            torusRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            illusionRenderer.setClearColor(0x000000, 1);
+            illusionRenderer.setSize(width, height);
+            illusionRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             
             // Shader uniforms
             const baseUniforms = {
@@ -5623,55 +5629,66 @@
             blueMat.uniforms.uPixSize.value = 1200;
             blueMat.uniforms.uIntensity.value = 0.88;
             
-            // Create torus
-            const R = 1.55, r = 0.60;
-            const torusGeo = new THREE.TorusGeometry(R, r, 80, 220);
-            torusMesh = new THREE.Mesh(torusGeo, redMat);
-            torusScene.add(torusMesh);
+            // Create geometry based on current illusion
+            let boundingRadius;
+            const illusionType = ILLUSIONS[currentIllusionIndex];
+            
+            if (illusionType === 'TORUS') {
+                const R = 1.55, r = 0.60;
+                const geo = new THREE.TorusGeometry(R, r, 80, 220);
+                illusionMesh = new THREE.Mesh(geo, redMat);
+                boundingRadius = R + r;
+            } else if (illusionType === 'SPHERE') {
+                const radius = 1.8;
+                const geo = new THREE.SphereGeometry(radius, 64, 64);
+                illusionMesh = new THREE.Mesh(geo, redMat);
+                boundingRadius = radius;
+            }
+            
+            illusionScene.add(illusionMesh);
             
             // Create background plane
             const plane = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), blueMat);
             plane.position.z = -14;
-            torusScene.add(plane);
+            illusionScene.add(plane);
             
             // Position camera
-            const boundingRadius = R + r;
-            const fitPadding = 1.8;  // Larger = smaller torus on screen
-            const vFov = THREE.MathUtils.degToRad(torusCamera.fov);
+            const fitPadding = 1.4;
+            const vFov = THREE.MathUtils.degToRad(illusionCamera.fov);
             const dist = (boundingRadius * fitPadding) / Math.tan(vFov * 0.5);
-            torusCamera.position.set(0, 0, dist);
-            torusCamera.lookAt(0, 0, 0);
+            illusionCamera.position.set(0, 0, dist);
+            illusionCamera.lookAt(0, 0, 0);
             
             // Drag interaction
             function onPointerDown(e) {
                 if (!illusionActive) return;
-                torusDragMode = true;
-                torusAutoRotate = false;
-                torusLastX = e.clientX || (e.touches && e.touches[0].clientX);
-                torusLastY = e.clientY || (e.touches && e.touches[0].clientY);
+                illusionDragMode = true;
+                illusionAutoRotate = false;
+                illusionLastX = e.clientX || (e.touches && e.touches[0].clientX);
+                illusionLastY = e.clientY || (e.touches && e.touches[0].clientY);
                 canvas.style.cursor = 'grabbing';
             }
             
             function onPointerMove(e) {
-                if (!torusDragMode || !illusionActive) return;
+                if (!illusionDragMode || !illusionActive) return;
                 const x = e.clientX || (e.touches && e.touches[0].clientX);
                 const y = e.clientY || (e.touches && e.touches[0].clientY);
                 if (x == null || y == null) return;
                 
-                const dx = x - torusLastX;
-                const dy = y - torusLastY;
+                const dx = x - illusionLastX;
+                const dy = y - illusionLastY;
                 const s = 0.009;
                 
-                torusMesh.rotation.y += dx * s;
-                torusMesh.rotation.x += dy * s;
+                illusionMesh.rotation.y += dx * s;
+                illusionMesh.rotation.x += dy * s;
                 
-                torusLastX = x;
-                torusLastY = y;
+                illusionLastX = x;
+                illusionLastY = y;
             }
             
             function onPointerUp() {
-                torusDragMode = false;
-                torusAutoRotate = true;
+                illusionDragMode = false;
+                illusionAutoRotate = true;
                 canvas.style.cursor = '';
             }
             
@@ -5686,41 +5703,47 @@
             
             function animate(now) {
                 if (!illusionActive) {
-                    torusAnimationId = null;
+                    illusionAnimationId = null;
                     return;
                 }
                 
                 const dt = Math.min(0.05, (now - lastTime) / 1000);
                 lastTime = now;
                 
-                if (torusAutoRotate) {
-                    // Slow rotation
-                    torusMesh.rotation.x += 0.12 * dt;
-                    torusMesh.rotation.y += 0.20 * dt;
-                    torusMesh.rotation.z += 0.03 * dt;
+                if (illusionAutoRotate) {
+                    illusionMesh.rotation.x += 0.25 * dt;
+                    illusionMesh.rotation.y += 0.40 * dt;
+                    illusionMesh.rotation.z += 0.08 * dt;
                 }
                 
-                torusRenderer.render(torusScene, torusCamera);
-                torusAnimationId = requestAnimationFrame(animate);
+                illusionRenderer.render(illusionScene, illusionCamera);
+                illusionAnimationId = requestAnimationFrame(animate);
             }
             
-            torusAnimationId = requestAnimationFrame(animate);
+            illusionAnimationId = requestAnimationFrame(animate);
         }
         
-        function stopTorus() {
-            if (torusAnimationId) {
-                cancelAnimationFrame(torusAnimationId);
-                torusAnimationId = null;
+        function stopIllusion() {
+            if (illusionAnimationId) {
+                cancelAnimationFrame(illusionAnimationId);
+                illusionAnimationId = null;
             }
-            if (torusRenderer) {
-                torusRenderer.dispose();
-                torusRenderer = null;
+            if (illusionRenderer) {
+                illusionRenderer.dispose();
+                illusionRenderer = null;
             }
-            torusScene = null;
-            torusCamera = null;
-            torusMesh = null;
-            torusAutoRotate = true;
-            torusDragMode = false;
+            illusionScene = null;
+            illusionCamera = null;
+            illusionMesh = null;
+            illusionAutoRotate = true;
+            illusionDragMode = false;
+        }
+        
+        function cycleIllusion() {
+            if (!illusionActive) return;
+            stopIllusion();
+            currentIllusionIndex = (currentIllusionIndex + 1) % ILLUSIONS.length;
+            renderIllusion();
         }
         
         function toggleIllusion() {
@@ -5745,14 +5768,14 @@
                 if (illusionBtn) illusionBtn.classList.add('active');
                 // Disable CRT effects for clear illusion viewing
                 document.body.classList.add('illusion-mode');
-                renderTorus();
+                renderIllusion();
             } else {
                 illusionContainer.classList.remove('active');
                 if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
                 if (illusionBtn) illusionBtn.classList.remove('active');
                 // Re-enable CRT effects
                 document.body.classList.remove('illusion-mode');
-                stopTorus();
+                stopIllusion();
             }
         }
         
@@ -5761,16 +5784,26 @@
             if (illusionBtn) {
                 illusionBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    toggleIllusion();
+                    if (illusionActive) {
+                        // If already active, cycle to next illusion
+                        cycleIllusion();
+                    } else {
+                        toggleIllusion();
+                    }
                 });
             }
             
-            // Press 'I' to toggle illusions
+            // Press 'I' to toggle illusions, Tab to cycle
             document.addEventListener('keydown', (e) => {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                 
                 if ((e.key === 'i' || e.key === 'I') && !e.ctrlKey && !e.metaKey) {
                     toggleIllusion();
+                }
+                
+                if (e.key === 'Tab' && illusionActive && !e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    cycleIllusion();
                 }
             });
         }
