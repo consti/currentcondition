@@ -2190,6 +2190,200 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
         
+        /* Illusion Button */
+        .illusion-btn {
+            position: absolute;
+            top: 55px;
+            left: 15px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #00aa00;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+            z-index: 50;
+            opacity: 0.7;
+        }
+        
+        .illusion-btn:hover {
+            opacity: 1;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        
+        .illusion-btn.active {
+            opacity: 1;
+            background: rgba(0, 100, 0, 0.8);
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+        
+        body.red-mode .illusion-btn {
+            background: rgba(20, 0, 0, 0.8);
+            border-color: #aa0000;
+        }
+        body.red-mode .illusion-btn:hover,
+        body.red-mode .illusion-btn.active {
+            border-color: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+        }
+        
+        body.purple-mode .illusion-btn {
+            background: rgba(20, 0, 20, 0.8);
+            border-color: #aa00aa;
+        }
+        body.purple-mode .illusion-btn:hover,
+        body.purple-mode .illusion-btn.active {
+            border-color: #ff00ff;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        
+        body.grey-mode .illusion-btn {
+            background: rgba(20, 20, 20, 0.8);
+            border-color: #888888;
+        }
+        body.grey-mode .illusion-btn:hover,
+        body.grey-mode .illusion-btn.active {
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        body.fullcolor-mode .illusion-btn {
+            background: rgba(10, 20, 40, 0.8);
+            border-color: #88ccff;
+        }
+        body.fullcolor-mode .illusion-btn:hover,
+        body.fullcolor-mode .illusion-btn.active {
+            border-color: #88ccff;
+            box-shadow: 0 0 10px rgba(136, 204, 255, 0.3);
+        }
+        
+        body.hdr-mode .illusion-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(0, 0, 0, 0.5);
+        }
+        body.hdr-mode .illusion-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Illusion Container */
+        .illusion-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 40px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            background: #000000;
+        }
+        
+        .illusion-container.active {
+            display: flex;
+        }
+        
+        .illusion-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            color: #ffffff;
+        }
+        
+        .illusion-instructions {
+            font-size: 0.9rem;
+            margin-top: 20px;
+            color: #888888;
+        }
+        
+        /* Chromostereopsis 3D Scene */
+        .chromostereopsis-scene {
+            width: 400px;
+            height: 400px;
+            perspective: 800px;
+        }
+        
+        .chromostereopsis-cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 12s infinite linear;
+        }
+        
+        .chromostereopsis-cube .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            left: 100px;
+            top: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            border: 3px solid;
+        }
+        
+        .chromostereopsis-cube .face.front {
+            background: #ff0000;
+            border-color: #cc0000;
+            color: #ffcccc;
+            transform: translateZ(100px);
+        }
+        
+        .chromostereopsis-cube .face.back {
+            background: #0000ff;
+            border-color: #0000cc;
+            color: #ccccff;
+            transform: translateZ(-100px) rotateY(180deg);
+        }
+        
+        .chromostereopsis-cube .face.right {
+            background: #ff0000;
+            border-color: #cc0000;
+            color: #ffcccc;
+            transform: rotateY(90deg) translateZ(100px);
+        }
+        
+        .chromostereopsis-cube .face.left {
+            background: #0000ff;
+            border-color: #0000cc;
+            color: #ccccff;
+            transform: rotateY(-90deg) translateZ(100px);
+        }
+        
+        .chromostereopsis-cube .face.top {
+            background: #ff0000;
+            border-color: #cc0000;
+            color: #ffcccc;
+            transform: rotateX(90deg) translateZ(100px);
+        }
+        
+        .chromostereopsis-cube .face.bottom {
+            background: #0000ff;
+            border-color: #0000cc;
+            color: #ccccff;
+            transform: rotateX(-90deg) translateZ(100px);
+        }
+        
+        @keyframes rotateCube {
+            0% {
+                transform: rotateX(-20deg) rotateY(0deg);
+            }
+            100% {
+                transform: rotateX(-20deg) rotateY(360deg);
+            }
+        }
+        
         /* Snake LED indicator */
         .monitor-btn.snake-led {
             cursor: pointer;
@@ -2557,6 +2751,23 @@
                     <button class="game-ctrl-btn action" id="game-action-btn">●</button>
                 </div>
             </div>
+            
+            <!-- Illusion Container -->
+            <div class="illusion-container" id="illusion-container">
+                <div class="illusion-title" id="illusion-title">CHROMOSTEREOPSIS</div>
+                <div class="chromostereopsis-scene">
+                    <div class="chromostereopsis-cube">
+                        <div class="face front"></div>
+                        <div class="face back"></div>
+                        <div class="face right"></div>
+                        <div class="face left"></div>
+                        <div class="face top"></div>
+                        <div class="face bottom"></div>
+                    </div>
+                </div>
+                <div class="illusion-instructions">RED APPEARS CLOSER, BLUE APPEARS FARTHER - PRESS I TO CLOSE</div>
+            </div>
+            
             <div class="main-display hidden-panel">
                 <div class="title">CURRENT CONDITION</div>
                 <div class="clock" id="clock">--:--:--</div>
@@ -2576,6 +2787,11 @@
             <!-- Game Button -->
             <button class="game-btn" id="game-btn" title="Play Games (G)">
                 <span class="game-icon">🕹️</span>
+            </button>
+            
+            <!-- Illusion Button -->
+            <button class="illusion-btn" id="illusion-btn" title="Optical Illusions (I)">
+                <span class="illusion-icon">👁️</span>
             </button>
             
             <!-- View Toggle Button -->
@@ -3836,6 +4052,11 @@
         let enteringHighscore = false;
         let highscoreInitials = '';
         let pendingHighscore = null;
+        
+        // Optical Illusions
+        const ILLUSIONS = ['CHROMOSTEREOPSIS'];
+        let currentIllusionIndex = 0;
+        let illusionActive = false;
         
         // Highscore system - Top 5, 3-character initials
         const DEFAULT_HIGHSCORES = [
@@ -5303,6 +5524,15 @@
         }
         
         function toggleGame() {
+            // Close illusion if open
+            if (illusionActive) {
+                illusionActive = false;
+                const illusionContainer = document.getElementById('illusion-container');
+                const illusionBtn = document.getElementById('illusion-btn');
+                if (illusionContainer) illusionContainer.classList.remove('active');
+                if (illusionBtn) illusionBtn.classList.remove('active');
+            }
+            
             gameActive = !gameActive;
             
             const gameContainer = document.getElementById('game-container');
@@ -5327,6 +5557,48 @@
                 if (gameBtn) gameBtn.classList.remove('active');
                 if (currentGame) currentGame.running = false;
             }
+        }
+        
+        function toggleIllusion() {
+            // Close game if open
+            if (gameActive) {
+                toggleGame();
+            }
+            
+            illusionActive = !illusionActive;
+            
+            const illusionContainer = document.getElementById('illusion-container');
+            const mainDisplay = document.querySelector('.main-display');
+            const illusionBtn = document.getElementById('illusion-btn');
+            
+            if (illusionActive) {
+                illusionContainer.classList.add('active');
+                if (mainDisplay) mainDisplay.classList.add('hidden-panel');
+                if (illusionBtn) illusionBtn.classList.add('active');
+            } else {
+                illusionContainer.classList.remove('active');
+                if (mainDisplay) mainDisplay.classList.remove('hidden-panel');
+                if (illusionBtn) illusionBtn.classList.remove('active');
+            }
+        }
+        
+        function initIllusions() {
+            const illusionBtn = document.getElementById('illusion-btn');
+            if (illusionBtn) {
+                illusionBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleIllusion();
+                });
+            }
+            
+            // Press 'I' to toggle illusions
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                if ((e.key === 'i' || e.key === 'I') && !e.ctrlKey && !e.metaKey) {
+                    toggleIllusion();
+                }
+            });
         }
         
         function initGameControls() {
@@ -5444,6 +5716,7 @@
         initPanelToggle();
         initGames();
         initGameControls();
+        initIllusions();
         initGlobe();
         initLocationTracking();
         updateClock();
